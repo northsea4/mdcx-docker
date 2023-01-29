@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  mdcx:
+    image: stainless403/mdcx-base:latest
+    container_name: mdcx
+    volumes:
+      # `stainless403/mdcx-base`镜像没有内置MDCx，需要自行将代码解压到app目录并映射到容器内
+      - ./app:/app
+      # 添加需要的映射
+      - /path/to/jav:/jav:rslave
+    environment:
+      - TZ=${TZ}
+      # 应用窗口宽度
+      - DISPLAY_WIDTH=${DISPLAY_WIDTH}
+      # 应用窗口高度
+      - DISPLAY_HEIGHT=${DISPLAY_HEIGHT}
+      # 访问密码
+      - VNC_PASSWORD=${VNC_PASSWORD}
+    ports:
+      - ${WEB_LISTENING_PORT}:5800
+      - ${VNC_LISTENING_PORT}:5900
+    restart: unless-stopped
+    network_mode: bridge
+    stdin_open: true

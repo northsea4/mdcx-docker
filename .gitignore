@@ -1,0 +1,7 @@
+.env
+
+docker-compose.yml
+docker-compose.mdcx.yml
+docker-compose.mdcx-base.yml
+
+/app

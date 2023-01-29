@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  mdcx:
+    image: stainless403/mdcx:latest
+    container_name: mdcx
+    volumes:
+      # 添加需要的映射
+      - /path/to/jav:/jav:rslave
+    environment:
+      - TZ=${TZ}
+      # 应用窗口宽度
+      - DISPLAY_WIDTH=${DISPLAY_WIDTH}
+      # 应用窗口高度
+      - DISPLAY_HEIGHT=${DISPLAY_HEIGHT}
+      # 访问密码
+      - VNC_PASSWORD=${VNC_PASSWORD}
+    ports:
+      - ${WEB_LISTENING_PORT}:5800
+      - ${VNC_LISTENING_PORT}:5900
+    restart: unless-stopped
+    network_mode: bridge
+    stdin_open: true

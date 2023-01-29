@@ -1,7 +1,8 @@
 #!/bin/sh
 
 # 表示应用已初始化的文件
-FILE_INITIALIZED="/app/.initialized"
+# TODO 不能放在app目录。但貌似放在tmp目录会丢失
+FILE_INITIALIZED="/home/.mdcx_initialized"
 
 FILE_PIP_REQ="/app/requirements.txt"
 

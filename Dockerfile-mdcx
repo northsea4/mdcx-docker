@@ -2,16 +2,21 @@ FROM stainless403/gui-base:latest
 LABEL maintainer="stainless403"
 LABEL description="MDCx容器化，内置了MDCx"
 
+ARG MD_MDCX_VERSION
+
 ENV APP_NAME        "MDCx Docker"
-ENV APP_VERSION     "20230127"
+ENV APP_VERSION     $MD_MDCX_VERSION
 
 # 复制应用文件到`/app`。文件路径示例：`app/MDCx_Main.py`
 ADD app /app
+# 删除动态文件
+RUN rm -f /app/config.ini && \
+    rm -rf /app/Log
 
 WORKDIR /app
 
 RUN python3.9 -m pip install --no-cache-dir -r requirements.txt -i https://pypi.douban.com/simple && \
-    touch .initialized
+    touch /home/.mdcx_initialized
 
 # 容器启动时执行的脚本
 COPY startapp.sh /startapp.sh

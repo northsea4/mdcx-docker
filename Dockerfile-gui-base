@@ -2,8 +2,10 @@ FROM jlesage/baseimage-gui:ubuntu-18.04-v4
 LABEL maintainer="stainless403"
 LABEL description="base on jlesage/baseimage-gui:ubuntu"
 
+ARG MD_GUI_BASE_VERSION
+
 ENV APP_NAME        "TigerVNC APP"
-ENV APP_VERSION     "0.0.0"
+ENV APP_VERSION     $MD_GUI_BASE_VERSION
 ENV USER_ID         0
 ENV GROUP_ID        0
 # 启用cjk字体（即Chinese-Japanese-Korean），以正常显示中文
@@ -18,11 +20,16 @@ ENV APT_SOURCE_HOST "mirrors.ustc.edu.cn"
 # 替换默认源，使用加速镜像
 RUN sed -i "s/archive.ubuntu.com/${APT_SOURCE_HOST}/g" /etc/apt/sources.list
 # 更新软件包
-# RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get update -y
 
-# 安装一些必须得软件包
-RUN apt-get install -y curl locales libgl1 qt5-default
+# 安装一些必须的软件包
+RUN apt-get install -y \
+    curl \
+    locales \
+    libgl1 \
+    qt5-default \
+    fonts-noto-color-emoji
+
 RUN export LANG=zh_CN.UTF-8 && locale-gen zh_CN.UTF-8
 
 # 默认源只到python3.6，使用第三方源安装python3.9

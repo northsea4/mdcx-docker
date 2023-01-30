@@ -1,7 +1,11 @@
 #!/bin/bash
+. .env.versions
 
-mv app/config.ini config.ini.bak
+if [[ -z "$MD_MDCX_VERSION" ]]; then
+  echo "请在 .env.versions 中指定版本号(MD_MDCX_VERSION)！"
+  exit
+fi
 
 docker build . -f Dockerfile-mdcx -t stainless403/mdcx:dev -t stainless403/mdcx:latest
 
-mv config.ini.bak app/config.ini
+docker tag stainless403/mdcx:latest stainless403/mdcx:$MD_MDCX_VERSION

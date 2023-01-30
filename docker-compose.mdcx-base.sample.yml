@@ -3,7 +3,7 @@ version: '3'
 services:
   mdcx:
     image: stainless403/mdcx-base:latest
-    container_name: mdcx
+    container_name: ${CONTAINER_NAME}
     volumes:
       # `stainless403/mdcx-base`镜像没有内置MDCx，需要自行将代码解压到app目录并映射到容器内
       - ./app:/app

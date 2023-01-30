@@ -3,7 +3,7 @@ version: '3'
 services:
   mdcx:
     image: stainless403/mdcx:latest
-    container_name: mdcx
+    container_name: ${CONTAINER_NAME}
     volumes:
       # 添加需要的映射
       - /path/to/jav:/jav:rslave

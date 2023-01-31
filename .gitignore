@@ -4,4 +4,8 @@ docker-compose.yml
 docker-compose.mdcx.yml
 docker-compose.mdcx-base.yml
 
-/app
+/app/*
+!/app/.keep
+
+/config/*
+!/config/config.ini

@@ -16,7 +16,7 @@ RUN rm -f /app/config.ini && \
 WORKDIR /app
 
 RUN python3.9 -m pip install --no-cache-dir -r requirements.txt -i https://pypi.douban.com/simple && \
-    touch /home/.mdcx_initialized
+    touch /.mdcx_initialized
 
 # 容器启动时执行的脚本
 COPY startapp.sh /startapp.sh

@@ -6,7 +6,7 @@
 # 删除`已初始化`标记文件
 
 # 表示应用已初始化的文件
-FILE_INITIALIZED="/home/.mdcx_initialized"
+FILE_INITIALIZED="/.mdcx_initialized"
 
 echo $CONTAINER_NAME
 

@@ -19,7 +19,7 @@ ENV APT_SOURCE_HOST "mirrors.ustc.edu.cn"
 
 # 替换默认源，使用加速镜像
 RUN sed -i "s/archive.ubuntu.com/${APT_SOURCE_HOST}/g" /etc/apt/sources.list
-# 更新软件包
+# 更新软件列表
 RUN apt-get update -y
 
 # 安装一些必须的软件包
@@ -34,7 +34,7 @@ RUN export LANG=zh_CN.UTF-8 && locale-gen zh_CN.UTF-8
 
 # 默认源只到python3.6，使用第三方源安装python3.9
 RUN apt-get install -y software-properties-common && \
-    # https://tooling.bennuttall.com/deadsnakes/ 添加源后更新一次源索引
+    # https://tooling.bennuttall.com/deadsnakes/ 添加源后更新一次软件列表
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update -y
 

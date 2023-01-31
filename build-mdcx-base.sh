@@ -6,6 +6,6 @@ if [[ -z "$MD_MDCX_BASE_VERSION" ]]; then
   exit
 fi
 
-docker build . -f Dockerfile-mdcx-base -t stainless403/mdcx-base:dev -t stainless403/mdcx-base:latest
+docker build . -f Dockerfile.mdcx-base -t stainless403/mdcx-base:dev -t stainless403/mdcx-base:latest
 
 docker tag stainless403/mdcx-base:latest stainless403/mdcx-base:$MD_MDCX_BASE_VERSION

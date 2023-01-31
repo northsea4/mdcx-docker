@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # 表示应用已初始化的文件
-FILE_INITIALIZED="/home/.mdcx_initialized"
+FILE_INITIALIZED="/.mdcx_initialized"
 
 FILE_PIP_REQ="/app/requirements.txt"
 

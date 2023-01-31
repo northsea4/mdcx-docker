@@ -5,7 +5,13 @@ services:
     image: stainless403/mdcx:latest
     container_name: ${CONTAINER_NAME}
     volumes:
-      # 添加需要的映射
+      # 建议将配置文件映射出来，升级后可继续使用。
+      - ./config/config.ini:/app/config.ini
+      # 更多配置文件
+      # - ./config/config2.ini:/app/config2.ini
+      # - ./config/config3.ini:/app/config3.ini
+
+      # 添加一些需要的映射，比如你的影片所在位置
       - /path/to/jav:/jav:rslave
     environment:
       - TZ=${TZ}

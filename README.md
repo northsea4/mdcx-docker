@@ -59,6 +59,8 @@ docker-compose up -d
 > 首次运行时会自动安装依赖，并在容器内的根目录生成一个名为`.mdcx_initialized`的标记文件。
 > 如果由于网络等原因没有成功安装依赖，但`/.mdcx_initialized`又已生成，记得先删除该文件后再重启容器。删除方法：执行`clear-initialized.sh`脚本，或者自己用其他方式删除该文件。
 
+> 这个处理似乎有点逻辑问题，比如，如果没有安装依赖成功，但却生成了标记文件，那容器应该是不能启动成功的，容器都没启动，那应该也删除不了里面的文件。待再想想，欢迎大佬们指点一下。
+
 ### 1.4 使用
 假设服务器IP为`192.168.1.100`，使用默认端口`5800`。
 则访问地址为：http://192.168.1.100:5800
@@ -158,15 +160,21 @@ docker run --name mdcx \
   stainless403/mdcx
 ```
 
-## 3. 升级
-### 3.1 docker-compose方式升级
+## 3. 更新
+### 3.0 mdcx-base更新应用
+如果使用的是没有内置MDCx应用的`stainless403/mdcx-base`镜像，需要先自行下载新版应用并将应用文件解压到`app`目录。
+`stainless403/mdcx`则可以省略这一步。
+
+### 3.1 docker-compose方式更新镜像
 ```bash
 cd /path/to/项目目录
 docker-compose pull
 docker-compose up -d
 ```
+> 使用docker-compose方式部署的才能用该方式更新镜像。
+> 另外其实使用docker-compose方式部署的，也可以使用下面说的`watchtower`进行更新。
 
-### 3.2 docker-run方式升级
+### 3.2 docker-run方式更新
 除了删除容器后重新执行`docker run ...`之外，推荐使用`watchtower`工具更新。
 
 1. 一次性更新
@@ -181,7 +189,7 @@ docker run --rm \
 2. 定时任务方式：
 示例：每天的凌晨2点进行更新
 ```bash
-docker run -d --name watchtower \
+docker run -d --name watchtower-mdcx \
   --restart unless-stopped \
   -v /var/run/docker.sock:/var/run/docker.sock \
   containrrr/watchtower \
@@ -190,12 +198,13 @@ docker run -d --name watchtower \
 
 `0 0 2 * * *`
 6个部分分别为：
-秒 分 时 日 月 星期
+`秒 分 时 日 月 星期`
+
 参考：[CRON_Expression_Format](https://pkg.go.dev/github.com/robfig/cron@v1.2.0#hdr-CRON_Expression_Format)
 
 取消定时更新：
 ```bash
-docker rm -f watchtower
+docker rm -f watchtower-mdcx
 ```
 
 ## 3. 镜像说明

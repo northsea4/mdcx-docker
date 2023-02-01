@@ -9,3 +9,5 @@ docker-compose.mdcx-base.yml
 
 /config/*
 !/config/config.ini
+
+/app-raw

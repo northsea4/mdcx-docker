@@ -1,11 +1,13 @@
 FROM stainless403/gui-base:latest
+
 LABEL maintainer="stainless403"
 LABEL description="用于运行MDCx的基础镜像，没有内置MDCx"
 
-ARG MD_MDCX_BASE_VERSION
+# TODO 没效果
+ARG APP_VERSION
 
 ENV APP_NAME        "MDCx Docker"
-ENV APP_VERSION     $MD_MDCX_BASE_VERSION
+ENV APP_VERSION     $APP_VERSION
 
 # 容器启动时执行的脚本
 COPY startapp.sh /startapp.sh

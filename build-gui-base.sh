@@ -6,6 +6,10 @@ if [[ -z "$MD_GUI_BASE_VERSION" ]]; then
   exit
 fi
 
-docker build . -f Dockerfile.gui-base -t stainless403/gui-base:dev -t stainless403/gui-base:latest
+docker build . \
+  --build-arg APP_VERSION=$MD_GUI_BASE_VERSION \
+  -f Dockerfile.gui-base \
+  -t stainless403/gui-base:dev \
+  -t stainless403/gui-base:latest
 
 docker tag stainless403/gui-base:latest stainless403/gui-base:$MD_GUI_BASE_VERSION

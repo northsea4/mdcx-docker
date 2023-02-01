@@ -2,10 +2,11 @@ FROM jlesage/baseimage-gui:ubuntu-18.04-v4
 LABEL maintainer="stainless403"
 LABEL description="base on jlesage/baseimage-gui:ubuntu"
 
-ARG MD_GUI_BASE_VERSION
+# TODO 没效果
+ARG APP_VERSION
 
 ENV APP_NAME        "TigerVNC APP"
-ENV APP_VERSION     $MD_GUI_BASE_VERSION
+ENV APP_VERSION     $APP_VERSION
 ENV USER_ID         0
 ENV GROUP_ID        0
 # 启用cjk字体（即Chinese-Japanese-Korean），以正常显示中文

@@ -15,7 +15,7 @@ services:
       - ./logs:/app/Log
 
       # 添加一些需要的映射，比如你的影片所在位置
-      - /path/to/jav:/jav:rslave
+      - /path/to/jav:/jav
     environment:
       - TZ=${TZ}
       # 应用窗口宽度

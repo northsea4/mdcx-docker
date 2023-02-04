@@ -49,7 +49,7 @@ cp docker-compose.mdcx-base.sample.yml docker-compose.yml
 
 #### 1.2.1 映射
 修改`docker-compose.yml`，在`volumes`下添加映射。
-> 比如影片存放在`/volume2`，可以简单地添加这样的映射：`/volume2:/volume2:rslave`，这样在MDCx内访问也是一样的路径。
+> 比如影片存放在`/volume2`，可以简单地添加这样的映射：`/volume2:/volume2`，这样在MDCx内访问也是一样的路径。
 
 #### 1.2.2 环境变量
 复制一份`.env.sample`：
@@ -97,8 +97,8 @@ services:
       - ./logs:/app/Log
 
       # 影片所在位置
-      - /volume2:/volume2:rslave
-      - /volume3:/volume3:rslave
+      - /volume2:/volume2
+      - /volume3:/volume3
     environment:
       - TZ=${TZ}
       # 应用窗口宽度
@@ -143,7 +143,7 @@ docker run --name mdcx \
   # 日志目录
   -v /path/to/mdcx-docker/logs:/app/Log
   # 影片所在位置
-  -v /volume2:/volume2:rslave \
+  -v /volume2:/volume2 \
   -e TZ=Asia/Shanghai \
   -e DISPLAY_WIDTH=1200 \
   -e DISPLAY_HEIGHT=750 \
@@ -184,7 +184,7 @@ cp docker-compose.mdcx.sample.yml docker-compose.yml
 
 #### 2.2.1 映射
 修改`docker-compose.yml`，在`volumes`下添加映射。
-> 比如影片存放在`/volume2`，可以简单地添加这样的映射：`/volume2:/volume2:rslave`，这样在MDCx内访问也是一样的路径。
+> 比如影片存放在`/volume2`，可以简单地添加这样的映射：`/volume2:/volume2`，这样在MDCx内访问也是一样的路径。
 
 
 #### 2.2.2 环境变量
@@ -232,8 +232,8 @@ services:
       - ./logs:/app/Log
       
       # 影片所在位置  
-      - /volume2:/volume2:rslave
-      - /volume3:/volume3:rslave
+      - /volume2:/volume2
+      - /volume3:/volume3
     environment:
       - TZ=${TZ}
       # 应用窗口宽度
@@ -272,7 +272,7 @@ docker run --name mdcx \
   # 日志
   -v /path/to/mdcx-docker/logs:/app/Log \
   # 你的影片所在位置
-  -v /volume2:/volume2:rslave \
+  -v /volume2:/volume2 \
   -e TZ=Asia/Shanghai \
   -e DISPLAY_WIDTH=1200 \
   -e DISPLAY_HEIGHT=750 \
@@ -296,6 +296,8 @@ chmod +x ./update-app.sh
 # 阅读脚本，或使用`--help`参数查看相关帮助说明
 ./update-app.sh --help
 ```
+
+> ⚠️ 同目录下必须要有`.env`和`.env.versions`这个两个文件！`.env`示例文件为`.env.sample`。
 
 > 如果你选择手动进行更新，请记得删除app目录下的`.mdcx_initialized`文件！
 

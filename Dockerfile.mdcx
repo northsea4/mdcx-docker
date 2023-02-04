@@ -5,7 +5,7 @@ LABEL description="MDCx容器化，内置了MDCx"
 # TODO 没效果
 ARG APP_VERSION
 
-ARG SOURCE_DIR="app-raw"
+ARG SOURCE_DIR=".mdcx_src"
 
 ENV APP_NAME        "MDCx Docker"
 ENV APP_VERSION     $APP_VERSION
@@ -16,11 +16,15 @@ ADD $SOURCE_DIR /app
 RUN rm -f /app/config.ini && \
     rm -rf /app/Log
 
+# 应用配置目录。基础镜像里已存在/config目录
+RUN mkdir /mdcx_config
+
 WORKDIR /app
 
 RUN python3.9 -m pip install \
     --no-cache-dir -r requirements.txt \
     -i https://pypi.douban.com/simple && \
+    touch /app/.mdcx_initialized && \
     touch /.mdcx_initialized
 
 # 容器启动时执行的脚本

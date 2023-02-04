@@ -9,5 +9,8 @@ ARG APP_VERSION
 ENV APP_NAME        "MDCx Docker"
 ENV APP_VERSION     $APP_VERSION
 
+# 应用配置目录。基础镜像里已存在/config目录
+RUN mkdir /mdcx_config
+
 # 容器启动时执行的脚本
 COPY startapp.sh /startapp.sh

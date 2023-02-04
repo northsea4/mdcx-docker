@@ -7,6 +7,13 @@ services:
     volumes:
       # `stainless403/mdcx-base`镜像没有内置MDCx，需要自行将代码解压到app目录并映射到容器内
       - ./app:/app
+      
+      # 可以将配置文件放置到单独的目录
+      - ./config:/mdcx_config
+
+      # 日志目录
+      - ./logs:/app/Log
+
       # 添加一些需要的映射，比如你的影片所在位置
       - /path/to/jav:/jav:rslave
     environment:

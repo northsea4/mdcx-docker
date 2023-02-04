@@ -1,5 +1,7 @@
 ## 1. mdcx-base示例
-[stainless403/mdcx-base](https://hub.docker.com/r/stainless403/mdcx-base)镜像没有内置MDCx，如果想使用内置的，请移步到下面的[mdcx示例](#2-mdcx示例)。
+[stainless403/mdcx-base](https://hub.docker.com/r/stainless403/mdcx-base)镜像没有内置MDCx，如果想使用内置的，请使用[stainless403/mdcx](https://hub.docker.com/r/stainless403/mdcx)镜像。
+
+🔗 [stainless403/mdcx示例](#2-mdcx示例)
 
 下面主要讲述`docker-compose`的部署方式。
 `docker-run`的方式也有简单的示例。
@@ -56,8 +58,25 @@ cp .env.sample .env
 ```
 
 修改`.env`，按需求修改相关参数
-> 如果有在公网远程访问的需求，建议设置一下`VNC_PASSWORD`
+```shell
+TZ=Asia/Shanghai
 
+# 应用窗口宽度
+DISPLAY_WIDTH=1200
+# 应用窗口高度
+DISPLAY_HEIGHT=750
+
+# 访问密码，如不需要，留空。如果有在公网远程访问的需求，建议设置
+VNC_PASSWORD=
+
+# 网页访问端口
+WEB_LISTENING_PORT=15800
+# VNC监听端口
+VNC_LISTENING_PORT=15900
+
+# 容器名称
+CONTAINER_NAME=mdcx
+```
 
 #### 1.2.3 完整docker-compose.yml示例
 ```yml
@@ -135,7 +154,9 @@ docker run --name mdcx \
 
 
 ## 2. mdcx示例
-[stainless403/mdcx](https://hub.docker.com/r/stainless403/mdcx)镜像已内置MDCx。
+[stainless403/mdcx](https://hub.docker.com/r/stainless403/mdcx)镜像已内置MDCx。如果想使用本地MDCx源码版的，请使用[stainless403/mdcx-base](https://hub.docker.com/r/stainless403/mdcx-base)镜像。
+
+🔗 [stainless403/mdcx-base示例](#1-mdcx-base示例)
 
 ### 2.1 准备项目目录
 建议使用 [示例项目](https://github.com/northsea4/mdcx-docker/archive/refs/heads/main.zip) 结构，解压到合适的位置后，进入项目目录，之后的操作，如无特殊说明，都是在该目录(假设名为`mdcx-docker`)内进行。
@@ -174,7 +195,25 @@ cp .env.sample .env
 ```
 
 修改`.env`，按需求修改相关参数
-> 如果有在公网远程访问的需求，建议设置一下`VNC_PASSWORD`
+```shell
+TZ=Asia/Shanghai
+
+# 应用窗口宽度
+DISPLAY_WIDTH=1200
+# 应用窗口高度
+DISPLAY_HEIGHT=750
+
+# 访问密码，如不需要，留空。如果有在公网远程访问的需求，建议设置
+VNC_PASSWORD=
+
+# 网页访问端口
+WEB_LISTENING_PORT=15800
+# VNC监听端口
+VNC_LISTENING_PORT=15900
+
+# 容器名称
+CONTAINER_NAME=mdcx
+```
 
 
 #### 2.2.3 完整docker-compose.yml示例
@@ -246,7 +285,7 @@ docker run --name mdcx \
 如果使用的是没有内置MDCx应用的`stainless403/mdcx-base`镜像，需要先自行下载新版应用并将应用文件解压到`app`目录。
 `stainless403/mdcx`则可以省略这一步。
 
-这里提供了一个一键更新脚本 [update-app.sh](update-app.sh) 自动为你完成更新处理。
+这里提供了一个一键更新脚本 update-app.sh](https://github.com/northsea4/mdcx-docker/update-app.sh) 自动为你完成更新处理。
 请确保`update-app.sh` 文件位于 `/path/to/mdcx-docker`目录下。
 ```bash
 cd /path/to/mdcx-docker
@@ -317,9 +356,9 @@ docker rm -f watchtower-mdcx
   > 支持运行MDCx的基础环境，非开发人员可以忽略。
 ### 3.2 构建镜像
 参考如下文件：
-- [build-mdcx-base.sh](build-mdcx-base.sh)
-- [build-mdcx.sh](build-mdcx.sh)
-- [build-gui-base.sh](build-gui-base.sh)
+- [build-mdcx-base.sh](https://github.com/northsea4/mdcx-docker/build-mdcx-base.sh)
+- [build-mdcx.sh](https://github.com/northsea4/mdcx-docker/build-mdcx.sh)
+- [build-gui-base.sh](https://github.com/northsea4/mdcx-docker/build-gui-base.sh)
   
 
 

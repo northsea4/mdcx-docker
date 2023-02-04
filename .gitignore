@@ -7,7 +7,4 @@ docker-compose.mdcx-base.yml
 /app/*
 !/app/.keep
 
-/config/*
-!/config/config.ini
-
 /.mdcx_src

@@ -8,7 +8,7 @@ FILE_PIP_REQ="/app/requirements.txt"
 
 cd /app
 
-if [[ -f "${FILE_INITIALIZED}" && -f "${FILE_INITIALIZED_INSIDE}" ]]; then
+if [ -f "${FILE_INITIALIZED}" -a -f "${FILE_INITIALIZED_INSIDE}" ]; then
   echo "✅ 已初始化"
 else
   echo "⏳ 初始化..."

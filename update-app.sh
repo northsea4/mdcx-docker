@@ -1,5 +1,15 @@
 #!/bin/bash
 
+if [ ! -f ".env" ]; then
+  echo "❌ 当前目录缺少文件 .env。示例文件：https://github.com/northsea4/mdcx-docker/blob/dev/.env.sample"
+  exit 1
+fi
+
+if [ ! -f ".env.versions" ]; then
+  echo "❌ 当前目录缺少文件 .env.versions。示例文件：https://github.com/northsea4/mdcx-docker/blob/dev/.env.versions"
+  exit 1
+fi
+
 . .env
 . .env.versions
 

@@ -2,7 +2,7 @@
 
 # 表示应用已初始化的文件
 FILE_INITIALIZED="/app/.mdcx_initialized"
-FILE_INITIALIZED_INSIDE="/.mdcx_initialized_2"
+FILE_INITIALIZED_INSIDE="/.mdcx_initialized"
 
 FILE_PIP_REQ="/app/requirements.txt"
 

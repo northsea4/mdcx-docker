@@ -1,13 +1,54 @@
 #!/bin/bash
 
 if [ ! -f ".env" ]; then
-  echo "❌ 当前目录缺少文件 .env。示例文件：https://github.com/northsea4/mdcx-docker/blob/dev/.env.sample"
-  exit 1
+  echo "⚠️ 当前目录缺少文件 .env。示例文件：https://github.com/northsea4/mdcx-docker/blob/dev/.env.sample"
+  echo 'TZ=Asia/Shanghai
+
+APP_NAME=MDCx
+APP_VERSION=20230204
+
+# 应用窗口宽度
+DISPLAY_WIDTH=1200
+# 应用窗口高度
+DISPLAY_HEIGHT=750
+
+# 访问密码，如不需要，留空。如果有在公网远程访问的需求，建议设置
+VNC_PASSWORD=
+
+# 网页访问端口
+WEB_LISTENING_PORT=5800
+# VNC监听端口
+VNC_LISTENING_PORT=5900
+
+# 容器名称
+CONTAINER_NAME=mdcx' > .env
+
+  echo "ℹ️  已创建 .env 文件"
 fi
 
 if [ ! -f ".env.versions" ]; then
-  echo "❌ 当前目录缺少文件 .env.versions。示例文件：https://github.com/northsea4/mdcx-docker/blob/dev/.env.versions"
-  exit 1
+  echo "⚠️ 当前目录缺少文件 .env.versions。示例文件：https://github.com/northsea4/mdcx-docker/blob/dev/.env.versions"
+
+  echo '# 本项目版本
+PROJECT_VERSION=0.3.4
+
+# stainless403/gui-base镜像版本
+GUI_BASE_VERSION=0.2.1
+
+# stainless403/mdcx-base镜像版本
+MDCX_BASE_IMAGE_VERSION=0.2.6
+
+# stainless403/mdcx镜像版本
+MDCX_IMAGE_VERSION=20230204
+
+# stainless403/mdcx内置MDCx版本
+BUILTIN_MDCX_VERSION=20230204
+
+# 本地自部署MDCx应用版本
+MDCX_APP_VERSION=20230204' > .env.versions
+
+  echo "ℹ️  已创建 .env.versions 文件"
+
 fi
 
 . .env
@@ -67,7 +108,7 @@ done
 
 
 if [ -n "$help" ]; then
-  echo "脚本功能：更新使用tainless403/mdcx-base部署的本地应用。"
+  echo "脚本功能：更新使用tainless403/mdcx-base部署的本地应用，如果没有安装过会自动安装。"
   echo ""
   echo "示例-检查并更新:    ./update-app.sh"
   echo "示例-指定应用目录:  ./update-app.sh --src /path/tp/mdcx-app"
@@ -117,22 +158,26 @@ compareVersion () {
 }
 
 appPath=$(echo "$appPath" | sed 's:/*$::')
+isEmpty=0
 
 if [[ -n "${appPath}" ]]; then
   if [[ ! -d "${appPath}" ]]; then
-    echo "❌ $appPath 不存在！"
-    exit 1
-  fi
-
-  if [[ -f "$appPath/setup.py" ]]; then
-    # 'CFBundleShortVersionString': "20230201",
-    appVersion=$(cat $appPath/setup.py | grep -oi 'CFBundleShortVersionString.: "[a-z0-9]\+' | grep -oi '[a-z0-9]\+$')
-    echo "ℹ️  从 $appPath/setup.py 检测到应用版本为 $appVersion"
+    echo "⚠️ $appPath 不存在，现在创建"
+    mkdir $appPath
   else
-    echo "ℹ️  本地应用版本: $appVersion"
+    if [[ -f "$appPath/setup.py" ]]; then
+      # 'CFBundleShortVersionString': "20230201",
+      appVersion=$(cat $appPath/setup.py | grep -oi 'CFBundleShortVersionString.: "[a-z0-9]\+' | grep -oi '[a-z0-9]\+$')
+      echo "ℹ️  从 $appPath/setup.py 检测到应用版本为 $appVersion"
+    else
+      isEmpty=1
+      appVersion=0
+      echo "ℹ️  本地应用版本: $appVersion"
+    fi
   fi
 else
-  echo "ℹ️  本地应用版本: $appVersion"
+  echo "❌ 应用源码目录不能为空！"
+  exit 1
 fi
 
 _content=$(curl -s "https://api.github.com/repos/anyabc/something/releases/latest")
@@ -211,6 +256,9 @@ if [[ -n "$shouldUpdate" ]]; then
 
     echo "✅ 更新 .env.versions MDCX_APP_VERSION=$archiveVersion"
     sed -i -e "s/MDCX_APP_VERSION=[0-9.]\+/MDCX_APP_VERSION=$archiveVersion/" .env.versions
+
+    echo "✅ 更新 .env APP_VERSION=$archiveVersion"
+    sed -i -e "s/APP_VERSION=[0-9.]\+/APP_VERSION=$archiveVersion/" .env
 
     echo "ℹ️  删除标记文件 $appPath/$FILE_INITIALIZED"
     rm -f "$appPath/$FILE_INITIALIZED"

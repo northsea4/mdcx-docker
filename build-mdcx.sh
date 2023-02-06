@@ -179,6 +179,9 @@ sed -i -e "s/MDCX_IMAGE_VERSION=[0-9.]\+/MDCX_IMAGE_VERSION=$imageVersion/" .env
 echo "ℹ️  更新 .env.versions BUILTIN_MDCX_VERSION=$appVersion"
 sed -i -e "s/BUILTIN_MDCX_VERSION=[0-9.]\+/BUILTIN_MDCX_VERSION=$appVersion/" .env.versions
 
+echo "ℹ️  更新 .env APP_VERSION=$appVersion"
+sed -i -e "s/APP_VERSION=[0-9.]\+/APP_VERSION=$appVersion/" .env
+
 if [[ -n "$push" ]]; then
   echo "⏳ 推送镜像..."
   if [[ -n "$verbose" ]]; then

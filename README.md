@@ -14,7 +14,9 @@
 1. 访问 [MDCx发布仓库](https://github.com/anyabc/something/releases/tag/MDCx)，
 下载源码版的压缩包(`MDCx-py-`开头)，如`MDCx-py-20230127.rar`。
 
-2. 将`MDCx-py-20230127.rar`里的文件放到`app`目录。
+> 也可以使用`update-app.sh`工具，现在已支持完成第1次源码的部署工作。但请注意，该工具只是为你下载并解压应用源码，不会部署docker容器。
+
+1. 将`MDCx-py-20230127.rar`里的文件放到`app`目录。
 整个docker项目的结构大致如下：
 ```
 mdcx-docker
@@ -285,7 +287,7 @@ docker run --name mdcx \
 如果使用的是没有内置MDCx应用的`stainless403/mdcx-base`镜像，需要先自行下载新版应用并将应用文件解压到`app`目录。
 `stainless403/mdcx`则可以省略这一步。
 
-这里提供了一个一键更新脚本 update-app.sh](https://github.com/northsea4/mdcx-docker/update-app.sh) 自动为你完成更新处理。
+这里提供了一个一键更新脚本 [update-app.sh](https://github.com/northsea4/mdcx-docker/blob/dev/update-app.sh) 自动为你完成更新处理。
 请确保`update-app.sh` 文件位于 `/path/to/mdcx-docker`目录下。
 ```bash
 cd /path/to/mdcx-docker
@@ -298,6 +300,7 @@ chmod +x ./update-app.sh
 ```
 
 > ⚠️ 同目录下必须要有`.env`和`.env.versions`这个两个文件！`.env`示例文件为`.env.sample`。
+> 另外`update-app.sh`脚本也可以完成第1次源码的部署处理。
 
 > 如果你选择手动进行更新，请记得删除app目录下的`.mdcx_initialized`文件！
 
@@ -358,13 +361,13 @@ docker rm -f watchtower-mdcx
   > 支持运行MDCx的基础环境，非开发人员可以忽略。
 ### 3.2 构建镜像
 参考如下文件：
-- [build-mdcx-base.sh](https://github.com/northsea4/mdcx-docker/build-mdcx-base.sh)
-- [build-mdcx.sh](https://github.com/northsea4/mdcx-docker/build-mdcx.sh)
-- [build-gui-base.sh](https://github.com/northsea4/mdcx-docker/build-gui-base.sh)
+- [build-mdcx-base.sh](https://github.com/northsea4/mdcx-docker/blob/dev/build-mdcx-base.sh)
+- [build-mdcx.sh](https://github.com/northsea4/mdcx-docker/blob/dev/build-mdcx.sh)
+- [build-gui-base.sh](https://github.com/northsea4/mdcx-docker/blob/dev/build-gui-base.sh)
   
 
 
 ## TODO
-- [x] ~~emoji乱码。比如日志里的 ✅ 这类emoji，都是乱码，暂时没找到解决方法。~~ 已解决：安装`fonts-noto-color-emoji`
-- [x] ~~编写脚本自动完成`stainless403/mdcx`镜像的处理流程。~~
-- [x] ~~编写脚本自动完成本地应用的更新流程~~
+- [x] emoji乱码。比如日志里的 ✅ 这类emoji，都是乱码，暂时没找到解决方法。已解决：安装`fonts-noto-color-emoji`
+- [x] 编写脚本自动完成`stainless403/mdcx`镜像的处理流程。
+- [x] 编写脚本自动完成本地应用的更新流程

@@ -1,6 +1,6 @@
 FROM stainless403/gui-base:latest
 LABEL maintainer="stainless403"
-LABEL description="MDCx容器化，内置了MDCx"
+LABEL description="MDCx Docker完整版镜像"
 
 # TODO 没效果
 ARG APP_VERSION
@@ -17,15 +17,19 @@ RUN rm -f /app/config.ini && \
     rm -rf /app/Log
 
 # 应用配置目录。基础镜像里已存在/config目录
-RUN mkdir /mdcx_config
+RUN mkdir /mdcx_config && \
+  mkdir -p /config/my_home && \
+  chmod -R 777 /app && \
+  chmod -R 777 /mdcx_config
 
 WORKDIR /app
 
 RUN python3.9 -m pip install \
-    --no-cache-dir -r requirements.txt \
-    -i https://pypi.douban.com/simple && \
-    touch /app/.mdcx_initialized && \
-    touch /.mdcx_initialized
+  --no-cache-dir -r requirements.txt \
+  -i https://pypi.doubanio.com/simple
+
+RUN touch /app/.mdcx_initialized && \
+  touch /config/my_home/.mdcx_initialized
 
 # 容器启动时执行的脚本
 COPY startapp.sh /startapp.sh

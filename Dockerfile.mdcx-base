@@ -1,7 +1,7 @@
 FROM stainless403/gui-base:latest
 
 LABEL maintainer="stainless403"
-LABEL description="用于运行MDCx的基础镜像，没有内置MDCx"
+LABEL description="MDCx Docker版基础镜像，没有内置MDCx"
 
 # TODO 没效果
 ARG APP_VERSION
@@ -9,8 +9,15 @@ ARG APP_VERSION
 ENV APP_NAME        "MDCx Docker"
 ENV APP_VERSION     $APP_VERSION
 
+# pip源
+ENV PYPI_MIRROR     "https://pypi.doubanio.com/simple"
+# ENV PYPI_MIRROR     "https://pypi.org/simple"
+# ENV PYPI_MIRROR     "https://pypi.tuna.tsinghua.edu.cn/simple"
+
 # 应用配置目录。基础镜像里已存在/config目录
-RUN mkdir /mdcx_config
+RUN mkdir /mdcx_config && \
+  mkdir -p /config/my_home && \
+  chmod -R 777 /mdcx_config
 
 # 容器启动时执行的脚本
 COPY startapp.sh /startapp.sh

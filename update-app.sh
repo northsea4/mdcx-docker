@@ -1,8 +1,11 @@
 #!/bin/bash
 
+USER_ID=$(id -u)
+GROUP_ID=$(id -g)
+
 if [ ! -f ".env" ]; then
   echo "⚠️ 当前目录缺少文件 .env。示例文件：https://github.com/northsea4/mdcx-docker/blob/dev/.env.sample"
-  echo 'TZ=Asia/Shanghai
+  echo "TZ=Asia/Shanghai
 
 APP_NAME=MDCx
 APP_VERSION=20230204
@@ -20,8 +23,21 @@ WEB_LISTENING_PORT=5800
 # VNC监听端口
 VNC_LISTENING_PORT=5900
 
+# 运行应用的用户ID
+USER_ID=$USER_ID
+# 运行应用的用户组ID
+GROUP_ID=$GROUP_ID
+
+# python软件包加速镜像
+# 豆瓣
+PYPI_MIRROR=https://pypi.doubanio.com/simple
+# 清华
+# PYPI_MIRROR=https://pypi.tuna.tsinghua.edu.cn/simple
+# 默认
+# PYPI_MIRROR=https://pypi.org/simple
+
 # 容器名称
-CONTAINER_NAME=mdcx' > .env
+CONTAINER_NAME=mdcx" > .env
 
   echo "ℹ️  已创建 .env 文件"
 fi
@@ -33,19 +49,19 @@ if [ ! -f ".env.versions" ]; then
 PROJECT_VERSION=0.3.4
 
 # stainless403/gui-base镜像版本
-GUI_BASE_VERSION=0.2.1
+GUI_BASE_VERSION=0.2.3
 
 # stainless403/mdcx-base镜像版本
-MDCX_BASE_IMAGE_VERSION=0.2.6
+MDCX_BASE_IMAGE_VERSION=0.2.7
 
 # stainless403/mdcx镜像版本
-MDCX_IMAGE_VERSION=20230204
+MDCX_IMAGE_VERSION=20230206
 
 # stainless403/mdcx内置MDCx版本
-BUILTIN_MDCX_VERSION=20230204
+BUILTIN_MDCX_VERSION=20230206
 
 # 本地自部署MDCx应用版本
-MDCX_APP_VERSION=20230204' > .env.versions
+MDCX_APP_VERSION=20230206' > .env.versions
 
   echo "ℹ️  已创建 .env.versions 文件"
 
@@ -163,7 +179,9 @@ isEmpty=0
 if [[ -n "${appPath}" ]]; then
   if [[ ! -d "${appPath}" ]]; then
     echo "⚠️ $appPath 不存在，现在创建"
-    mkdir $appPath
+    mkdir -p $appPath
+    isEmpty=1
+    appVersion=0
   else
     if [[ -f "$appPath/setup.py" ]]; then
       # 'CFBundleShortVersionString': "20230201",
@@ -263,11 +281,17 @@ if [[ -n "$shouldUpdate" ]]; then
     echo "ℹ️  删除标记文件 $appPath/$FILE_INITIALIZED"
     rm -f "$appPath/$FILE_INITIALIZED"
 
+    configPath=$(realpath $appPath | xargs dirname)/config
+    if [[ ! -d "$configPath" ]]; then
+      echo "ℹ️  创建持久化的config目录，路径：$configPath"
+      mkdir -p $configPath
+    fi
+
     if [[ "$restart" == "1" || "$restart" == "true" ]]; then
-      echo "⏳ 重启容器..."
+      echo "⏳ 重启容器... 如果没有部署容器请参考教程进行部署。"
       docker restart $CONTAINER_NAME
     else
-      echo "ℹ️  执行以下命令重启容器"
+      echo "ℹ️  执行以下命令重启容器。如果没有部署容器请参考教程进行部署。"
       echo "docker restart $CONTAINER_NAME"
     fi
   fi

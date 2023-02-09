@@ -1,3 +1,48 @@
+## 0. 必看
+
+## 0.1 USER_ID和GROUP_ID
+```bash
+# 获取当前用户的
+id
+# 获取指定用户的
+id admin
+
+# 获取USER_ID
+id -u admin
+# 获取GROUP_ID
+id -g admin
+```
+容器内置了一个用户，名为`app`，其`用户ID`和`分组ID`对应了部署容器时指定的`USER_ID`和`GROUP_ID`这两个环境变量。
+默认都为`0`，即`root`用户。
+`app`是运行MDCx的用户，也就是MDCx产生的文件，比如nfo、海报等，默认都是归属于`app`这个用户的。
+进一步说，如果`app`用户不具备某些文件的权限，则MDCx可能会运行异常。
+比如，如下场景：
+- 配置目录映射：`./config:/mdcx_config`，且在MDCx设置了配置目录为`/mdcx_config`
+- `./config`目录归属于`root`且权限不是`777`，比如是`755`
+- 使用普通用户的`USER_ID`和`GROUP_ID`
+  
+这个情况下，MDCx由于没有`/mdcx_config`目录的写入权限，在保存配置文件时，会报错，导致容器退出：
+> 关键日志：PermissionError: [Errno 13] Permission denied
+```log
+mdcx   | [app         ] Traceback (most recent call last):
+mdcx   | [app         ]   File "/app/MDCx_Main.py", line 3971, in pushButton_save_new_config_clicked
+mdcx   | [app         ]     self.pushButton_save_config_clicked()
+mdcx   | [app         ]   File "/app/MDCx_Main.py", line 3958, in pushButton_save_config_clicked
+mdcx   | [app         ]     self.save_config_clicked()
+mdcx   | [app         ]   File "/app/MDCx_Main.py", line 4939, in save_config_clicked
+mdcx   | [app         ]     cf.save_config(json_config)
+mdcx   | [app         ]   File "/app/Function/config.py", line 557, in save_config
+mdcx   | [app         ]     with open(config_path, "wt", encoding='UTF-8') as code:
+mdcx   | [app         ] PermissionError: [Errno 13] Permission denied: '/mdcx_config/config3.ini'
+mdcx   | [app         ] Fatal Python error: Aborted
+mdcx   | [app         ] Current thread 0x00007fd625215740 (most recent call first):
+mdcx   | [app         ]   File "/app/MDCx_Main.py", line 13568 in <module>
+mdcx   | [app         ] Aborted (core dumped)
+mdcx   | [supervisor  ] service 'app' exited (with status 134).
+mdcx   | [supervisor  ] service 'app' exited, shutting down...
+```
+
+
 ## 1. mdcx-base示例
 [stainless403/mdcx-base](https://hub.docker.com/r/stainless403/mdcx-base)镜像没有内置MDCx，如果想使用内置的，请使用[stainless403/mdcx](https://hub.docker.com/r/stainless403/mdcx)镜像。
 
@@ -38,9 +83,12 @@ mdcx-docker
   |-- logs
     |-- 2023-02-04-01-15-00.txt
   |-- .env
+  |-- .env.sample
+  |-- .env.versions
   |-- docker-compose.mdcx-base.sample.yml
   |-- docker-compose.mdcx.sample.yml
   |-- docker-compose.yml
+  |-- update-app.sh
 ```
 
 ### 1.2 设置参数
@@ -72,9 +120,22 @@ DISPLAY_HEIGHT=750
 VNC_PASSWORD=
 
 # 网页访问端口
-WEB_LISTENING_PORT=15800
+WEB_LISTENING_PORT=5800
 # VNC监听端口
-VNC_LISTENING_PORT=15900
+VNC_LISTENING_PORT=5900
+
+# 运行应用的用户ID
+USER_ID=0
+# 运行应用的用户组ID
+GROUP_ID=0
+
+# python软件包加速镜像
+# 豆瓣
+PYPI_MIRROR=https://pypi.doubanio.com/simple
+# 清华
+# PYPI_MIRROR=https://pypi.tuna.tsinghua.edu.cn/simple
+# 默认
+# PYPI_MIRROR=https://pypi.org/simple
 
 # 容器名称
 CONTAINER_NAME=mdcx
@@ -92,13 +153,13 @@ services:
       # `stainless403/mdcx-base`镜像没有内置MDCx，需要自行将代码解压到app目录并映射到容器内
       - ./app:/app
 
-      # 配置文件
+      # 配置目录
       - ./config:/mdcx_config
 
       # 日志目录
       - ./logs:/app/Log
 
-      # 影片所在位置
+      # 影片目录
       - /volume2:/volume2
       - /volume3:/volume3
     environment:
@@ -109,6 +170,12 @@ services:
       - DISPLAY_HEIGHT=${DISPLAY_HEIGHT}
       # 访问密码
       - VNC_PASSWORD=${VNC_PASSWORD}
+      # 运行应用的用户ID
+      - USER_ID=${USER_ID}
+      # 运行应用的用户分组ID
+      - GROUP_ID=${GROUP_ID}
+      # python软件包镜像地址
+      - PYPI_MIRROR=${PYPI_MIRROR}
     ports:
       - ${WEB_LISTENING_PORT}:5800
       - ${VNC_LISTENING_PORT}:5900
@@ -122,7 +189,7 @@ services:
 docker-compose up -d
 ```
 
-> 首次运行时会自动安装依赖，并在app目录 和 容器根目录生成一个名为`.mdcx_initialized`的标记文件。
+> 首次运行时会自动安装依赖，并在app目录 和 容器内的`/config/my_home`目录生成一个名为`.mdcx_initialized`的标记文件。
 > 当启动脚本检查到这两个文件同时存在时，就认为已安装过依赖。而当重建容器时，由于新容器里没有标记文件，所以会进行一次安装依赖的处理。
 > 如果由于网络等原因没有成功安装依赖，但`.mdcx_initialized`又已生成，删除app目录下的`.mdcx_initialized`文件即可(容器内的标记文件不需要删除)。
 
@@ -150,6 +217,9 @@ docker run --name mdcx \
   -e DISPLAY_WIDTH=1200 \
   -e DISPLAY_HEIGHT=750 \
   -e VNC_PASSWORD=123456 \
+  # 运行应用的用户ID和分组ID，替换为你实际的ID
+  -e USER_ID=0 \
+  -e GROUP_ID=0 \
   --restart unless-stopped \
   stainless403/mdcx-base
 ```
@@ -173,13 +243,16 @@ mdcx-docker
   |-- logs
     |-- 2023-02-04-01-15-00.txt
   |-- .env
+  |-- .env.sample
+  |-- .env.versions
   |-- docker-compose.mdcx-base.sample.yml
   |-- docker-compose.mdcx.sample.yml
   |-- docker-compose.yml
+  |-- update-app.sh
 ```
 
 ### 2.2 设置参数
-复制一份`docker-compose.mdcx.sample.yml`：
+复制一份`docker-compose.mdcx.sample.yml`，手动或使用如下命令：
 ```bash
 cp docker-compose.mdcx.sample.yml docker-compose.yml
 ```
@@ -191,7 +264,7 @@ cp docker-compose.mdcx.sample.yml docker-compose.yml
 
 #### 2.2.2 环境变量
 
-复制一份`.env.sample`：
+复制一份`.env.sample`，手动或使用如下命令：
 ```bash
 cp .env.sample .env
 ```
@@ -209,9 +282,22 @@ DISPLAY_HEIGHT=750
 VNC_PASSWORD=
 
 # 网页访问端口
-WEB_LISTENING_PORT=15800
+WEB_LISTENING_PORT=5800
 # VNC监听端口
-VNC_LISTENING_PORT=15900
+VNC_LISTENING_PORT=5900
+
+# 运行应用的用户ID
+USER_ID=0
+# 运行应用的用户组ID
+GROUP_ID=0
+
+# python软件包加速镜像
+# 豆瓣
+PYPI_MIRROR=https://pypi.doubanio.com/simple
+# 清华
+# PYPI_MIRROR=https://pypi.tuna.tsinghua.edu.cn/simple
+# 默认
+# PYPI_MIRROR=https://pypi.org/simple
 
 # 容器名称
 CONTAINER_NAME=mdcx
@@ -244,6 +330,12 @@ services:
       - DISPLAY_HEIGHT=${DISPLAY_HEIGHT}
       # 访问密码
       - VNC_PASSWORD=${VNC_PASSWORD}
+      # 运行应用的用户ID
+      - USER_ID=${USER_ID}
+      # 运行应用的用户分组ID
+      - GROUP_ID=${GROUP_ID}
+      # python软件包镜像地址
+      - PYPI_MIRROR=${PYPI_MIRROR}
     ports:
       - ${WEB_LISTENING_PORT}:5800
       - ${VNC_LISTENING_PORT}:5900
@@ -269,16 +361,19 @@ docker run --name mdcx \
   --restart unless-stopped \
   -p 5800:5800 \
   -p 5900:5900 \
-  # 配置文件
+  # 配置目录
   -v /path/to/mdcx-docker/config:/mdcx_config \
-  # 日志
+  # 日志目录
   -v /path/to/mdcx-docker/logs:/app/Log \
-  # 你的影片所在位置
+  # 影片目录
   -v /volume2:/volume2 \
   -e TZ=Asia/Shanghai \
   -e DISPLAY_WIDTH=1200 \
   -e DISPLAY_HEIGHT=750 \
   -e VNC_PASSWORD=123456 \
+  # 运行应用的用户ID和分组ID，替换为你实际的ID
+  -e USER_ID=0 \
+  -e GROUP_ID=0 \
   stainless403/mdcx
 ```
 
@@ -326,6 +421,8 @@ docker run --rm \
 ```
 
 1. 定时任务方式：
+> 个人不太建议自动更新，请自行斟酌。
+
 示例：每天的凌晨2点进行更新
 ```bash
 docker run -d --name watchtower-mdcx \
@@ -359,15 +456,18 @@ docker rm -f watchtower-mdcx
   
 - [stainless403/gui-base](https://hub.docker.com/r/stainless403/gui-base)
   > 支持运行MDCx的基础环境，非开发人员可以忽略。
+
 ### 3.2 构建镜像
 参考如下文件：
 - [build-mdcx-base.sh](https://github.com/northsea4/mdcx-docker/blob/dev/build-mdcx-base.sh)
 - [build-mdcx.sh](https://github.com/northsea4/mdcx-docker/blob/dev/build-mdcx.sh)
 - [build-gui-base.sh](https://github.com/northsea4/mdcx-docker/blob/dev/build-gui-base.sh)
-  
 
 
 ## TODO
 - [x] emoji乱码。比如日志里的 ✅ 这类emoji，都是乱码，暂时没找到解决方法。已解决：安装`fonts-noto-color-emoji`
 - [x] 编写脚本自动完成`stainless403/mdcx`镜像的处理流程。
 - [x] 编写脚本自动完成本地应用的更新流程
+- [x] 内置CJK字体，免去容器初次运行时才去安装
+- [ ] 使用Github Actions构建
+- [ ] rdesktop

@@ -21,6 +21,12 @@ services:
       - DISPLAY_HEIGHT=${DISPLAY_HEIGHT}
       # 访问密码
       - VNC_PASSWORD=${VNC_PASSWORD}
+      # 运行应用的用户ID
+      - USER_ID=${USER_ID}
+      # 运行应用的用户分组ID
+      - GROUP_ID=${GROUP_ID}
+      # python软件包镜像地址
+      - PYPI_MIRROR=${PYPI_MIRROR}
     ports:
       - ${WEB_LISTENING_PORT}:5800
       - ${VNC_LISTENING_PORT}:5900

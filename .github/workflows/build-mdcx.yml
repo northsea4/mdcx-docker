@@ -16,11 +16,7 @@ on:
           - prod
       baseImage:
         description: Tag of base image `build-mdcx-base`
-        type: choice
         default: 'latest'
-        options:
-          - 'ubuntu-22.04'
-          - 'latest'
 
 env:
   IMAGE_BASE: build-mdcx
@@ -81,6 +77,7 @@ jobs:
           file: ${{ env.IMAGE_BASE }}/Dockerfile.${{ env.IMAGE_KEY }}
           build-args: |
             APT_SOURCE_HOST=
+            PYPI_MIRROR=
             BASE_IMAGE_TAG=${{ github.event.inputs.baseImage }}
           platforms: |
             linux/amd64

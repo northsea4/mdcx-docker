@@ -3,7 +3,7 @@
 export LC_ALL=zh_CN.UTF-8
 
 echo "=========================!!!!!!!!=============================="
-echo "This script sleep forever in order to keep the container alive."
+echo "            I'm sleeping. Make yourself at home!"
 echo "=========================!!!!!!!!=============================="
 
 while :

@@ -66,4 +66,6 @@ RUN chmod +x /app/MDCx
 #     APP_ICON_URL=https://github.com/jlesage/docker-templates/raw/master/jlesage/images/generic-app-icon.png && \
 #     install_app_icon.sh "$APP_ICON_URL"
 
+COPY gui-base/rootfs/ /
+
 COPY scripts/run-bin.sh /startapp.sh

@@ -1,12 +1,17 @@
 #!/bin/sh
 
-export LC_ALL=zh_CN.UTF-8
+if [[ -n "$DEBUG" ]]; then
+  echo "=========================!!!!!!!!=============================="
+  echo "            I'm sleeping. Make yourself at home!"
+  echo "=========================!!!!!!!!=============================="
 
-if command -v take-ownership > /dev/null 2>&1; then
-  echo "😁 take-ownership /app and /mdcx-config"
-  take-ownership /app
-  take-ownership /mdcx-config
+  while :
+  do
+    sleep 10
+  done
 fi
+
+export LC_ALL=zh_CN.UTF-8
 
 cd /app
 

@@ -42,6 +42,10 @@ RUN mkdir -p "$MDCX_CONFIG_PATH" && \
   chmod -R 777 /app && \
   chmod -R 777 "$MDCX_CONFIG_PATH"
 
+# RUN groupadd app && useradd -ms /usr/sbin/nologin -g app app
+# RUN chown -R app:app /app "$MDCX_CONFIG_PATH"
+RUN take-ownership /app && take-ownership "$MDCX_CONFIG_PATH"
+
 # 写入默认的`配置文件目录`标记文件
 RUN echo "$MDCX_CONFIG_PATH/config.ini" > /app/MDCx.config
 
@@ -50,4 +54,5 @@ RUN echo "$MDCX_CONFIG_PATH/config.ini" > /app/MDCx.config
 #     APP_ICON_URL=https://github.com/jlesage/docker-templates/raw/master/jlesage/images/generic-app-icon.png && \
 #     install_app_icon.sh "$APP_ICON_URL"
 
-COPY scripts/run-src.sh /startapp.sh
+# COPY scripts/run-src.sh /startapp.sh
+COPY scripts/run-nothing.sh /startapp.sh

@@ -70,7 +70,7 @@ jobs:
           context: .
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          file: $IMAGE_BASE/Dockerfile.$IMAGE_KEY
+          file: ${{ env.IMAGE_BASE }}/Dockerfile.${{ env.IMAGE_KEY }}
           build-args: |
             APT_SOURCE_HOST=
             BASE_IMAGE_TAG=${{ github.event.inputs.baseImage }}

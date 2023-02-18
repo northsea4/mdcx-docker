@@ -40,8 +40,8 @@ jobs:
         name: Prepare App info
         id: appInfo
         run: |
-          APP_IMAGE="stainless403/build-mdcx:${{ github.event.inputs.appVersion }}"
-          APP_VERSION=$(docker run --rm $APP_IMAGE sh -c cat /app-version)
+          APP_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/build-mdcx:${{ github.event.inputs.appVersion }}"
+          APP_VERSION=$(docker run --rm $APP_IMAGE cat /app-version)
           if [[ -z "$APP_VERSION" ]]; then
             echo "❌ Failed to get app version from app bin image!"
             exit 1

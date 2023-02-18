@@ -79,6 +79,7 @@ jobs:
             APT_SOURCE_HOST=
             PYPI_MIRROR=
             BASE_IMAGE_TAG=${{ github.event.inputs.baseImage }}
+            APP_VERSION=${{ steps.prepare.outputs.APP_VERSION }}
           platforms: |
             linux/amd64
             linux/arm64

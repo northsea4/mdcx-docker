@@ -55,8 +55,13 @@ RUN pyinstaller -n MDCx \
 
 RUN pyinstaller MDCx.spec
 
+RUN echo $APP_VERSION > /tmp/mdcx/dist/app-verbose
+
 FROM scratch
 COPY --from=builder /tmp/mdcx/dist/MDCx /MDCx
-RUN echo $APP_VERSION > /app-version
+COPY --from=builder /tmp/mdcx/dist/app-version /app-version
+
+# scratch里没有bash
+# RUN echo $APP_VERSION > /app-version
 
 CMD [ "echo", "This image just contains MDCx bin." ]

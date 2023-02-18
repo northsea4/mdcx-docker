@@ -13,9 +13,6 @@ fi
 
 export LC_ALL=zh_CN.UTF-8
 
-# 运行应用的用户的Home目录 https://github.com/jlesage/docker-baseimage-gui#the-home-variable
-export HOME=$USER_HOME
-
 # 表示应用已初始化的文件
 FILE_INITIALIZED="/app/.mdcx_initialized"
 FILE_INITIALIZED_INSIDE="/tmp/.mdcx_initialized"
@@ -45,7 +42,7 @@ else
     echo "PYPI_MIRROR: $PYPI_MIRROR"
 
     python3 -m pip install \
-      --verbose --user --no-cache-dir \
+      --verbose --user \
       -r requirements.txt \
       -i $PYPI_MIRROR
   else

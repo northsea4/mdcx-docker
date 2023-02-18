@@ -1,17 +1,11 @@
 #!/bin/sh
 
 if [ ! -f ".env" ]; then
-  echo "⚠️ 当前目录缺少文件 .env。示例文件：https://github.com/northsea4/mdcx-docker/blob/dev/.env.sample"
+  echo "⚠️ 当前目录缺少文件 .env。示例文件：https://github.com/northsea4/mdcx-docker/blob/dev/webtop-base/.env.sample"
   exit 1
 fi
 
-# if [ ! -f ".env.versions" ]; then
-#   echo "⚠️ 当前目录缺少文件 .env.versions。示例文件：https://github.com/northsea4/mdcx-docker/blob/dev/.env.versions"
-#   exit 1
-# fi
-
 . .env
-# . .env.versions
 
 FILE_INITIALIZED=".mdcx_initialized"
 
@@ -60,14 +54,6 @@ do
   esac
 done
 
-# echo "appPath: $appPath"
-# echo "restart: $restart"
-# echo "force: $force"
-# echo "dry: $dry"
-# echo "verbose: $verbose"
-# echo "help: $help"
-# exit
-
 
 if [ -n "$help" ]; then
   echo "脚本功能：更新自部署的应用源码"
@@ -75,12 +61,10 @@ if [ -n "$help" ]; then
   echo "示例-检查并更新:    ./update-src.sh"
   echo ""
   echo "参数说明："
-  # echo "-p, --path, --src         本地应用目录路径，默认为 ./app"
   echo "--restart                 更新后重启容器，默认true。可选参数值: 1, 0; true, false"
   echo "--force                   强制更新。默认情况下当已发布版本较新于本地版本时才会更新。"
   echo "--dry                     只检查，不更新"
   echo "-h, --help                显示帮助信息"
-  echo ""
   exit 0
 fi
 

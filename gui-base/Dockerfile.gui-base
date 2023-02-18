@@ -1,0 +1,73 @@
+# syntax=docker/dockerfile:1.4
+
+ARG BASE_IMAGE_TAG="ubuntu-22.04"
+FROM stainless403/baseimage-gui:$BASE_IMAGE_TAG
+
+LABEL maintainer="stainless403"
+LABEL description="base on stainless403/baseimage-gui:$BASE_IMAGE_TAG"
+
+ARG TARGETPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
+
+ARG BUILDPLATFORM
+ARG BUILDOS
+ARG BUILDARCH
+ARG BUILDVARIANT
+
+RUN echo "-----Image target platform details:"
+RUN echo "TARGETPLATFORM    : $TARGETPLATFORM"
+RUN echo "TARGETOS          : $TARGETOS"
+RUN echo "TARGETARCH        : $TARGETARCH"
+RUN echo "TARGETVARIANT     : $TARGETVARIANT"
+
+RUN echo "-----Image build platform details:"
+RUN echo "BUILDPLATFORM     : $BUILDPLATFORM"
+RUN echo "BUILDOS           : $BUILDOS"
+RUN echo "BUILDARCH         : $BUILDARCH"
+RUN echo "BUILDVARIANT      : $BUILDVARIANT"
+
+ARG APP_VERSION
+
+ENV APP_NAME        "TigerVNC APP"
+ENV APP_VERSION     $APP_VERSION
+
+ENV USER_ID         1000
+ENV GROUP_ID        1000
+
+# 启用cjk字体
+ENV ENABLE_CJK_FONT 1
+
+# 宽度(px)
+ENV DISPLAY_WIDTH   "1200"
+# 高度(px)
+ENV DISPLAY_HEIGHT  "750"
+
+ARG APT_SOURCE_HOST="mirrors.ustc.edu.cn"
+
+RUN if [[ -n "$APT_SOURCE_HOST" ]]; then \
+    sed -i "s/archive.ubuntu.com/${APT_SOURCE_HOST}/g" /etc/apt/sources.list; \
+  fi
+
+RUN apt-get update -y
+
+# 安装一些必须的软件包
+RUN apt-get install -y \
+    curl \
+    locales \
+    # ImportError: libGL.so.1: cannot open shared object file: No such file or directory
+    libgl1 \
+    fonts-wqy-zenhei \
+    fonts-noto-color-emoji
+
+
+RUN export LANG=zh_CN.UTF-8 && locale-gen zh_CN.UTF-8
+# RUN export LC_ALL=zh_CN.UTF-8
+ENV LC_ALL=zh_CN.UTF-8
+
+RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+WORKDIR /app
+
+COPY scripts/run-nothing.sh /startapp.sh

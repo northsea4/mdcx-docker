@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  gui_base_src:
+    image: stainless403/gui-base_mdcx-src:${MDCX_SRC_IMAGE_TAG}
+    container_name: ${MDCX_SRC_CONTAINER_NAME}
+    env_file:
+      - .env
+    volumes:
+      # 系统数据目录
+      - ./data:/config
+
+      # 源码目录
+      - ./app:/app
+
+      # 配置目录
+      - ./mdcx-config:/mdcx-config
+      # 记录当前`配置文件目录`的状态文件
+      - ./mdcx-config/MDCx.config:/app/MDCx.config
+
+      # 日志目录
+      - ./logs:/app/Log
+
+      # 影片目录
+      - /path/to/movies:/movies
+    environment:
+      - MEANINGLESS_ENV=
+      # - APP_VERSION=20230217
+    ports:
+      - ${WEB_PORT}:5800
+      - ${VNC_PORT}:5900
+    restart: unless-stopped
+    network_mode: bridge
+    stdin_open: true

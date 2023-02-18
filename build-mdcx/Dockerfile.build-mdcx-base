@@ -1,0 +1,52 @@
+# syntax=docker/dockerfile:1.4
+
+ARG BASE_IMAGE_TAG="22.04"
+FROM stainless403/ubuntu:$BASE_IMAGE_TAG
+
+LABEL maintainer="stainless403"
+LABEL description="base on stainless403/ubuntu:$BASE_IMAGE_TAG"
+
+ARG TARGETPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
+
+ARG BUILDPLATFORM
+ARG BUILDOS
+ARG BUILDARCH
+ARG BUILDVARIANT
+
+RUN echo "-----Image target platform details:"
+RUN echo "TARGETPLATFORM    : $TARGETPLATFORM"
+RUN echo "TARGETOS          : $TARGETOS"
+RUN echo "TARGETARCH        : $TARGETARCH"
+RUN echo "TARGETVARIANT     : $TARGETVARIANT"
+
+RUN echo "-----Image build platform details:"
+RUN echo "BUILDPLATFORM     : $BUILDPLATFORM"
+RUN echo "BUILDOS           : $BUILDOS"
+RUN echo "BUILDARCH         : $BUILDARCH"
+RUN echo "BUILDVARIANT      : $BUILDVARIANT"
+
+ARG APT_SOURCE_HOST="mirrors.ustc.edu.cn"
+
+RUN if [[ -n "$APT_SOURCE_HOST" ]]; then \
+    sed -i "s/archive.ubuntu.com/${APT_SOURCE_HOST}/g" /etc/apt/sources.list; \
+  fi
+
+RUN apt update -y
+RUN apt install python3 python3-pip python3-pyqt5 unrar wget curl -y
+# RUN apt install fonts-wqy-zenhei fonts-noto-color-emoji -y
+
+
+ARG PYPI_MIRROR="https://pypi.doubanio.com/simple"
+RUN echo "PYPI_MIRROR: $PYPI_MIRROR"
+
+RUN python3 -m pip install pyinstaller --verbose -i $PYPI_MIRROR
+
+RUN if which pyinstaller > /dev/null 2>&1; then \
+    echo '⚠️ pyinstaller is not in $PATH, now make a link.'; \
+    ln -s ~/.local/bin/pyinstaller /usr/local/sbin/pyinstaller; \
+  else \
+    echo '✅ pyinstaller is in $PATH.'; \
+  fi

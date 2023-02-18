@@ -1,0 +1,57 @@
+# syntax=docker/dockerfile:1.4
+
+ARG BASE_IMAGE_TAG="ubuntu-kde-22.04"
+FROM stainless403/rdesktop:$BASE_IMAGE_TAG
+
+LABEL maintainer="stainless403"
+LABEL description="base on stainless403/rdesktop:$BASE_IMAGE_TAG"
+
+ARG TARGETPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
+
+ARG BUILDPLATFORM
+ARG BUILDOS
+ARG BUILDARCH
+ARG BUILDVARIANT
+
+RUN echo "-----Image target platform details:"
+RUN echo "TARGETPLATFORM    : $TARGETPLATFORM"
+RUN echo "TARGETOS          : $TARGETOS"
+RUN echo "TARGETARCH        : $TARGETARCH"
+RUN echo "TARGETVARIANT     : $TARGETVARIANT"
+
+RUN echo "-----Image build platform details:"
+RUN echo "BUILDPLATFORM     : $BUILDPLATFORM"
+RUN echo "BUILDOS           : $BUILDOS"
+RUN echo "BUILDARCH         : $BUILDARCH"
+RUN echo "BUILDVARIANT      : $BUILDVARIANT"
+
+ENV PUID         1000
+ENV PGID         1000
+
+ARG APT_SOURCE_HOST="mirrors.ustc.edu.cn"
+
+RUN if [[ -n "$APT_SOURCE_HOST" ]]; then \
+    sed -i "s/archive.ubuntu.com/${APT_SOURCE_HOST}/g" /etc/apt/sources.list; \
+  fi
+
+RUN apt-get update -y
+
+RUN apt-get install -y \
+    curl \
+    locales \
+    # ImportError: libGL.so.1: cannot open shared object file: No such file or directory
+    libgl1 \
+    fonts-wqy-zenhei \
+    fonts-noto-color-emoji
+
+
+RUN export LANG=zh_CN.UTF-8 && locale-gen zh_CN.UTF-8
+# RUN export LC_ALL=zh_CN.UTF-8
+ENV LC_ALL=zh_CN.UTF-8
+
+RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+WORKDIR /app

@@ -1,0 +1,59 @@
+# syntax=docker/dockerfile:1.4
+
+ARG BASE_IMAGE_TAG=latest
+FROM stainless403/build-mdcx-base:$BASE_IMAGE_TAG as builder
+
+LABEL maintainer="stainless403"
+LABEL description="base on stainless403/mdcx-build-base:$BASE_IMAGE_TAG"
+
+ARG APP_VERSION
+
+ARG TARGETPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
+
+ARG BUILDPLATFORM
+ARG BUILDOS
+ARG BUILDARCH
+ARG BUILDVARIANT
+
+RUN echo "-----Image target platform details:"
+RUN echo "TARGETPLATFORM    : $TARGETPLATFORM"
+RUN echo "TARGETOS          : $TARGETOS"
+RUN echo "TARGETARCH        : $TARGETARCH"
+RUN echo "TARGETVARIANT     : $TARGETVARIANT"
+
+RUN echo "-----Image build platform details:"
+RUN echo "BUILDPLATFORM     : $BUILDPLATFORM"
+RUN echo "BUILDOS           : $BUILDOS"
+RUN echo "BUILDARCH         : $BUILDARCH"
+RUN echo "BUILDVARIANT      : $BUILDVARIANT"
+
+COPY build-mdcx/.mdcx_src /tmp/mdcx
+WORKDIR /tmp/mdcx
+
+ARG PYQT5_VERSION="5.15.6"
+
+RUN cp requirements.txt requirements.txt.bak
+RUN sed -i -e "s/PyQt5==[0-9.]\+/PyQt5==$PYQT5_VERSION/" requirements.txt
+
+ARG PYPI_MIRROR="https://pypi.doubanio.com/simple"
+
+RUN python3 -m pip install -r requirements.txt --verbose -i $PYPI_MIRROR
+
+RUN pyinstaller -n MDCx \
+  -i Img/MDCx.ico \
+  -F -w MDCx_Main.py \
+  --add-data "Data:." \
+  --add-data "Img:Img" \
+  --hidden-import socks \
+  --hidden-import urllib3
+
+RUN pyinstaller MDCx.spec
+
+FROM scratch
+COPY --from=builder /tmp/mdcx/dist/MDCx /MDCx
+RUN echo $APP_VERSION > /app-version
+
+CMD [ "echo", "This image just contains MDCx bin." ]

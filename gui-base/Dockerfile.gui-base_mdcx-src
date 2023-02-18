@@ -1,0 +1,53 @@
+# syntax=docker/dockerfile:1.4
+
+ARG BASE_IMAGE_TAG="ubuntu-kde-22.04"
+FROM stainless403/gui-base:$BASE_IMAGE_TAG
+
+LABEL maintainer="stainless403"
+LABEL description="base on stainless403/gui-base:$BASE_IMAGE_TAG"
+
+ARG TARGETPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+ARG TARGETVARIANT
+
+ARG BUILDPLATFORM
+ARG BUILDOS
+ARG BUILDARCH
+ARG BUILDVARIANT
+
+RUN echo "-----Image target platform details:"
+RUN echo "TARGETPLATFORM    : $TARGETPLATFORM"
+RUN echo "TARGETOS          : $TARGETOS"
+RUN echo "TARGETARCH        : $TARGETARCH"
+RUN echo "TARGETVARIANT     : $TARGETVARIANT"
+
+RUN echo "-----Image build platform details:"
+RUN echo "BUILDPLATFORM     : $BUILDPLATFORM"
+RUN echo "BUILDOS           : $BUILDOS"
+RUN echo "BUILDARCH         : $BUILDARCH"
+RUN echo "BUILDVARIANT      : $BUILDVARIANT"
+
+RUN apt-get update -y
+RUN apt-get install python3 python3-pip python3-pyqt5 unrar curl \
+  fonts-wqy-zenhei fonts-noto-color-emoji -y
+
+WORKDIR /app
+
+ENV MDCX_CONFIG_PATH        "/mdcx-config"
+ENV USER_HOME               "/config/home"
+
+RUN mkdir -p "$MDCX_CONFIG_PATH" && \
+  mkdir -p "$USER_HOME" && \
+  chmod -R 777 /app && \
+  chmod -R 777 "$MDCX_CONFIG_PATH"
+
+# 写入默认的`配置文件目录`标记文件
+RUN echo "$MDCX_CONFIG_PATH/config.ini" > /app/MDCx.config
+
+# TODO app icon
+# RUN \
+#     APP_ICON_URL=https://github.com/jlesage/docker-templates/raw/master/jlesage/images/generic-app-icon.png && \
+#     install_app_icon.sh "$APP_ICON_URL"
+
+COPY scripts/run-src.sh /startapp.sh

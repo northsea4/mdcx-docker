@@ -1,0 +1,19 @@
+.env
+
+# docker-compse test files
+/gui-base/dc-gui-base.yml
+/gui-base/dc-gui-base-builtin.yml
+/gui-base/dc-gui-base-src.yml
+
+/webtop-base/dc-webtop-base.yml
+/webtop-base/dc-webtop-base-builtin.yml
+/webtop-base/dc-webtop-base-src.yml
+
+/rdesktop-base/dc-rdesktop-base.yml
+/rdesktop-base/dc-rdesktop-base-builtin.yml
+/rdesktop-base/dc-rdesktop-base-src.yml
+
+/app/*
+!/app/.keep
+
+.mdcx_src

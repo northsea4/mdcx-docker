@@ -1,0 +1,337 @@
+name: Test Images CI
+
+on:
+  push:
+    branches:
+      - none
+
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Release production images when pass all tests
+        required: false
+        default: false
+        type: boolean
+      screenshots:
+        description: Generate screenshots
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  mdcx-base:
+    runs-on: ubuntu-latest
+    name: Test mdcx-base
+    steps:
+      - 
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Install packages
+        run: |
+          sudo apt-get install -y unrar
+      -
+        name: Prepare Versions Values
+        uses: cardinalby/export-env-action@v2
+        id: versions
+        with:
+          envFile: '.env.versions'
+          export: 'false'
+      -
+        name: Prepare env
+        uses: cardinalby/export-env-action@v2
+        id: appEnv
+        with:
+          envFile: '.env.sample'
+          export: 'false'
+      -
+        name: Run container
+        id: runContainer
+        run: |
+          USER_ID=$(id -u)
+          GROUP_ID=$(id -g)
+          echo "USER_ID=$USER_ID" >> $GITHUB_OUTPUT
+          echo "GROUP_ID=$GROUP_ID" >> $GITHUB_OUTPUT
+
+          cp .env.sample .env
+          sed -i -e "s/USER_ID=[0-9]\+/USER_ID=$USER_ID/" .env
+          sed -i -e "s/GROUP_ID=[0-9]\+/GROUP_ID=$GROUP_ID/" .env
+
+          echo "----------------env------------------"
+          echo $(cat .env)
+          echo "-------------------------------------"
+
+          mkdir -m 777 -p ./movies
+
+          bash ./update-app.sh --verbose --restart false
+
+          cp docker-compose.mdcx-base.sample.yml docker-compose.yml
+
+          # TODO 镜像缓存
+          docker-compose -f docker-compose.yml up -d
+      - 
+        if: ${{ github.event.inputs.release == 'true' }}
+        name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Check container running status
+        run: |
+          duration=0
+          timeout=60
+          while true
+          do
+            isRunning=$(docker inspect ${{ steps.appEnv.outputs.CONTAINER_NAME }} | grep '"Status": "running"')
+            if [[ -n "$isRunning" ]]; then
+              echo "✅ 已检测到容器Status=running"
+              exit 0
+            fi
+
+            if [[ "$duration" -eq "$timeout" ]]; then
+              echo "❌ 等待${duration}秒后仍未检测到容器Status=running！"
+              exit 1
+            fi
+            sleep 1
+            duration=$((duration+1))
+          done
+      -
+        name: Check if config.ini file created
+        run: |
+          duration=0
+          # 因为需要安装依赖，这里超时时间设置长一点
+          timeout=300
+          while true
+          do
+            if [[ -f "./config/config.ini" ]]; then
+              echo "✅ 已检测到config.ini"
+              exit 0
+            fi
+
+            if [[ "$duration" -eq "$timeout" ]]; then
+              echo "❌ 等待 $duration 秒后仍未检测到config.ini！"
+              exit 1
+            fi
+            sleep 2
+            duration=$((duration+2))
+          done
+      - 
+        if: ${{ github.event.inputs.release == 'true' }}
+        name: Create production tags for image
+        run: |
+          echo "⏳ Downloading regctl.."
+          curl -s -L -o /opt/regctl https://github.com/regclient/regclient/releases/download/v0.4.5/regctl-linux-amd64
+          chmod +x /opt/regctl
+          echo "✅ regctl downloaded successfully"
+
+          NAME="stainless403/test-mdcx-base"
+
+          # 因为这里的环境只是amd64，如果直接docker tag 然后 push，只会创建amd64架构的tag。
+          # `regctl`工具可以在不需要下载镜像文件的情况下，快速为已有的multi-arch镜像创建新tag
+          /opt/regctl image copy $NAME:latest-dev $NAME:latest
+          /opt/regctl image copy $NAME:latest-dev $NAME:${{ steps.versions.outputs.MDCX_BASE_IMAGE_VERSION }}
+
+      - 
+        # TODO 没有`/var/lib/docker`目录权限，缓存失败！
+        name: Cache puppeteer-headful image
+        uses: actions/cache@v3
+        with:
+          path: ~/.image-cache/puppeteer-headful.tar
+          key: ${{ runner.os }}-docker-image-${{ hashFiles('~/.image-cache/puppeteer-headful.tar') }}
+          restore-keys: |
+            ${{ runner.os }}-docker-image-
+      -
+        name: Prepare puppeteer-headful image
+        run: |
+          CACHE_PATH="$HOME/.image-cache"
+          IMAGE_PATH="$CACHE_PATH/puppeteer-headful.tar"
+          mkdir -p $CACHE_PATH
+          if [[ ! -f "$CACHE_PATH" ]]; then
+            echo "⏳ 拉取puppeteer-headful..."
+            docker pull stainless403/puppeteer-headful:master
+            docker save stainless403/puppeteer-headful:master -o "$IMAGE_PATH"
+            echo "✅ 拉取puppeteer-headful成功。保存到 $IMAGE_PATH"
+          else
+            echo "⏳ puppeteer-headful已有缓存，加载..."
+            docker load -i "$IMAGE_PATH"
+            echo "😁 puppeteer-headful载入成功"
+          fi
+      - 
+        if: ${{ github.event.inputs.screenshots == 'true' }}
+        name: Install puppeteer-headful
+        uses: northsea4/puppeteer-headful@master
+        env:
+          CI: 'true'
+      - 
+        if: ${{ github.event.inputs.screenshots == 'true' }}
+        name: Screenshots-ci-action
+        uses: flameddd/screenshots-ci-action@v2.0.0
+        env:
+          TELE_CHAT_ID: ${{ secrets.TELE_CHAT_ID }}
+          TELE_BOT_TOKEN: ${{ secrets.TELE_BOT_TOKEN }}
+        with:
+          url: http://localhost:5800
+          devices: iPhone 6,iPhone 6 landscape,Nexus 7,Pad Pro,Galaxy S III landscape,iPad Pro landscape
+      - 
+        if: ${{ github.event.inputs.screenshots == 'true' }}
+        name: Uplaod screenshots to Actions Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: screenshots-mdcx-base
+          name: Download-screenshots
+
+
+  mdcx:
+    runs-on: ubuntu-latest
+    name: Test mdcx
+    # needs: mdcx-base
+    steps:
+      - 
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Prepare Versions Values
+        uses: cardinalby/export-env-action@v2
+        id: versions
+        with:
+          envFile: '.env.versions'
+          export: 'false'
+      -
+        name: Prepare env
+        uses: cardinalby/export-env-action@v2
+        id: appEnv
+        with:
+          envFile: '.env.sample'
+          export: 'false'
+      -
+        name: Run container
+        id: runContainer
+        run: |
+          USER_ID=$(id -u)
+          GROUP_ID=$(id -g)
+          echo "USER_ID=$USER_ID" >> $GITHUB_OUTPUT
+          echo "GROUP_ID=$GROUP_ID" >> $GITHUB_OUTPUT
+
+          cp .env.sample .env
+          sed -i -e "s/USER_ID=[0-9]\+/USER_ID=$USER_ID/" .env
+          sed -i -e "s/GROUP_ID=[0-9]\+/GROUP_ID=$GROUP_ID/" .env
+
+          echo "----------------env------------------"
+          echo $(cat .env)
+          echo "-------------------------------------"
+
+          mkdir -m 777 -p ./movies
+
+          cp docker-compose.mdcx.sample.yml docker-compose.yml
+
+          docker-compose -f docker-compose.yml up -d
+      - 
+        if: ${{ github.event.inputs.release == 'true' }}
+        name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Check container running status
+        run: |
+          duration=0
+          maxDuration=120
+          while true
+          do
+            isRunning=$(docker inspect ${{ steps.appEnv.outputs.CONTAINER_NAME }} | grep '"Status": "running"')
+            if [[ -n "$isRunning" ]]; then
+              echo "✅ 已检测到容器Status=running"
+              break
+            fi
+            if [[ "$duration" -eq "$maxDuration" ]]; then
+              echo "❌ 等待${duration}秒后仍未检测到容器Status=running！"
+              exit 1
+            fi
+            sleep 1
+            duration=$((duration+1))
+          done
+      -
+        name: Check if config.ini file created
+        run: |
+          duration=0
+          timeout=60
+          while true
+          do
+            if [[ -f "./config/config.ini" ]]; then
+              echo "✅ 已检测到config.ini"
+              exit 0
+            fi
+
+            if [[ "$duration" -eq "$timeout" ]]; then
+              echo "❌ 等待 $duration 秒后仍未检测到config.ini！"
+              exit 1
+            fi
+            sleep 1
+            duration=$((duration+1))
+          done
+      - 
+        if: ${{ github.event.inputs.release == 'true' }}
+        name: Create production tags for image
+        run: |
+          echo "⏳ Downloading regctl.."
+          curl -s -L -o /opt/regctl https://github.com/regclient/regclient/releases/download/v0.4.5/regctl-linux-amd64
+          chmod +x /opt/regctl
+          echo "✅ regctl downloaded successfully"
+
+          NAME="stainless403/test-mdcx"
+
+          # 因为这里的环境只是amd64，如果直接docker tag 然后 push，只会创建amd64架构的tag。
+          # `regctl`工具可以在不需要下载镜像文件的情况下，快速为已有的multi-arch镜像创建新tag
+          /opt/regctl image copy $NAME:latest-dev $NAME:latest
+          /opt/regctl image copy $NAME:latest-dev $NAME:${{ steps.versions.outputs.MDCX_IMAGE_VERSION }}
+
+      - 
+        # TODO 没有`/var/lib/docker`目录权限，缓存失败！
+        name: Cache puppeteer-headful image
+        uses: actions/cache@v3
+        with:
+          path: ~/.image-cache/puppeteer-headful.tar
+          key: ${{ runner.os }}-docker-image-${{ hashFiles('~/.image-cache/puppeteer-headful.tar') }}
+          restore-keys: |
+            ${{ runner.os }}-docker-image-
+      -
+        name: Prepare puppeteer-headful image
+        run: |
+          CACHE_PATH="$HOME/.image-cache"
+          IMAGE_PATH="$CACHE_PATH/puppeteer-headful.tar"
+          mkdir -p $CACHE_PATH
+          if [[ ! -f "$CACHE_PATH" ]]; then
+            echo "⏳ 拉取puppeteer-headful..."
+            docker pull stainless403/puppeteer-headful:master
+            docker save stainless403/puppeteer-headful:master -o "$IMAGE_PATH"
+            echo "✅ 拉取puppeteer-headful成功。保存到 $IMAGE_PATH"
+          else
+            echo "⏳ puppeteer-headful已有缓存，加载..."
+            docker load -i "$IMAGE_PATH"
+            echo "😁 puppeteer-headful载入成功"
+          fi
+      - 
+        if: ${{ github.event.inputs.screenshots == 'true' }}
+        name: Install puppeteer-headful
+        uses: northsea4/puppeteer-headful@master
+        env:
+          CI: 'true'
+      - 
+        if: ${{ github.event.inputs.screenshots == 'true' }}
+        name: Screenshots-ci-action
+        uses: flameddd/screenshots-ci-action@v2.0.0
+        env:
+          TELE_CHAT_ID: ${{ secrets.TELE_CHAT_ID }}
+          TELE_BOT_TOKEN: ${{ secrets.TELE_BOT_TOKEN }}
+        with:
+          url: http://localhost:5800
+          devices: iPhone 6,iPhone 6 landscape,Nexus 7,Pad Pro,Galaxy S III landscape,iPad Pro landscape
+      - 
+        if: ${{ github.event.inputs.screenshots == 'true' }}
+        name: Uplaod screenshots to Actions Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          path: screenshots-mdcx
+          name: Download-screenshots

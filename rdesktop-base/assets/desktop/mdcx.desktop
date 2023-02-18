@@ -1,0 +1,16 @@
+[Desktop Entry]
+Comment=
+Exec=/app/MDCx
+GenericName=
+Icon=/app/logo.ico
+MimeType=
+Name=MDCx
+Path=/app
+StartupNotify=true
+Terminal=false
+TerminalOptions=
+Type=Application
+X-DBUS-ServiceName=
+X-DBUS-StartupType=
+X-KDE-SubstituteUID=false
+X-KDE-Username=

@@ -5,7 +5,7 @@ do
   key="$1"
   case $key in
     --context)
-      restart="$2"
+      context="$2"
       shift
       shift
       ;;

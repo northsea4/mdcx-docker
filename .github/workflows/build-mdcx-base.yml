@@ -60,7 +60,7 @@ jobs:
             echo "latest=latest-dev" >> $GITHUB_OUTPUT
             echo "version=${{ steps.versions.outputs.BUILD_MDCX_BASE_VERSION }}-dev" >> $GITHUB_OUTPUT
           else
-            echo "latest=latest-python${pv}" >> $GITHUB_OUTPUT
+            echo "latest=latest" >> $GITHUB_OUTPUT
             echo "version=${{ steps.versions.outputs.BUILD_MDCX_BASE_VERSION }}" >> $GITHUB_OUTPUT
           fi
       - 

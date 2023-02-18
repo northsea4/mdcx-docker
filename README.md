@@ -1,5 +1,7 @@
 ## This README is in progress.
 
+[Legacy README](https://github.com/northsea4/mdcx-docker/blob/main/README-legacy.md)
+
 ## 镜像
 | 镜像 | Web | RDP | 文件管理 | 浏览器 |
 | --- | --- | --- | --- | --- |
@@ -23,3 +25,8 @@
 - 法律后果及使用后果由使用者承担
 - [GPL LICENSE](https://github.com/northsea4/mdcx-docker/blob/main/LICENSE.md)
 - 若用户不同意上述条款任意一条，请勿使用本项目和项目成果
+
+
+## TODO 
+- [ ] 新版README
+- [ ] 部署桌面快捷方式的正确姿势

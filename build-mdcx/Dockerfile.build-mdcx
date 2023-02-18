@@ -46,7 +46,8 @@ RUN echo "PYPI_MIRROR: $PYPI_MIRROR"
 RUN python3 -m pip install -r requirements.txt --verbose -i $PYPI_MIRROR
 
 RUN pyinstaller -n MDCx \
-  -i Img/MDCx.ico \
+  # 图标是macOS和Windows专属
+  # -i Img/MDCx.ico \
   -F -w MDCx_Main.py \
   --add-data "Data:." \
   --add-data "Img:Img" \
@@ -57,9 +58,16 @@ RUN pyinstaller MDCx.spec
 
 RUN echo $APP_VERSION > /tmp/mdcx/dist/app-version
 
-FROM scratch
+# 改选alpine，体积很小
+FROM alpine:latest
 COPY --from=builder /tmp/mdcx/dist/MDCx /MDCx
 COPY --from=builder /tmp/mdcx/dist/app-version /app-version
+
+# 从scratch里复制文件似乎并没有那么简单。
+# 目前了解到的是：先docker pull，再docker save为tar，再解压tar，接着再解压某个目录里的layer.tar...
+# FROM scratch
+# COPY --from=builder /tmp/mdcx/dist/MDCx /MDCx
+# COPY --from=builder /tmp/mdcx/dist/app-version /app-version
 
 # scratch里没有bash
 # RUN echo $APP_VERSION > /app-version

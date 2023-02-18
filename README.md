@@ -24,3 +24,13 @@ file:///usr/share/plasma/plasmoids/org.kde.plasma.keyboardlayout/contents/ui/mai
 System has not been booted with systemd as init system (PID 1). Can't operate.
 Failed to connect to bus: Host is down
 Failed to talk to init daemon.
+
+
+TODO Image build-mdcx CI 卡在很久：
+#51 5.196 3981 INFO: checking Analysis
+#51 5.299 4084 INFO: Appending 'datas' from .spec
+#51 5.327 4112 INFO: checking PYZ
+#51 5.381 4166 WARNING: Ignoring icon; supported only on Windows and macOS!
+#51 5.385 4170 INFO: checking PKG
+#51 5.413 4198 INFO: Building because toc changed
+#51 5.416 4199 INFO: Building PKG (CArchive) MDCx.pkg

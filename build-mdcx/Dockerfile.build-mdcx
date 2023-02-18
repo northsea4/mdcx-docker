@@ -55,7 +55,7 @@ RUN pyinstaller -n MDCx \
 
 RUN pyinstaller MDCx.spec
 
-RUN echo $APP_VERSION > /tmp/mdcx/dist/app-verbose
+RUN echo $APP_VERSION > /tmp/mdcx/dist/app-version
 
 FROM scratch
 COPY --from=builder /tmp/mdcx/dist/MDCx /MDCx

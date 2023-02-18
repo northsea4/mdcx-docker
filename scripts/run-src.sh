@@ -2,6 +2,12 @@
 
 export LC_ALL=zh_CN.UTF-8
 
+if command -v some_command > /dev/null 2>&1; then
+  echo "😁 take-ownership /app and /mdcx_config"
+  take-ownership /app
+  take-ownership /mdcx_config
+fi
+
 # 运行应用的用户的Home目录 https://github.com/jlesage/docker-baseimage-gui#the-home-variable
 export HOME=$USER_HOME
 

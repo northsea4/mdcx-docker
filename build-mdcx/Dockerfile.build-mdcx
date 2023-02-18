@@ -38,7 +38,10 @@ ARG PYQT5_VERSION="5.15.6"
 RUN cp requirements.txt requirements.txt.bak
 RUN sed -i -e "s/PyQt5==[0-9.]\+/PyQt5==$PYQT5_VERSION/" requirements.txt
 
-ARG PYPI_MIRROR="https://pypi.doubanio.com/simple"
+ARG PYPI_MIRROR
+ARG DEFAULT_MIRROR="https://pypi.doubanio.com/simple"
+ENV PYPI_MIRROR=${PYPI_MIRROR:-${DEFAULT_MIRROR}}
+RUN echo "PYPI_MIRROR: $PYPI_MIRROR"
 
 RUN python3 -m pip install -r requirements.txt --verbose -i $PYPI_MIRROR
 

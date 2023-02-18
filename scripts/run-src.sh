@@ -29,6 +29,10 @@ else
       sed -i -e "s/PyQt5==[0-9.]\+/PyQt5==$PYQT5_VERSION/" requirements.txt
     fi
 
+    DEFAULT_MIRROR="https://pypi.doubanio.com/simple"
+    PYPI_MIRROR=${PYPI_MIRROR:-${DEFAULT_MIRROR}}
+    echo "PYPI_MIRROR: $PYPI_MIRROR"
+
     python3 -m pip install \
       --verbose --user --no-cache-dir \
       -r requirements.txt \

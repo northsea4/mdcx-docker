@@ -1,36 +1,25 @@
 ## This README is in progress.
 
-## 镜像说明
-| 镜像 | 描述 | Web | RDP | 文件管理 | 浏览器 |
-| --- | --- | --- | --- | --- | --- |
-| stainless403/gui-base | 内容2 | ✅ | ❌ | ❌ | ❌ |
-| stainless403/webtop-base | 内容7 | ✅ | ✅ | ✅ | ✅ |
+## 镜像
+| 镜像 | Web | RDP | 文件管理 | 浏览器 |
+| --- | --- | --- | --- | --- |
+| stainless403/gui-base_xxx | ✅ | ❌ | ❌ | ❌ |
+| stainless403/webtop-base_xxx | ✅ | ✅ | ✅ | ✅ |
 
-## 配置文件目录
-为了避免不必要的麻烦，我将MDCx的`配置文件目录`默认设置为`/mdcx-config`。
+## 关于公网访问
+如果公网访问的需求，请自行设置好访问密码。
 
-基础镜像默认使用`/config`目录保存一些数据文件，虽然有可能可以设置其他目录，但这里我不做这方面的研究。
+| 镜像 | 默认 | 方式1 |
+| --- | --- | --- |
+| stainless403/gui-base_xxx | 空 | 设置环境变量`VNC_PASSWORD` |
+| stainless403/webtop-base_xxx | abc/abc | `docker exec -it 容器名称 passwd abc`<br>或进入桌面使用命令行工具执行`passwd abc` |
 
-如果你需要设置`/mdcx-config`之外的目录，请了解上面的描述，并尽量避免使用`/config`。
+## 申明
+当你查阅、下载了本项目源代码或二进制程序，即代表你接受了以下条款：
 
-## 添加中文语言
-https://askubuntu.com/questions/1232927/there-are-no-additional-languages-available-on-this-system
-
-## 不能设置时区
-https://github.com/EXALAB/AnLinux-App/issues/325
-
-file:///usr/share/plasma/plasmoids/org.kde.plasma.keyboardlayout/contents/ui/main.qml:7:1: module "Qt.labs.platform" is not installed
-
-System has not been booted with systemd as init system (PID 1). Can't operate.
-Failed to connect to bus: Host is down
-Failed to talk to init daemon.
-
-
-TODO Image build-mdcx CI 卡在很久：
-#51 5.196 3981 INFO: checking Analysis
-#51 5.299 4084 INFO: Appending 'datas' from .spec
-#51 5.327 4112 INFO: checking PYZ
-#51 5.381 4166 WARNING: Ignoring icon; supported only on Windows and macOS!
-#51 5.385 4170 INFO: checking PKG
-#51 5.413 4198 INFO: Building because toc changed
-#51 5.416 4199 INFO: Building PKG (CArchive) MDCx.pkg
+- 本项目和项目成果仅供技术，学术交流和docker测试使用
+- 本项目贡献者编写该项目旨在学习docker和python应用在linux平台上的打包处理
+- 用户在使用本项目和项目成果前，请用户了解并遵守当地法律法规，如果本项目及项目成果使用过程中存在违反当地法律法规的行为，请勿使用该项目及项目成果
+- 法律后果及使用后果由使用者承担
+- [GPL LICENSE](https://github.com/northsea4/mdcx-docker/blob/main/LICENSE.md)
+- 若用户不同意上述条款任意一条，请勿使用本项目和项目成果

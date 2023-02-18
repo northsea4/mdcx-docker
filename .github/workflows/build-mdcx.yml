@@ -36,7 +36,7 @@ jobs:
         name: Prepare App source
         id: prepare
         run: |
-          bash ./prepare-app.sh --verbose --context $IMAGE_BASE
+          bash ./prepare-src.sh --verbose --context $IMAGE_BASE
       -
         name: Prepare Version Values
         uses: cardinalby/export-env-action@v2

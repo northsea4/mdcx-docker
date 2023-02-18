@@ -21,7 +21,7 @@ on:
         options:
           - 'ubuntu-22.04'
           - 'latest'
-      appVersion:
+      binTag:
         description: Tag of app bin image
         default: 'latest'
 
@@ -40,7 +40,7 @@ jobs:
         name: Prepare App info
         id: appInfo
         run: |
-          APP_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/build-mdcx:${{ github.event.inputs.appVersion }}"
+          APP_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/build-mdcx:${{ github.event.inputs.binTag }}"
           APP_VERSION=$(docker run --rm $APP_IMAGE cat /app-version)
           if [[ -z "$APP_VERSION" ]]; then
             echo "❌ Failed to get app version from app bin image!"
@@ -90,6 +90,7 @@ jobs:
             APT_SOURCE_HOST=
             BASE_IMAGE_TAG=${{ github.event.inputs.baseImage }}
             APP_VERSION=${{ steps.appInfo.outputs.APP_VERSION }}
+            MDCX_BIN_IMAGE_TAG=${{ github.event.inputs.binTag }}
           platforms: |
             linux/amd64
             linux/arm64

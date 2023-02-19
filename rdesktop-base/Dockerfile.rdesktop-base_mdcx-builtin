@@ -63,8 +63,8 @@ RUN chmod +x /app/MDCx
 COPY rdesktop-base/assets/logo.ico /app/
 
 # 桌面快捷方式
-COPY rdesktop-base/assets/desktop/mdcx.desktop /tmp/.desktop-files/
-COPY rdesktop-base/assets/desktop/mdcx-config.desktop /tmp/.desktop-files/
-COPY rdesktop-base/assets/desktop/mdcx-logs.desktop /tmp/.desktop-files/
+COPY rdesktop-base/assets/desktop/mdcx.desktop /usr/.desktop-files/
+COPY rdesktop-base/assets/desktop/mdcx-config.desktop /usr/.desktop-files/
+COPY rdesktop-base/assets/desktop/mdcx-logs.desktop /usr/.desktop-files/
 
 COPY rdesktop-base/assets/rootfs /

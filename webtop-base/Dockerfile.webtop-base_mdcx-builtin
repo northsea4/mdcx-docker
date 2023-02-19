@@ -61,7 +61,7 @@ COPY --from=provider /MDCx /app/MDCx
 RUN chmod +x /app/MDCx
 
 
-COPY webtop-base/assets/rootfs /
-COPY webtop-base/assets/rootfs-builtin /
+COPY webtop-base/rootfs /
+COPY webtop-base/rootfs-builtin /
 
 RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime

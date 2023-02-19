@@ -2,7 +2,7 @@
 Comment=运行已编译版本
 Exec=/app/MDCx
 GenericName=
-Icon=/app/logo.ico
+Icon=/app-assets/logo.ico
 MimeType=
 Name=MDCx
 Path=/app

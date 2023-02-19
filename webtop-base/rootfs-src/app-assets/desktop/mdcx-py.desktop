@@ -1,8 +1,8 @@
 [Desktop Entry]
 Comment=运行源码版
-Exec=/app/run-src.sh
+Exec=/app-assets/scripts/run-src.sh
 GenericName=
-Icon=/app/Img/MDCx.ico
+Icon=/app-assets/logo.ico
 MimeType=
 Name=MDCx源码版
 Path=/app

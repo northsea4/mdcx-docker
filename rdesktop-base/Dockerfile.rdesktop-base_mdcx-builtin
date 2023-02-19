@@ -45,6 +45,7 @@ RUN apt-get install unrar curl -y
 
 WORKDIR /app
 
+ENV MDCX_APP_TYPE =         "bin"
 ENV MDCX_CONFIG_PATH        "/mdcx-config"
 
 RUN mkdir -p "$MDCX_CONFIG_PATH" && \
@@ -59,13 +60,7 @@ COPY --from=provider /MDCx /app/MDCx
 
 RUN chmod +x /app/MDCx
 
-# 应用图标
-COPY rdesktop-base/assets/logo.ico /app/
-
-# 桌面快捷方式
-RUN mkdir -p /.app-assets/desktop
-COPY rdesktop-base/assets/desktop/mdcx.desktop /.app-assets/desktop/
-COPY rdesktop-base/assets/desktop/mdcx-config.desktop /.app-assets/desktop/
-COPY rdesktop-base/assets/desktop/mdcx-logs.desktop /.app-assets/desktop/
+COPY rdesktop-base/assets/rootfs /
+COPY rdesktop-base/assets/rootfs-builtin /
 
 COPY rdesktop-base/assets/rootfs /

@@ -13,8 +13,8 @@
 
 | 镜像 | 默认 | 方式1 |
 | --- | --- | --- |
-| stainless403/gui-base_xxx | 空 | 设置环境变量`VNC_PASSWORD` |
-| stainless403/webtop-base_xxx | abc/abc | `docker exec -it 容器名称 passwd abc`<br>或进入桌面使用命令行工具执行`passwd abc` |
+| [stainless403/gui-base_mdcx-builtin](https://hub.docker.com/r/stainless403/gui-base_mdcx-builtin/tags) | 空 | 设置环境变量`VNC_PASSWORD` |
+| [stainless403/webtop-base_mdcx-builtin](https://hub.docker.com/r/stainless403/webtop-base_mdcx-builtin/tags) | abc/abc | `docker exec -it 容器名称 passwd abc`<br>或进入桌面使用命令行工具执行`passwd abc` |
 
 ## 申明
 当你查阅、下载了本项目源代码或二进制程序，即代表你接受了以下条款：

@@ -24,3 +24,5 @@ Desktop.ini
 !/app/.keep
 
 .mdcx_src
+
+/regctl.sh

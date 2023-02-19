@@ -5,6 +5,7 @@ ehthumbs.db
 Desktop.ini
 
 .env
+.env.local
 
 # docker-compse test files
 /gui-base/dc-gui-base.yml

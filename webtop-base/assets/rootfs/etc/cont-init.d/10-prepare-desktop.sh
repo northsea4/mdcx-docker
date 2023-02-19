@@ -3,9 +3,9 @@
 prepare() {
   while true
   do
-    if [ -d "/config/Desktop" -a -d "/app/.desktop-files" ]; then
+    if [ -d "/config/Desktop" -a -d "/tmp/.desktop-files" ]; then
       echo "Desktop is ready, copy desktop files..."
-      cp /app/.desktop-files/* /config/Desktop/
+      cp /tmp/.desktop-files/* /config/Desktop/
       break
     else
       # echo "Desktop is not ready"

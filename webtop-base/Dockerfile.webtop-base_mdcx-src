@@ -47,9 +47,9 @@ RUN echo "$MDCX_CONFIG_PATH/config.ini" > /app/MDCx.config
 COPY webtop-base/assets/logo.ico /app/logo.ico
 
 # 桌面快捷方式
-COPY webtop-base/assets/desktop/mdcx-py.desktop /app/.desktop-files/
-COPY webtop-base/assets/desktop/mdcx-config.desktop /app/.desktop-files/
-COPY webtop-base/assets/desktop/mdcx-logs.desktop /app/.desktop-files/
+COPY webtop-base/assets/desktop/mdcx-py.desktop /tmp/.desktop-files/
+COPY webtop-base/assets/desktop/mdcx-config.desktop /tmp/.desktop-files/
+COPY webtop-base/assets/desktop/mdcx-logs.desktop /tmp/.desktop-files/
 
 COPY webtop-base/assets/rootfs /
 

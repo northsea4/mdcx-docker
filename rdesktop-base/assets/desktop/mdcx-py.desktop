@@ -1,10 +1,10 @@
 [Desktop Entry]
-Comment=运行已编译版本
-Exec=/app/MDCx
+Comment=运行源码版
+Exec=/app/run-src.sh
 GenericName=
-Icon=/app/logo.ico
+Icon=/app/Img/MDCx.ico
 MimeType=
-Name=MDCx
+Name=MDCx源码版
 Path=/app
 StartupNotify=true
 Terminal=false

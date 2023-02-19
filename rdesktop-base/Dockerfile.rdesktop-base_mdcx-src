@@ -35,10 +35,8 @@ RUN apt-get install python3 python3-pip python3-pyqt5 unrar curl \
 WORKDIR /app
 
 ENV MDCX_CONFIG_PATH        "/mdcx-config"
-ENV MDCX_MISC_PATH          "/config/my_home"
 
 RUN mkdir -p "$MDCX_CONFIG_PATH" && \
-  mkdir -p "$MDCX_MISC_PATH" && \
   chmod -R 777 /app && \
   chmod -R 777 "$MDCX_CONFIG_PATH"
 
@@ -49,4 +47,8 @@ RUN echo "$MDCX_CONFIG_PATH/config.ini" > /app/MDCx.config
 COPY rdesktop-base/assets/logo.ico /app/logo.ico
 
 # 桌面快捷方式
-COPY webtop-base/assets/desktop/* /config/Desktop/
+COPY rdesktop-base/assets/desktop/mdcx-py.desktop /app/.desktop-files/
+COPY rdesktop-base/assets/desktop/mdcx-config.desktop /app/.desktop-files/
+COPY rdesktop-base/assets/desktop/mdcx-logs.desktop /app/.desktop-files/
+
+COPY rdesktop-base/assets/rootfs /

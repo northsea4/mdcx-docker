@@ -62,5 +62,3 @@ RUN chmod +x /app/MDCx
 
 COPY rdesktop-base/assets/rootfs /
 COPY rdesktop-base/assets/rootfs-builtin /
-
-COPY rdesktop-base/assets/rootfs /

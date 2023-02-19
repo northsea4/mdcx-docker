@@ -44,7 +44,5 @@ RUN mkdir -p "$MDCX_CONFIG_PATH" && \
 # 写入默认的`配置文件目录`标记文件
 RUN echo "$MDCX_CONFIG_PATH/config.ini" > /app/MDCx.config
 
-COPY rdesktop-base/assets/rootfs /
-COPY rdesktop-base/assets/rootfs-src /
-
-COPY rdesktop-base/assets/rootfs /
+COPY rdesktop-base/rootfs /
+COPY rdesktop-base/rootfs-src /

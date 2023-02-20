@@ -3,7 +3,7 @@ name: Github Release CI
 on:
   push:
     branches:
-      - main
+      - none
     tags:
 
   workflow_dispatch:
@@ -12,6 +12,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'main' }}
     steps:
       - 
         name: Checkout
@@ -41,7 +42,7 @@ jobs:
 
           rm -rf mdcx-docker
 
-          mkdir mdcx-docker && cd mdcx-docker && -a ../webtop-base/. .
+          mkdir mdcx-docker && cd mdcx-docker && cp -a ../webtop-base/. .
           cp .env.sample .env
           cp webtop-base-src.sample.yml docker-compose.yml
           rm Dockerfile*

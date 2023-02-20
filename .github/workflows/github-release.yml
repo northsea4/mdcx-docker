@@ -12,6 +12,9 @@ on:
         description: Tag
         default: 'latest'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -61,7 +64,10 @@ jobs:
 
           rm -rf mdcx-docker
 
-          TAG=${{ github.ref_name }}
+          TAG=
+          if [[ "${{ github.event_name }}" == "tag" ]]; then
+            TAG=${{ github.ref_name }}
+          fi
           FALLBACK_TAG=${{ github.event.inputs.tag }}
           TAG=${TAG-${FALLBACK_TAG}}
           echo "TAG=$TAG" >> $GITHUB_OUTPUT

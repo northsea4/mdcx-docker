@@ -76,7 +76,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           name: "latest"
-          tag: ${{ steps.prepare.outputs.TAG }}
+          tag: "latest"
           allowUpdates: true
           removeArtifacts: true
           replacesArtifacts: true

@@ -29,6 +29,7 @@ jobs:
           export: 'false'
       - 
         name: Create template directories
+        id: prepare
         run: |
           mkdir mdcx-docker && cd mdcx-docker && cp -a ../gui-base/. .
           cp .env.sample .env
@@ -59,11 +60,17 @@ jobs:
           zip -q -r template-webtop-base-builtin.zip mdcx-docker
 
           rm -rf mdcx-docker
+
+          TAG=${{ github.ref_name }}
+          FALLBACK_TAG=${{ github.event.inputs.tag }}
+          TAG=${TAG-${FALLBACK_TAG}}
+          echo "TAG=$TAG" >> $GITHUB_OUTPUT
       - 
         name: Create latest release
         uses: ncipollo/release-action@v1
         with:
           name: "latest"
+          tag: ${{ steps.prepare.outputs.TAG }}
           allowUpdates: true
           removeArtifacts: true
           replacesArtifacts: true

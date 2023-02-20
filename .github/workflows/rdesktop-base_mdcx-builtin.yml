@@ -5,6 +5,11 @@ on:
     branches:
       - none
 
+  workflow_run:
+    workflows: [Image build-mdcx CI]
+    types: [completed]
+    branches: [main]
+
   workflow_dispatch:
     inputs:
       stage:
@@ -17,7 +22,7 @@ on:
       baseImage:
         description: Tag of base image `rdesktop-base`
         type: choice
-        default: 'ubuntu-kde-22.04'
+        default: 'latest'
         options:
           - 'ubuntu-kde-22.04'
           - 'latest'
@@ -36,6 +41,19 @@ jobs:
       - 
         name: Checkout
         uses: actions/checkout@v3
+      -
+        name: Prepare build info
+        id: buildInfo
+        run: |
+          STAGE=${{ github.event.inputs.stage }}
+          if [[ "${{ github.event_name }}" == "workflow_run" && "${{ github.ref_name }}" == "main" ]]; then
+            STAGE=prod
+          fi
+          echo "STAGE=$STAGE" >> $GITHUB_OUTPUT
+
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            sleep 10
+          fi        
       -
         name: Prepare App info
         id: appInfo
@@ -71,7 +89,7 @@ jobs:
         name: Produce docker image tags and other information
         id: imageInfo
         run: |
-          if [[ "${{ github.event.inputs.stage }}" == "dev" ]]; then
+          if [[ "${{ steps.buildInfo.outputs.STAGE }}" == "dev" ]]; then
             echo "latest=latest-dev" >> $GITHUB_OUTPUT
             echo "version=${{ steps.appInfo.outputs.APP_VERSION }}-dev" >> $GITHUB_OUTPUT
           else

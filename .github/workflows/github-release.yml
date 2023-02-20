@@ -1,0 +1,68 @@
+name: Github Release CI
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Prepare Version Values
+        uses: cardinalby/export-env-action@v2
+        id: versions
+        with:
+          envFile: '.env.versions'
+          export: 'false'
+      - 
+        name: Create template directories
+        run: |
+          mkdir mdcx-docker && cd mdcx-docker && cp -a ../gui-base/. .
+          cp .env.sample .env
+          cp gui-base-src.sample.yml docker-compose.yml
+          rm Dockerfile*
+          rm -rf rootfs*
+          cd ..
+          zip -q -r template-gui-base-src.zip mdcx-docker
+
+          cd mdcx-docker
+          cp -f gui-base-builtin.sample.yml docker-compose.yml
+          cd ..
+          zip -q -r template-gui-base-buiultin.zip mdcx-docker
+
+          rm -rf mdcx-docker
+
+          mkdir mdcx-docker && cd mdcx-docker && -a ../webtop-base/. .
+          cp .env.sample .env
+          cp webtop-base-src.sample.yml docker-compose.yml
+          rm Dockerfile*
+          rm -rf rootfs*
+          cd ..
+          zip -q -r template-webtop-base-src.zip mdcx-docker
+
+          cd mdcx-docker
+          cp -f webtop-base-builtin.sample.yml docker-compose.yml
+          cd ..
+          zip -q -r template-webtop-base-builtin.zip mdcx-docker
+
+          rm -rf mdcx-docker
+      - 
+        name: Create latest release
+        uses: ncipollo/release-action@v1
+        with:
+          name: "latest"
+          allowUpdates: true
+          removeArtifacts: true
+          replacesArtifacts: true
+          artifacts: "template-*.zip"
+
+        

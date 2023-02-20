@@ -157,7 +157,7 @@ services:
       # `stainless403/mdcx-base`镜像没有内置MDCx，需要自行将代码解压到app目录并映射到容器内
       - ./app:/app
 
-      # 配置目录
+      # 配置文件目录
       - ./config:/mdcx_config
 
       # 日志目录
@@ -211,7 +211,7 @@ docker run --name mdcx \
   -p 5900:5900 \
   # 源码目录
   -v /path/to/mdcx-docker/app:/app \
-  # 配置目录
+  # 配置文件目录
   -v /path/to/mdcx-docker/config:/mdcx_config \
   # 日志目录
   -v /path/to/mdcx-docker/logs:/app/Log
@@ -317,7 +317,7 @@ services:
     image: stainless403/mdcx:latest
     container_name: ${CONTAINER_NAME}
     volumes:
-      # 配置目录
+      # 配置文件目录
       - ./config:/mdcx_config
 
       # 日志目录
@@ -365,7 +365,7 @@ docker run --name mdcx \
   --restart unless-stopped \
   -p 5800:5800 \
   -p 5900:5900 \
-  # 配置目录
+  # 配置文件目录
   -v /path/to/mdcx-docker/config:/mdcx_config \
   # 日志目录
   -v /path/to/mdcx-docker/logs:/app/Log \

@@ -46,10 +46,15 @@ jobs:
         id: buildInfo
         run: |
           STAGE=${{ github.event.inputs.stage }}
+          STAGE=${STAGE:-dev}
+          BIN_TAG=${{ github.event.inputs.binTag }}
+          BIN_TAG=${BIN_TAG:-latest}
           if [[ "${{ github.event_name }}" == "workflow_run" && "${{ github.ref_name }}" == "main" ]]; then
             STAGE=prod
+            BIN_TAG=latest
           fi
           echo "STAGE=$STAGE" >> $GITHUB_OUTPUT
+          echo "BIN_TAG=$BIN_TAG" >> $GITHUB_OUTPUT
 
           if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
             sleep 10
@@ -58,7 +63,7 @@ jobs:
         name: Prepare App info
         id: appInfo
         run: |
-          APP_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/build-mdcx:${{ github.event.inputs.binTag }}"
+          APP_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/build-mdcx:${{ steps.buildInfo.outputs.BIN_TAG }}"
           APP_VERSION=$(docker run --rm $APP_IMAGE cat /app-version)
           if [[ -z "$APP_VERSION" ]]; then
             echo "❌ Failed to get app version from app bin image!"
@@ -108,7 +113,7 @@ jobs:
             APT_SOURCE_HOST=
             BASE_IMAGE_TAG=${{ github.event.inputs.baseImage }}
             APP_VERSION=${{ steps.appInfo.outputs.APP_VERSION }}
-            MDCX_BIN_IMAGE_TAG=${{ github.event.inputs.binTag }}
+            MDCX_BIN_IMAGE_TAG=${{ steps.buildInfo.outputs.BIN_TAG }}
           platforms: |
             linux/amd64
             linux/arm64

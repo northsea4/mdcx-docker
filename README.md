@@ -1,14 +1,10 @@
-## This README is in progress.
-
-[Legacy README](https://github.com/northsea4/mdcx-docker/blob/main/README-legacy.md)
-
 ## 镜像
-| 镜像 | Web | RDP | 文件管理 | 浏览器 |
-| --- | --- | --- | --- | --- |
-| [gui-base_mdcx-builtin](https://hub.docker.com/r/stainless403/gui-base_mdcx-builtin/tags) | ✅ | ❌ | ❌ | ❌ |
-| [webtop-base_mdcx-builtin](https://hub.docker.com/r/stainless403/webtop-base_mdcx-builtin/tags) | ✅ | ✅ | ✅ | ✅ |
+| 镜像 | 部署说明 | Web | RDP | 文件管理 | 浏览器 |
+| --- | --- | --- | --- | --- | --- |
+| [gui-base_mdcx-builtin](https://hub.docker.com/r/stainless403/gui-base_mdcx-builtin/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/docs/gui-base.md) | ✅ | ❌ | ❌ | ❌ |
+| [webtop-base_mdcx-builtin](https://hub.docker.com/r/stainless403/webtop-base_mdcx-builtin/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/docs/webtop-base.md) | ✅ | ✅ | ✅ | ✅ |
 
-## 关于公网访问
+## 公网访问
 如果公网访问的需求，请自行设置好访问密码。
 
 | 镜像 | 默认 | 方式1 |
@@ -28,6 +24,4 @@
 
 
 ## TODO 
-- [ ] 新版README
-- [x] 部署桌面快捷方式的正确姿势
 - [ ] 自动编译新版应用并发布

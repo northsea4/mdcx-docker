@@ -13,9 +13,9 @@ services:
       # 源码目录
       - ./app:/app
 
-      # 配置目录
+      # 配置文件目录
       - ./mdcx-config:/mdcx-config
-      # 记录当前`配置文件目录`的状态文件
+      # `配置文件目录`标记文件
       - ./mdcx-config/MDCx.config:/app/MDCx.config
 
       # 日志目录

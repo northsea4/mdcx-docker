@@ -45,7 +45,7 @@ jobs:
           cd mdcx-docker
           cp -f gui-base-builtin.sample.yml docker-compose.yml
           cd ..
-          zip -q -r template-gui-base-buiultin.zip mdcx-docker
+          zip -q -r template-gui-base-builtin.zip mdcx-docker
 
           rm -rf mdcx-docker
 

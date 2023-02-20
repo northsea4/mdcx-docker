@@ -5,10 +5,10 @@ on:
     branches:
       - none
 
-  workflow_run:
-    workflows: [Image build-mdcx CI]
-    types: [completed]
-    branches: [main]
+  # workflow_run:
+  #   workflows: [Image build-mdcx CI]
+  #   types: [completed]
+  #   branches: [main]
 
   workflow_dispatch:
     inputs:
@@ -46,19 +46,24 @@ jobs:
         id: buildInfo
         run: |
           STAGE=${{ github.event.inputs.stage }}
+          STAGE=${STAGE:-dev}
+
+          BIN_TAG=${{ github.event.inputs.binTag }}
+          BIN_TAG=${BIN_TAG:-latest}
+
+          BASE_IMAGE_TAG=${{ github.event.inputs.baseImage }}
+          BASE_IMAGE_TAG=${BASE_IMAGE_TAG:-latest}
+
           if [[ "${{ github.event_name }}" == "workflow_run" && "${{ github.ref_name }}" == "main" ]]; then
             STAGE=prod
+            BIN_TAG=latest
+            BASE_IMAGE_TAG=latest
           fi
-          echo "STAGE=$STAGE" >> $GITHUB_OUTPUT
-
-          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
-            sleep 10
-          fi        
       -
         name: Prepare App info
         id: appInfo
         run: |
-          APP_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/build-mdcx:${{ github.event.inputs.binTag }}"
+          APP_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/build-mdcx:${{ steps.buildInfo.outputs.BIN_TAG }}"
           APP_VERSION=$(docker run --rm $APP_IMAGE cat /app-version)
           if [[ -z "$APP_VERSION" ]]; then
             echo "❌ Failed to get app version from app bin image!"
@@ -106,9 +111,9 @@ jobs:
           file: ${{ env.IMAGE_BASE }}/Dockerfile.${{ env.IMAGE_KEY }}
           build-args: |
             APT_SOURCE_HOST=
-            BASE_IMAGE_TAG=${{ github.event.inputs.baseImage }}
+            BASE_IMAGE_TAG=${{ steps.buildInfo.outputs.BASE_IMAGE_TAG }}
             APP_VERSION=${{ steps.appInfo.outputs.APP_VERSION }}
-            MDCX_BIN_IMAGE_TAG=${{ github.event.inputs.binTag }}
+            MDCX_BIN_IMAGE_TAG=${{ steps.buildInfo.outputs.BIN_TAG }}
           platforms: |
             linux/amd64
             linux/arm64

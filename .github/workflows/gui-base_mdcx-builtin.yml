@@ -47,11 +47,17 @@ jobs:
         run: |
           STAGE=${{ github.event.inputs.stage }}
           STAGE=${STAGE:-dev}
+
           BIN_TAG=${{ github.event.inputs.binTag }}
           BIN_TAG=${BIN_TAG:-latest}
+
+          BASE_IMAGE_TAG=${{ github.event.inputs.baseImage }}
+          BASE_IMAGE_TAG=${BASE_IMAGE_TAG:-latest}
+
           if [[ "${{ github.event_name }}" == "workflow_run" && "${{ github.ref_name }}" == "main" ]]; then
             STAGE=prod
             BIN_TAG=latest
+            BASE_IMAGE_TAG=latest
           fi
           echo "STAGE=$STAGE" >> $GITHUB_OUTPUT
           echo "BIN_TAG=$BIN_TAG" >> $GITHUB_OUTPUT
@@ -111,7 +117,7 @@ jobs:
           file: ${{ env.IMAGE_BASE }}/Dockerfile.${{ env.IMAGE_KEY }}
           build-args: |
             APT_SOURCE_HOST=
-            BASE_IMAGE_TAG=${{ github.event.inputs.baseImage }}
+            BASE_IMAGE_TAG=${{ steps.buildInfo.outputs.BASE_IMAGE_TAG }}
             APP_VERSION=${{ steps.appInfo.outputs.APP_VERSION }}
             MDCX_BIN_IMAGE_TAG=${{ steps.buildInfo.outputs.BIN_TAG }}
           platforms: |

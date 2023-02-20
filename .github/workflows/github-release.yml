@@ -7,7 +7,10 @@ on:
     tags:
 
   workflow_dispatch:
-
+    inputs:
+      tag:
+        description: Tag
+        default: 'latest'
 
 jobs:
   build:

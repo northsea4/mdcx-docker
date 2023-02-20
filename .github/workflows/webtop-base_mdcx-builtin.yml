@@ -59,6 +59,13 @@ jobs:
             BIN_TAG=latest
             BASE_IMAGE_TAG=latest
           fi
+          echo "STAGE=$STAGE" >> $GITHUB_OUTPUT
+          echo "BIN_TAG=$BIN_TAG" >> $GITHUB_OUTPUT
+          echo "BASE_IMAGE_TAG=$BASE_IMAGE_TAG" >> $GITHUB_OUTPUT
+
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            sleep 10
+          fi
       -
         name: Prepare App info
         id: appInfo
@@ -107,7 +114,7 @@ jobs:
         with:
           context: .
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=min
           file: ${{ env.IMAGE_BASE }}/Dockerfile.${{ env.IMAGE_KEY }}
           build-args: |
             APT_SOURCE_HOST=

@@ -53,7 +53,6 @@ RUN echo "$MDCX_CONFIG_PATH/config.ini" > /app/MDCx.config
 #     APP_ICON_URL=https://github.com/jlesage/docker-templates/raw/master/jlesage/images/generic-app-icon.png && \
 #     install_app_icon.sh "$APP_ICON_URL"
 
-# COPY scripts/run-src.sh /startapp.sh
-COPY scripts/run-nothing.sh /startapp.sh
+COPY scripts/run-src.sh /startapp.sh
 
 COPY gui-base/rootfs/ /

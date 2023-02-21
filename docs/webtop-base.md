@@ -128,8 +128,10 @@ cd /path/to/mdcx-docker
 # mkdir app mdcx-config logs data
 
 docker run --name mdcx \
+  # 网页访问端口
   -p 3000:3000 \
-  -p 5900:5900 \
+  # 远程桌面端口
+  -p 3389:3389 \
   # 容器系统数据
   -v /path/to/mdcx-data/data:/config \
   # 源码目录
@@ -143,12 +145,9 @@ docker run --name mdcx \
   # 影片目录
   -v /volume2:/volume2 \
   -e TZ=Asia/Shanghai \
-  -e DISPLAY_WIDTH=1200 \
-  -e DISPLAY_HEIGHT=750 \
-  -e VNC_PASSWORD=123456 \
   # 运行应用的用户ID和分组ID，替换为你实际需要的ID
-  -e USER_ID=0 \
-  -e GROUP_ID=0 \
+  -e PUID=0 \
+  -e PGID=0 \
   --restart unless-stopped \
   stainless403/webtop-base_mdcx-src
 ```
@@ -252,8 +251,10 @@ cd /path/to/mdcx-docker
 
 docker run --name mdcx \
   --restart unless-stopped \
+  # 网页访问端口
   -p 3000:3000 \
-  -p 5900:5900 \
+  # 远程桌面端口
+  -p 3389:3389 \
   # 容器系统数据
   -v /path/to/mdcx-data/data:/config \
   # 源码目录
@@ -265,12 +266,9 @@ docker run --name mdcx \
   # 影片目录
   -v /volume2:/volume2 \
   -e TZ=Asia/Shanghai \
-  -e DISPLAY_WIDTH=1200 \
-  -e DISPLAY_HEIGHT=750 \
-  -e VNC_PASSWORD=123456 \
   # 运行应用的用户ID和分组ID，替换为你实际需要的ID
-  -e USER_ID=0 \
-  -e GROUP_ID=0 \
+  -e PUID=0 \
+  -e PGID=0 \
   stainless403/webtop-base_mdcx-builtin
 ```
 

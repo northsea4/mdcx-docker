@@ -25,3 +25,4 @@
 
 ## TODO 
 - [ ] 自动编译新版应用并发布
+- [ ] 解决docker/build-push-action缓存问题。超出10GB，构建速度会大幅下降。

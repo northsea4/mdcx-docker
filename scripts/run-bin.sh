@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ -n "$DEBUG" ]; then
+if [ -n "$DEBUG_CONTAINER" ]; then
   echo "=========================!!!!!!!!=============================="
   echo "            I'm sleeping. Make yourself at home!"
   echo "=========================!!!!!!!!=============================="

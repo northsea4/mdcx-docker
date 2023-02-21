@@ -12,6 +12,7 @@ if [ -n "$DEBUG_CONTAINER" ]; then
 fi
 
 export LC_ALL=zh_CN.UTF-8
+export HOME=${USER_HOME-/config/home}
 
 # 表示应用已初始化的文件
 FILE_INITIALIZED="/app/.mdcx_initialized"

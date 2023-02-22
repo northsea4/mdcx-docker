@@ -34,7 +34,7 @@ docker run -d --name mdcx \
   stainless403/gui-base_mdcx-builtin:latest
 ```
 
-访问 http://192.168.1.100:5800 使用。
+浏览器访问 http://192.168.1.100:5800 使用。
 
 ### webtop-base_mdcx-builtin示例
 ⚠️ 这里只给出一个简单的运行示例，建议查看 [部署说明](https://github.com/northsea4/mdcx-docker/blob/main/docs/webtop-base.md) 了解更多细节。
@@ -63,7 +63,7 @@ docker run -d --name mdcx \
 ```
 
 - 使用`Windows远程桌面`或`Microsoft Remote Desktop`连接 `192.168.1.100:3389` 使用，账号密码`abc/abc`。
-- 使用浏览器访问 http://192.168.1.100:3000 访问。
+- 浏览器访问 http://192.168.1.100:3000 使用。
 
 
 ## 公网访问

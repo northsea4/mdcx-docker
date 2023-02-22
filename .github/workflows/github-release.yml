@@ -3,7 +3,7 @@ name: Github Release CI
 on:
   push:
     branches:
-      - none
+      - main
     tags:
 
   workflow_dispatch:

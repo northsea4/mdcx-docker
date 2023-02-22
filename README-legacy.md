@@ -176,7 +176,7 @@ services:
       - VNC_PASSWORD=${VNC_PASSWORD}
       # 运行应用的用户ID
       - USER_ID=${USER_ID}
-      # 运行应用的用户分组ID
+      # 运行应用的用户组ID
       - GROUP_ID=${GROUP_ID}
       # python软件包镜像地址
       - PYPI_MIRROR=${PYPI_MIRROR}
@@ -336,7 +336,7 @@ services:
       - VNC_PASSWORD=${VNC_PASSWORD}
       # 运行应用的用户ID
       - USER_ID=${USER_ID}
-      # 运行应用的用户分组ID
+      # 运行应用的用户组ID
       - GROUP_ID=${GROUP_ID}
       # python软件包镜像地址
       - PYPI_MIRROR=${PYPI_MIRROR}

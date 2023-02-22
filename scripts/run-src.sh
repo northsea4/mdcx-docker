@@ -13,6 +13,7 @@ fi
 
 export LC_ALL=zh_CN.UTF-8
 export HOME=${USER_HOME-/config/home}
+# TODO WARNING: The scripts f2py, f2py3 and f2py3.10 are installed in '/config/home/.local/bin' which is not on PATH.
 
 # 表示应用已初始化的文件
 FILE_INITIALIZED="/app/.mdcx_initialized"

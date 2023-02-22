@@ -4,6 +4,68 @@
 | [gui-base_mdcx-builtin](https://hub.docker.com/r/stainless403/gui-base_mdcx-builtin/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/docs/gui-base.md) | ✅ | ❌ | ❌ | ❌ |
 | [webtop-base_mdcx-builtin](https://hub.docker.com/r/stainless403/webtop-base_mdcx-builtin/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/docs/webtop-base.md) | ✅ | ✅ | ✅ | ✅ |
 
+### gui-base_mdcx-builtin示例
+⚠️ 这里只给出一个简单的运行示例，建议查看 [部署说明](https://github.com/northsea4/mdcx-docker/blob/main/docs/gui-base.md) 了解更多细节。
+
+```bash
+# 选一个合适的目录
+MDCX_DOCKER_DIR=/path/to/mdcx-docker
+mkdir -p $MDCX_DOCKER_DIR && cd $MDCX_DOCKER_DIR
+# 必须：相关数据或日志目录
+mkdir -p mdcx-config logs data
+# 必须：配置文件目录标记文件
+echo "/mdcx-config/config.ini" > mdcx-config/MDCx.config
+
+docker run -d --name mdcx \
+  -p 5800:5800 `#Web访问端口` \
+  -p 5900:5900 \
+  -v $(pwd)/data:/config `#容器系统数据` \
+  -v $(pwd)/mdcx-config:/mdcx-config `#配置文件目录` \
+  -v $(pwd)/mdcx-config/MDCx.config:/app/MDCx.config `#配置文件目录标记文件` \
+  -v $(pwd)/logs:/app/Log `#日志目录` \
+  -v /volume2:/volume2 `#影片目录` \
+  -e TZ=Asia/Shanghai \
+  -e DISPLAY_WIDTH=1200 \
+  -e DISPLAY_HEIGHT=750 \
+  -e VNC_PASSWORD=  `#查看密码` \
+  -e USER_ID=$(id -u) `#运行应用的用户ID` \
+  -e GROUP_ID=$(id -g) `#运行应用的用户组ID` \
+  --restart unless-stopped \
+  stainless403/gui-base_mdcx-builtin:latest
+```
+
+访问 http://192.168.1.100:5800 使用。
+
+### webtop-base_mdcx-builtin示例
+⚠️ 这里只给出一个简单的运行示例，建议查看 [部署说明](https://github.com/northsea4/mdcx-docker/blob/main/docs/webtop-base.md) 了解更多细节。
+
+```bash
+MDCX_DOCKER_DIR=/path/to/mdcx-docker
+mkdir -p $MDCX_DOCKER_DIR && cd $MDCX_DOCKER_DIR
+# 必须：相关数据或日志目录
+mkdir -p mdcx-config logs data
+# 必须：配置文件目录标记文件
+echo "/mdcx-config/config.ini" > mdcx-config/MDCx.config
+
+docker run -d --name mdcx \
+  -p 3000:3000 `#Web访问端口` \
+  -p 3389:3389 `#RDP访问端口` \
+  -v $(pwd)/data:/config `#容器系统数据` \
+  -v $(pwd)/mdcx-config:/mdcx-config `#配置文件目录` \
+  -v $(pwd)/mdcx-config/MDCx.config:/app/MDCx.config `#配置文件目录标记文件` \
+  -v $(pwd)/logs:/app/Log `#日志目录` \
+  -v /volume2:/volume2 `#影片目录` \
+  -e TZ=Asia/Shanghai \
+  -e USER_ID=$(id -u) `#运行应用的用户ID` \
+  -e GROUP_ID=$(id -g) `#运行应用的用户组ID` \
+  --restart unless-stopped \
+  stainless403/webtop-base_mdcx-builtin:latest
+```
+
+- 使用`Windows远程桌面`或`Microsoft Remote Desktop`连接 `192.168.1.100:3389` 使用，账号密码`abc/abc`。
+- 使用浏览器访问 http://192.168.1.100:3000 访问。
+
+
 ## 公网访问
 如果公网访问的需求，请自行设置好访问密码。
 

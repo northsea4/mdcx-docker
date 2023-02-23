@@ -1,5 +1,6 @@
 ## 镜像
 ⚠️ 更改了镜像名称：`gui-base_mdcx-builtin` 更改为 `mdcx-builtin-gui-base`
+
 ⚠️ 更改了镜像名称：`webtop-base_mdcx-builtin` 更改为 `mdcx-builtin-webtop-base`
 
 > 短期内旧名称镜像仍会存在，但建议尽快使用新名称镜像。

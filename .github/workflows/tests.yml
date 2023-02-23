@@ -19,9 +19,9 @@ on:
         type: boolean
 
 jobs:
-  mdcx-base:
+  mdcx-src-gui-base:
     runs-on: ubuntu-latest
-    name: Test mdcx-base
+    name: Test mdcx-src-gui-base
     steps:
       - 
         name: Checkout
@@ -35,14 +35,14 @@ jobs:
         uses: cardinalby/export-env-action@v2
         id: versions
         with:
-          envFile: '.env.versions'
+          envFile: 'gui-base/.env.versions'
           export: 'false'
       -
         name: Prepare env
         uses: cardinalby/export-env-action@v2
         id: appEnv
         with:
-          envFile: '.env.sample'
+          envFile: 'gui-base/.env.sample'
           export: 'false'
       -
         name: Run container
@@ -63,11 +63,11 @@ jobs:
 
           mkdir -m 777 -p ./movies
 
-          bash ./update-app.sh --verbose --restart false
+          cd gui-base
+          bash ./update-src.sh --verbose --restart false
 
-          cp docker-compose.mdcx-base.sample.yml docker-compose.yml
+          cp mdcx-src.sample.yml docker-compose.yml
 
-          # TODO 镜像缓存
           docker-compose -f docker-compose.yml up -d
       - 
         if: ${{ github.event.inputs.release == 'true' }}
@@ -83,7 +83,7 @@ jobs:
           timeout=60
           while true
           do
-            isRunning=$(docker inspect ${{ steps.appEnv.outputs.CONTAINER_NAME }} | grep '"Status": "running"')
+            isRunning=$(docker inspect ${{ steps.appEnv.outputs.MDCX_SRC_CONTAINER_NAME }} | grep '"Status": "running"')
             if [[ -n "$isRunning" ]]; then
               echo "✅ 已检测到容器Status=running"
               exit 0
@@ -125,13 +125,16 @@ jobs:
           chmod +x /opt/regctl
           echo "✅ regctl downloaded successfully"
 
-          NAME="stainless403/test-mdcx-base"
+          NAME="stainless403/mdcx-src-gui-base"
+          DEPRECATED_NAME="stainless403/gui-base_mdcx-src"
 
           # 因为这里的环境只是amd64，如果直接docker tag 然后 push，只会创建amd64架构的tag。
           # `regctl`工具可以在不需要下载镜像文件的情况下，快速为已有的multi-arch镜像创建新tag
-          /opt/regctl image copy $NAME:latest-dev $NAME:latest
-          /opt/regctl image copy $NAME:latest-dev $NAME:${{ steps.versions.outputs.MDCX_BASE_IMAGE_VERSION }}
+          /opt/regctl image copy -v info $NAME:latest-dev $NAME:latest
+          /opt/regctl image copy -v info $NAME:latest-dev $NAME:${{ steps.runContainer.outputs.APP_VERSION }}
 
+          /opt/regctl image copy -v info $NAME:latest-dev $DEPRECATED_NAME:latest
+          /opt/regctl image copy -v info $NAME:latest-dev $DEPRECATED_NAME:${{ steps.runContainer.outputs.APP_VERSION }}
       - 
         # TODO 没有`/var/lib/docker`目录权限，缓存失败！
         name: Cache puppeteer-headful image

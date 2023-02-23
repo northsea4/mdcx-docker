@@ -220,3 +220,7 @@ else
     echo "ℹ️ 本地版本 已是最新版本"
   fi
 fi
+
+if [ -n "$GITHUB_ACTIONS" ]; then
+  echo "APP_VERSION=$archiveVersion" >> $GITHUB_OUTPUT
+fi

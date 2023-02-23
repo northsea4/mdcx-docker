@@ -1,8 +1,8 @@
 version: '3'
 
 services:
-  webtop_base_src:
-    image: stainless403/webtop-base_mdcx-src:${MDCX_SRC_IMAGE_TAG}
+  mdcx_src_webtop:
+    image: stainless403/mdcx-src-webtop-base:${MDCX_SRC_IMAGE_TAG}
     container_name: ${MDCX_SRC_CONTAINER_NAME}
     env_file:
       - .env.webtop-base

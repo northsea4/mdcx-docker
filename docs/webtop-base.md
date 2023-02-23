@@ -5,12 +5,12 @@
 
 
 ## 1. mdcx-builtin示例
-[stainless403/webtop-base_mdcx-builtin](https://hub.docker.com/r/stainless403/webtop-base_mdcx-builtin)镜像已内置编译好的MDCx。如果想使用本地MDCx源码版的，请使用[stainless403/webtop-base_mdcx-src](https://hub.docker.com/r/stainless403/webtop-base_mdcx-src)镜像。
+[stainless403/mdcx-builtin-webtop-base](https://hub.docker.com/r/stainless403/mdcx-builtin-webtop-base)镜像已内置编译好的MDCx。如果想使用本地MDCx源码版的，请使用[stainless403/mdcx-src-webtop-base](https://hub.docker.com/r/stainless403/mdcx-src-webtop-base)镜像。
 
-🔗 [stainless403/webtop-base_mdcx-src示例](#2-mdcx-src示例)
+🔗 [stainless403/mdcx-src-webtop-base示例](#2-mdcx-src示例)
 
 ### 1.1 准备项目目录
-下载 [示例项目](https://github.com/northsea4/mdcx-docker/releases/download/latest/template-webtop-base-builtin.zip)，解压到合适的位置后，进入项目目录，如无特别说明，之后的操作都是在该目录(假设名为`mdcx-docker`)内进行。
+下载 [示例项目](https://github.com/northsea4/mdcx-docker/releases/download/latest/template-mdcx-builtin-webtop-base.zip)，解压到合适的位置后，进入项目目录，如无特别说明，之后的操作都是在该目录(假设名为`mdcx-docker`)内进行。
 
 整个项目的结构大致如下：
 ```
@@ -25,8 +25,8 @@ mdcx-docker
   |-- .env ------环境变量文件
   |-- .env.sample ------环境变量示例文件
   |-- .env.versions ------应用版本文件
-  |-- webtop-base-src.sample.yml
-  |-- webtop-base-builtin.sample.yml -------容器部署配置示例
+  |-- mdcx-src.sample.yml
+  |-- mdcx-builtin.sample.yml -------容器部署配置示例
   |-- docker-compose.yml -------容器部署配置
 ```
 
@@ -35,7 +35,7 @@ mdcx-docker
 编辑`.env`文件，按需修改。
 文件里每个参数都有具体的说明，`.env.sample`文件里可以查看原始的数值。
 一般需要修改的参数：`RDP_PORT`, `WEB_PORT`, `PUID`, `PGID`
-| 参数名称 | 参数说明 | 参数默认值 | 是否必填 |
+| 参数名称 | 说明 | 默认值 | 必填 |
 | --- | --- | --- | --- |
 | RDP_PORT | RDP远程桌面端口 | 3389 | 是 |
 | WEB_PORT | Web访问端口 | 3000 | 是 |
@@ -48,8 +48,8 @@ mdcx-docker
 version: '3'
 
 services:
-  webtop_base_builtin:
-    image: stainless403/webtop-base_mdcx-builtin:${MDCX_BUILTIN_IMAGE_TAG}
+  mdcx_builtin_webtop:
+    image: stainless403/mdcx-builtin-webtop-base:${MDCX_BUILTIN_IMAGE_TAG}
     container_name: ${MDCX_BUILTIN_CONTAINER_NAME}
     env_file:
       - .env
@@ -80,13 +80,13 @@ services:
 docker-compose up -d
 
 # 查看容器日志
-# docker logs -f webtop_base_builtin
+# docker logs -f mdcx_builtin_webtop
 ```
 
 ### 1.5 使用
 
 > ⚠️ 默认的账号密码是abc/abc。如果需要公网访问，请记得修改密码。
-> 修改密码方式1：docker exec -it webtop_base_builtin passwd abc
+> 修改密码方式1：docker exec -it mdcx_builtin_webtop passwd abc
 > 修改密码方式2：进入系统后，打开`konsole`，然后执行`passwd abc`
 
 `webtop-base`重点是支持[RDP](https://zh.wikipedia.org/zh-cn/%E9%81%A0%E7%AB%AF%E6%A1%8C%E9%9D%A2%E5%8D%94%E5%AE%9A)，也就是常说的`远程桌面`。默认端口是`3389`。
@@ -123,21 +123,21 @@ docker run -d --name mdcx \
   -e USER_ID=$(id -u) `#运行应用的用户ID` \
   -e GROUP_ID=$(id -g) `#运行应用的用户组ID` \
   --restart unless-stopped \
-  stainless403/webtop-base_mdcx-builtin:latest
+  stainless403/mdcx-builtin-webtop-base:latest
 ```
 
 
 ## 2. mdcx-src示例
-[stainless403/webtop-base_mdcx-src](https://hub.docker.com/r/stainless403/webtop-base_mdcx-src)镜像没有内置MDCx，如果想使用内置的，请使用[stainless403/webtop-base_mdcx-builtin](https://hub.docker.com/r/stainless403/webtop-base_mdcx-builtin)镜像。
+[stainless403/mdcx-src-webtop-base](https://hub.docker.com/r/stainless403/mdcx-src-webtop-base)镜像没有内置MDCx，如果想使用内置的，请使用[stainless403/mdcx-builtin-webtop-base](https://hub.docker.com/r/stainless403/mdcx-builtin-webtop-base)镜像。
 
-🔗 [stainless403/webtop-base_mdcx-builtin示例](#1-mdcx-builtin示例)
+🔗 [stainless403/mdcx-builtin-webtop-base示例](#1-mdcx-builtin示例)
 
-> Tips: webtop-base_mdcx-src支持运行已编译的应用，但webtop-base_mdcx-builtin默认情况下不能运行应用源码。
+> Tips: mdcx-src-webtop-base支持运行已编译的应用，但mdcx-builtin-webtop-base默认情况下不能运行应用源码。
 
 下面主要讲述`docker-compose`的部署方式。`docker-run`的方式也有简单的示例。
 
 ### 2.1 准备项目目录
-下载 [示例项目](https://github.com/northsea4/mdcx-docker/releases/download/latest/template-webtop-base-src.zip)，解压到合适的位置后，进入项目目录，如无特别说明，之后的操作都是在该目录(假设名为`mdcx-docker`)内进行。
+下载 [示例项目](https://github.com/northsea4/mdcx-docker/releases/download/latest/template-mdcx-src-webtop-base.zip)，解压到合适的位置后，进入项目目录，如无特别说明，之后的操作都是在该目录(假设名为`mdcx-docker`)内进行。
 
 ### 2.2 准备应用源码
    
@@ -170,8 +170,8 @@ mdcx-docker
   |-- .env ------环境变量文件
   |-- .env.sample ------环境变量示例文件
   |-- .env.versions ------应用版本文件
-  |-- webtop-base-builtin.sample.yml
-  |-- webtop-base-src.sample.yml -------容器部署配置示例
+  |-- mdcx-builtin.sample.yml
+  |-- mdcx-src.sample.yml -------容器部署配置示例
   |-- docker-compose.yml -------容器部署配置
   |-- update-app.sh
 ```
@@ -180,7 +180,7 @@ mdcx-docker
 编辑`.env`文件，按需修改。
 文件里每个参数都有具体的说明，`.env.sample`文件里可以查看原始的数值。
 一般需要修改的参数：`RDP_PORT`, `WEB_PORT`, `PUID`, `PGID`
-| 参数名称 | 参数说明 | 参数默认值 | 是否必填 |
+| 参数名称 | 说明 | 默认值 | 必填 |
 | --- | --- | --- | --- |
 | RDP_PORT | RDP远程桌面端口 | 3389 | 是 |
 | WEB_PORT | Web访问端口 | 3000 | 是 |
@@ -192,8 +192,8 @@ mdcx-docker
 version: '3'
 
 services:
-  webtop_base_src:
-    image: stainless403/webtop-base_mdcx-src:${MDCX_SRC_IMAGE_TAG}
+  mdcx_src_webtop:
+    image: stainless403/mdcx-src-webtop-base:${MDCX_SRC_IMAGE_TAG}
     container_name: ${MDCX_SRC_CONTAINER_NAME}
     env_file:
       - .env
@@ -227,7 +227,7 @@ services:
 docker-compose up -d
 
 # 查看容器日志
-# docker logs -f webtop_base_src
+# docker logs -f mdcx_src_webtop
 ```
 
 > 首次运行时会自动安装依赖，并在app目录 和 容器内的`/tmp`目录生成一个名为`.mdcx_initialized`的标记文件。
@@ -237,7 +237,7 @@ docker-compose up -d
 ### 2.6 使用
 
 > ⚠️ 默认的账号密码是abc/abc。如果需要公网访问，请记得修改密码。
-> 修改密码方式1：docker exec -it webtop_base_src passwd abc
+> 修改密码方式1：docker exec -it mdcx_src_webtop passwd abc
 > 修改密码方式2：进入系统后，打开`konsole`，然后执行`passwd abc`
 
 `webtop-base`重点是支持[RDP](https://zh.wikipedia.org/zh-cn/%E9%81%A0%E7%AB%AF%E6%A1%8C%E9%9D%A2%E5%8D%94%E5%AE%9A)，也就是常说的`远程桌面`。默认端口是`3389`。
@@ -249,6 +249,8 @@ docker-compose up -d
 假设服务器IP为`192.168.1.100`，使用默认端口`3000`。
 则访问地址为：http://192.168.1.100:3000。
 
+进入桌面后，点击桌面上的应用图标即可运行。
+> ⚠️ 初次运行需要安装依赖，请耐心等待，不要重复点击
 
 ### 2.7 docker run运行示例
 `/path/to/` 替换为你实际的路径。
@@ -278,7 +280,7 @@ docker run -d --name mdcx \
   -e PUID=$(id -u) `#运行应用的用户ID` \
   -e PGID=$(id -g) `#运行应用的用户组ID` \
   --restart unless-stopped \
-  stainless403/webtop-base_mdcx-src:latest
+  stainless403/mdcx-src-webtop-base:latest
 ```
 
 
@@ -295,7 +297,7 @@ chmod +x ./update-src.sh
 ./update-src.sh --verbose
 
 # 完成更新源码之后，重启容器
-# docker restart 容器名称
+# docker restart mdcx_src_webtop
 ```
 
 > ⚠️ 如果你选择不使用脚本而是手动进行更新，请记得删除`app`目录下的`.mdcx_initialized`文件！

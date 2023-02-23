@@ -99,4 +99,6 @@ else
   echo "✅ 源码已解压到 $srcDir"
 fi
 
-echo "APP_VERSION=$archiveVersion" >> $GITHUB_OUTPUT
+if [ -n "$GITHUB_ACTIONS" ]; then
+  echo "APP_VERSION=$archiveVersion" >> $GITHUB_OUTPUT
+fi

@@ -1,4 +1,4 @@
-name: Image webtop-base_mdcx-builtin CI
+name: Image mdcx-builtin-gui-base CI
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
     workflows: [Image build-mdcx CI]
     types: [completed]
     branches: [main]
-    
+
   workflow_dispatch:
     inputs:
       stage:
@@ -20,19 +20,20 @@ on:
           - dev
           - prod
       baseImage:
-        description: Tag of base image `webtop-base`
+        description: Tag of base image `gui-base`
         type: choice
         default: 'latest'
         options:
-          - 'ubuntu-kde-22.04'
-          - 'latest'          
+          - 'ubuntu-22.04'
+          - 'latest'
       binTag:
         description: Tag of app bin image
         default: 'latest'
 
 env:
-  IMAGE_BASE: webtop-base
-  IMAGE_KEY: webtop-base_mdcx-builtin
+  IMAGE_BASE: gui-base
+  IMAGE_KEY: mdcx-builtin-gui-base
+  DEPRECATED_IMAGE_KEY: gui-base_mdcx-builtin
 
 jobs:
   build:
@@ -113,8 +114,8 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          cache-from: type=gha
-          cache-to: type=gha,mode=min
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=min
           file: ${{ env.IMAGE_BASE }}/Dockerfile.${{ env.IMAGE_KEY }}
           build-args: |
             APT_SOURCE_HOST=
@@ -128,3 +129,5 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:${{ steps.imageInfo.outputs.latest }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:${{ steps.imageInfo.outputs.version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DEPRECATED_IMAGE_KEY }}:${{ steps.imageInfo.outputs.latest }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DEPRECATED_IMAGE_KEY }}:${{ steps.imageInfo.outputs.version }}

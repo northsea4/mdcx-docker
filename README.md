@@ -64,6 +64,7 @@ docker run -d --name mdcx \
   -v $(pwd)/logs:/app/Log `#日志目录` \
   -v /volume2:/volume2 `#影片目录` \
   -e TZ=Asia/Shanghai \
+  -e AUTO_LOGIN=false `#使用默认密码(abc)，且通过网页访问时，是否自动登录` \
   -e USER_ID=$(id -u) `#运行应用的用户ID` \
   -e GROUP_ID=$(id -g) `#运行应用的用户组ID` \
   --restart unless-stopped \
@@ -75,12 +76,13 @@ docker run -d --name mdcx \
 
 
 ## 公网访问
-如果公网访问的需求，请自行设置好访问密码。
+如果公网访问的需求，请自行设置好访问密码（<b>不要使用默认密码</b>）。
 
 | 镜像 | 默认 | 方式1 |
 | --- | --- | --- |
 | [mdcx-builtin-gui-base](https://hub.docker.com/r/stainless403/mdcx-builtin-gui-base/tags) | 空 | 设置环境变量`VNC_PASSWORD` |
 | [mdcx-builtin-webtop-base](https://hub.docker.com/r/stainless403/mdcx-builtin-webtop-base/tags) | abc/abc | `docker exec -it 容器名称 passwd abc`<br>或进入桌面使用命令行工具执行`passwd abc` |
+
 
 ## 申明
 当你查阅、下载了本项目源代码或二进制程序，即代表你接受了以下条款：

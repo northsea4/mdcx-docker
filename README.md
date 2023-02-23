@@ -1,10 +1,17 @@
 ## 镜像
-| 镜像 | 部署说明 | Web | RDP | 文件管理 | 浏览器 |
-| --- | --- | --- | --- | --- | --- |
-| [gui-base_mdcx-builtin](https://hub.docker.com/r/stainless403/gui-base_mdcx-builtin/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/docs/gui-base.md) | ✅ | ❌ | ❌ | ❌ |
-| [webtop-base_mdcx-builtin](https://hub.docker.com/r/stainless403/webtop-base_mdcx-builtin/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/docs/webtop-base.md) | ✅ | ✅ | ✅ | ✅ |
+⚠️ 更改了镜像名称：`gui-base_mdcx-builtin` 更改为 `mdcx-builtin-gui-base`
+⚠️ 更改了镜像名称：`webtop-base_mdcx-builtin` 更改为 `mdcx-builtin-webtop-base`
 
-### gui-base_mdcx-builtin示例
+> 短期内旧名称镜像仍会存在，但建议尽快使用新名称镜像。
+---
+
+
+| 镜像 | 部署说明 | 网页查看 | 远程桌面 | 文件管理 | 浏览器 |
+| --- | --- | --- | --- | --- | --- |
+| [mdcx-builtin-gui-base](https://hub.docker.com/r/stainless403/mdcx-builtin-gui-base/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/docs/gui-base.md) | ✅ | ❌ | ❌ | ❌ |
+| [mdcx-builtin-webtop-base](https://hub.docker.com/r/stainless403/mdcx-builtin-webtop-base/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/docs/webtop-base.md) | ✅ | ✅ | ✅ | ✅ |
+
+### mdcx-builtin-gui-base示例
 ⚠️ 这里只给出一个简单的运行示例，建议查看 [部署说明](https://github.com/northsea4/mdcx-docker/blob/main/docs/gui-base.md) 了解更多细节。
 
 ```bash
@@ -31,12 +38,12 @@ docker run -d --name mdcx \
   -e USER_ID=$(id -u) `#运行应用的用户ID` \
   -e GROUP_ID=$(id -g) `#运行应用的用户组ID` \
   --restart unless-stopped \
-  stainless403/gui-base_mdcx-builtin:latest
+  stainless403/mdcx-builtin-gui-base:latest
 ```
 
 浏览器访问 http://192.168.1.100:5800 使用。
 
-### webtop-base_mdcx-builtin示例
+### mdcx-builtin-webtop-base示例
 ⚠️ 这里只给出一个简单的运行示例，建议查看 [部署说明](https://github.com/northsea4/mdcx-docker/blob/main/docs/webtop-base.md) 了解更多细节。
 
 ```bash
@@ -59,7 +66,7 @@ docker run -d --name mdcx \
   -e USER_ID=$(id -u) `#运行应用的用户ID` \
   -e GROUP_ID=$(id -g) `#运行应用的用户组ID` \
   --restart unless-stopped \
-  stainless403/webtop-base_mdcx-builtin:latest
+  stainless403/mdcx-builtin-webtop-base:latest
 ```
 
 - 使用`Windows远程桌面`或`Microsoft Remote Desktop`连接 `192.168.1.100:3389` 使用，账号密码`abc/abc`。
@@ -71,8 +78,8 @@ docker run -d --name mdcx \
 
 | 镜像 | 默认 | 方式1 |
 | --- | --- | --- |
-| [gui-base_mdcx-builtin](https://hub.docker.com/r/stainless403/gui-base_mdcx-builtin/tags) | 空 | 设置环境变量`VNC_PASSWORD` |
-| [webtop-base_mdcx-builtin](https://hub.docker.com/r/stainless403/webtop-base_mdcx-builtin/tags) | abc/abc | `docker exec -it 容器名称 passwd abc`<br>或进入桌面使用命令行工具执行`passwd abc` |
+| [mdcx-builtin-gui-base](https://hub.docker.com/r/stainless403/mdcx-builtin-gui-base/tags) | 空 | 设置环境变量`VNC_PASSWORD` |
+| [mdcx-builtin-webtop-base](https://hub.docker.com/r/stainless403/mdcx-builtin-webtop-base/tags) | abc/abc | `docker exec -it 容器名称 passwd abc`<br>或进入桌面使用命令行工具执行`passwd abc` |
 
 ## 申明
 当你查阅、下载了本项目源代码或二进制程序，即代表你接受了以下条款：

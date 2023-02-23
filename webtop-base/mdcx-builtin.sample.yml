@@ -1,29 +1,31 @@
 version: '3'
 
 services:
-  gui_base_builtin:
-    image: stainless403/gui-base_mdcx-builtin:${MDCX_BUILTIN_IMAGE_TAG}
+  mdcx_builtin_webtop:
+    image: stainless403/mdcx-builtin-webtop-base:${MDCX_BUILTIN_IMAGE_TAG}
     container_name: ${MDCX_BUILTIN_CONTAINER_NAME}
     env_file:
       - .env
     volumes:
       # 系统数据目录
       - ./data:/config
-          
-      # 配置文件目录
+
+      # 应用配置目录
       - ./mdcx-config:/mdcx-config
       # `配置文件目录`标记文件
       - ./mdcx-config/MDCx.config:/app/MDCx.config
 
-      # 日志目录
+      # 应用日志目录
       - ./logs:/app/Log
 
       # 影片目录
       - /path/to/movies:/movies
     # environment:
     ports:
-      - ${WEB_PORT}:5800
-      - ${VNC_PORT}:5900
+      - ${WEB_PORT}:3000
+      - ${RDP_PORT}:3389
+    # devices:
+    #   - /dev/dri:/dev/dri
     restart: unless-stopped
     network_mode: bridge
     stdin_open: true

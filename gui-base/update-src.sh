@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ ! -f ".env" ]; then
-  echo "⚠️ 当前目录缺少文件 .env。示例文件：https://github.com/northsea4/mdcx-docker/blob/dev/webtop-base/.env.sample"
+  echo "⚠️ 当前目录缺少文件 .env。示例文件：https://github.com/northsea4/mdcx-docker/blob/main/gui-base/.env.sample"
   exit 1
 fi
 

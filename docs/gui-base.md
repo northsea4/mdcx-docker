@@ -6,12 +6,12 @@
 
 
 ## 1. mdcx-builtin示例
-[stainless403/gui-base_mdcx-builtin](https://hub.docker.com/r/stainless403/gui-base_mdcx-builtin)镜像已内置编译好的MDCx。如果想使用本地MDCx源码版的，请使用[stainless403/gui-base_mdcx-src](https://hub.docker.com/r/stainless403/gui-base_mdcx-src)镜像。
+[stainless403/mdcx-builtin-gui-base](https://hub.docker.com/r/stainless403/mdcx-builtin-gui-base)镜像已内置编译好的MDCx。如果想使用本地MDCx源码版的，请使用[stainless403/mdcx-src-gui-base](https://hub.docker.com/r/stainless403/mdcx-src-gui-base)镜像。
 
-🔗 [stainless403/gui-base_mdcx-src示例](#2-mdcx-src示例)
+🔗 [stainless403/mdcx-src-gui-base示例](#2-mdcx-src示例)
 
 ### 1.1 准备项目目录
-下载 [示例项目](https://github.com/northsea4/mdcx-docker/releases/download/latest/template-gui-base-builtin.zip)，解压到合适的位置后，进入项目目录。如无特别说明，之后的操作都是在该目录(假设名为`mdcx-docker`)内进行。
+下载 [示例项目](https://github.com/northsea4/mdcx-docker/releases/download/latest/template-mdcx-builtin-gui-base.zip)，解压到合适的位置后，进入项目目录。如无特别说明，之后的操作都是在该目录(假设名为`mdcx-docker`)内进行。
 
 整个项目的结构大致如下：
 ```
@@ -36,7 +36,7 @@ mdcx-docker
 编辑`.env`文件，按需修改。
 文件里每个参数都有具体的说明，`.env.sample`文件里可以查看原始的数值。
 一般需要修改的参数：`VNC_PASSWORD`, `WEB_PORT`, `VNC_PORT`, `USER_ID`, `GROUP_ID`
-| 参数名称 | 参数说明 | 参数默认值 | 是否必填 |
+| 参数名称 | 说明 | 默认值 | 必填 |
 | --- | --- | --- | --- |
 | VNC_PASSWORD | 访问密码，如不需要，留空。如果有在公网远程访问的需求，建议设置 | 无 | 否 |
 | WEB_PORT | 网页访问端口 | 5800 | 是 |
@@ -52,8 +52,8 @@ mdcx-docker
 version: '3'
 
 services:
-  gui_base_builtin:
-    image: stainless403/gui-base_mdcx-builtin:${MDCX_BUILTIN_IMAGE_TAG}
+  mdcx_builtin_gui:
+    image: stainless403/mdcx-builtin-gui-base:${MDCX_BUILTIN_IMAGE_TAG}
     container_name: ${MDCX_BUILTIN_CONTAINER_NAME}
     env_file:
       - .env
@@ -84,7 +84,7 @@ services:
 docker-compose up -d
 
 # 查看容器日志
-# docker logs -f gui_base_builtin
+# docker logs -f mdcx_builtin_gui
 ```
 
 ### 1.5 使用
@@ -117,22 +117,22 @@ docker run -d --name mdcx \
   -e USER_ID=$(id -u) `#运行应用的用户ID` \
   -e GROUP_ID=$(id -g) `#运行应用的用户组ID` \
   --restart unless-stopped \
-  stainless403/gui-base_mdcx-builtin:latest
+  stainless403/mdcx-builtin-gui-base:latest
 ```
 
 
 ## 2. mdcx-src示例
-[stainless403/gui-base_mdcx-src](https://hub.docker.com/r/stainless403/gui-basemdcx-src)镜像没有内置MDCx，如果想使用内置的，请使用[stainless403/gui-base_mdcx-builtin](https://hub.docker.com/r/stainless403/gui-base_mdcx-builtin)镜像。
+[stainless403/mdcx-src-gui-base](https://hub.docker.com/r/stainless403/gui-basemdcx-src)镜像没有内置MDCx，如果想使用内置的，请使用[stainless403/mdcx-builtin-gui-base](https://hub.docker.com/r/stainless403/mdcx-builtin-gui-base)镜像。
 
-🔗 [stainless403/gui-base_mdcx-builtin示例](#2-mdcx-builtin示例)
+🔗 [stainless403/mdcx-builtin-gui-base示例](#2-mdcx-builtin示例)
 
-> Tips: gui-base_mdcx-src支持运行已编译的应用，但gui-base_mdcx-builtin默认情况下不能运行应用源码。
+> Tips: mdcx-src-gui-base支持运行已编译的应用，但mdcx-builtin-gui-base默认情况下不能运行应用源码。
 
 下面主要讲述`docker-compose`的部署方式。`docker-run`的方式也有简单的示例。
 
 ### 2.1 准备项目目录
 
-下载 [示例项目](https://github.com/northsea4/mdcx-docker/releases/download/latest/template-gui-base-src.zip)，解压到合适的位置后，进入项目目录，之后的操作，如无特别说明，都是在该目录(假设名为`mdcx-docker`)内进行。
+下载 [示例项目](https://github.com/northsea4/mdcx-docker/releases/download/latest/template-mdcx-src-gui-base.zip)，解压到合适的位置后，进入项目目录，之后的操作，如无特别说明，都是在该目录(假设名为`mdcx-docker`)内进行。
 
 ### 2.2 准备应用源码
    
@@ -165,8 +165,8 @@ mdcx-docker
   |-- .env ------环境变量文件
   |-- .env.sample ------环境变量示例文件
   |-- .env.versions ------应用版本文件
-  |-- gui-base-builtin.sample.yml
-  |-- gui-base-src.sample.yml -------容器部署配置示例
+  |-- mdcx-builtin.sample.yml
+  |-- mdcx-src.sample.yml -------容器部署配置示例
   |-- docker-compose.yml -------容器部署配置
   |-- update-app.sh
 ```
@@ -175,7 +175,7 @@ mdcx-docker
 编辑`.env`文件，按需修改。
 文件里每个参数都有具体的说明，`.env.sample`文件里可以查看原始的数值。
 一般需要修改的参数：`VNC_PASSWORD`, `WEB_PORT`, `VNC_PORT`, `USER_ID`, `GROUP_ID`
-| 参数名称 | 参数说明 | 参数默认值 | 是否必填 |
+| 参数名称 | 说明 | 默认值 | 必填 |
 | --- | --- | --- | --- |
 | VNC_PASSWORD | 访问密码，如不需要，留空。如果有在公网远程访问的需求，建议设置 | 无 | 否 |
 | WEB_PORT | 网页访问端口 | 5800 | 是 |
@@ -190,8 +190,8 @@ mdcx-docker
 version: '3'
 
 services:
-  gui_base_src:
-    image: stainless403/gui-base_mdcx-src:${MDCX_SRC_IMAGE_TAG}
+  mdcx_src_gui:
+    image: stainless403/mdcx-src-gui-base:${MDCX_SRC_IMAGE_TAG}
     container_name: ${MDCX_SRC_CONTAINER_NAME}
     env_file:
       - .env
@@ -225,7 +225,7 @@ services:
 docker-compose up -d
 
 # 查看容器日志
-# docker logs -f gui_base_src
+# docker logs -f mdcx_src_gui
 ```
 
 > 首次运行时会自动安装依赖，并在app目录 和 容器内的`/tmp`目录生成一个名为`.mdcx_initialized`的标记文件。
@@ -267,7 +267,7 @@ docker run -d --name mdcx \
   -e USER_ID=$(id -u) `#运行应用的用户ID` \
   -e GROUP_ID=$(id -g) `#运行应用的用户组ID` \
   --restart unless-stopped \
-  stainless403/gui-base_mdcx-src:latest
+  stainless403/mdcx-src-gui-base:latest
 ```
 
 
@@ -284,7 +284,7 @@ chmod +x ./update-src.sh
 ./update-src.sh --verbose
 
 # 完成更新源码之后，重启容器
-# docker restart 容器名称
+# docker restart mdcx_src_gui
 ```
 
 > ⚠️ 如果你选择不使用脚本而是手动进行更新，请记得删除`app`目录下的`.mdcx_initialized`文件！

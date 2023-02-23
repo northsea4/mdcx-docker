@@ -1,4 +1,4 @@
-name: Image gui-base_mdcx-src CI
+name: Image mdcx-src-webtop-base CI
 
 on:
   push:
@@ -15,16 +15,17 @@ on:
           - dev
           - prod
       baseImage:
-        description: Tag of base image `gui-base`
+        description: Tag of base image `webtop-base`
         type: choice
-        default: 'ubuntu-22.04'
+        default: 'ubuntu-kde-22.04'
         options:
-          - 'ubuntu-22.04'
+          - 'ubuntu-kde-22.04'
           - 'latest'          
 
 env:
-  IMAGE_BASE: gui-base
-  IMAGE_KEY: gui-base_mdcx-src
+  IMAGE_BASE: webtop-base
+  IMAGE_KEY: mdcx-src-webtop-base
+  DEPRECATED_IMAGE_KEY: webtop-base_mdcx-src
 
 jobs:
   build:
@@ -33,14 +34,6 @@ jobs:
       - 
         name: Checkout
         uses: actions/checkout@v3
-      # -
-      #   name: Install apt packages
-      #   run: sudo apt-get install -y unrar
-      # -
-      #   name: Prepare App source
-      #   id: prepare
-      #   run: |
-      #     bash ./prepare-src.sh --verbose --context $IMAGE_BASE
       -
         name: Prepare Version Values
         uses: cardinalby/export-env-action@v2
@@ -66,18 +59,18 @@ jobs:
         run: |
           if [[ "${{ github.event.inputs.stage }}" == "dev" ]]; then
             echo "latest=latest-dev" >> $GITHUB_OUTPUT
-            echo "version=${{ steps.versions.outputs.GUI_BASE_MDCX_SRC_VERSION }}-dev" >> $GITHUB_OUTPUT
+            echo "version=${{ steps.versions.outputs.WEBTOP_BASE_MDCX_SRC_VERSION }}-dev" >> $GITHUB_OUTPUT
           else
             echo "latest=latest" >> $GITHUB_OUTPUT
-            echo "version=${{ steps.versions.outputs.GUI_BASE_MDCX_SRC_VERSION }}" >> $GITHUB_OUTPUT
+            echo "version=${{ steps.versions.outputs.WEBTOP_BASE_MDCX_SRC_VERSION }}" >> $GITHUB_OUTPUT
           fi
       - 
         name: Build and push
         uses: docker/build-push-action@v3
         with:
           context: .
-          cache-from: type=gha
-          cache-to: type=gha,mode=min
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=min
           file: ${{ env.IMAGE_BASE }}/Dockerfile.${{ env.IMAGE_KEY }}
           build-args: |
             APT_SOURCE_HOST=
@@ -89,3 +82,5 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:${{ steps.imageInfo.outputs.latest }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:${{ steps.imageInfo.outputs.version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DEPRECATED_IMAGE_KEY }}:${{ steps.imageInfo.outputs.latest }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DEPRECATED_IMAGE_KEY }}:${{ steps.imageInfo.outputs.version }}

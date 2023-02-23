@@ -72,8 +72,8 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          cache-from: type=gha
-          cache-to: type=gha,mode=min
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=min
           file: ${{ env.IMAGE_BASE }}/Dockerfile.${{ env.IMAGE_KEY }}
           build-args: |
             APT_SOURCE_HOST=

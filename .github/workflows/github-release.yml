@@ -36,31 +36,31 @@ jobs:
         run: |
           mkdir mdcx-docker && cd mdcx-docker && cp -a ../gui-base/. .
           cp .env.sample .env
-          cp gui-base-src.sample.yml docker-compose.yml
+          cp mdcx-src.sample.yml docker-compose.yml
           rm Dockerfile*
           rm -rf rootfs*
           cd ..
-          zip -q -r template-gui-base-src.zip mdcx-docker
+          zip -q -r template-mdcx-src-gui-base.zip mdcx-docker
 
           cd mdcx-docker
-          cp -f gui-base-builtin.sample.yml docker-compose.yml
+          cp -f mdcx-builtin.sample.yml docker-compose.yml
           cd ..
-          zip -q -r template-gui-base-builtin.zip mdcx-docker
+          zip -q -r template-mdcx-builtin-gui-base.zip mdcx-docker
 
           rm -rf mdcx-docker
 
           mkdir mdcx-docker && cd mdcx-docker && cp -a ../webtop-base/. .
           cp .env.sample .env
-          cp webtop-base-src.sample.yml docker-compose.yml
+          cp mdcx-src.sample.yml docker-compose.yml
           rm Dockerfile*
           rm -rf rootfs*
           cd ..
-          zip -q -r template-webtop-base-src.zip mdcx-docker
+          zip -q -r template-mdcx-src-webtop-base.zip mdcx-docker
 
           cd mdcx-docker
-          cp -f webtop-base-builtin.sample.yml docker-compose.yml
+          cp -f mdcx-builtin.sample.yml docker-compose.yml
           cd ..
-          zip -q -r template-webtop-base-builtin.zip mdcx-docker
+          zip -q -r template-mdcx-builtin-webtop-base.zip mdcx-docker
 
           rm -rf mdcx-docker
 

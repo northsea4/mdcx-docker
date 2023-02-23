@@ -1,5 +1,5 @@
 ## 0. 关于镜像
-`gui-base`，是基于 [jlesage/baseimage-gui](https://hub.docker.com/r/jlesage/baseimage-gui) 构建的适合python+QT5应用运行的容器。
+`gui-base`，是基于 [jlesage/baseimage-gui](https://hub.docker.com/r/jlesage/baseimage-gui) 构建的适合python+QT5应用运行的镜像。
 
 > `gui-base`优点是`轻量`，缺点是只支持通过网页查看，且没有文件管理。
 
@@ -11,7 +11,7 @@
 🔗 [stainless403/gui-base_mdcx-src示例](#2-mdcx-src示例)
 
 ### 1.1 准备项目目录
-下载 [示例项目](https://github.com/northsea4/mdcx-docker/releases/download/latest/template-gui-base-builtin.zip)，解压到合适的位置后，进入项目目录。如无特殊说明，之后的操作都是在该目录(假设名为`mdcx-docker`)内进行。
+下载 [示例项目](https://github.com/northsea4/mdcx-docker/releases/download/latest/template-gui-base-builtin.zip)，解压到合适的位置后，进入项目目录。如无特别说明，之后的操作都是在该目录(假设名为`mdcx-docker`)内进行。
 
 整个项目的结构大致如下：
 ```
@@ -132,7 +132,7 @@ docker run -d --name mdcx \
 
 ### 2.1 准备项目目录
 
-下载 [示例项目](https://github.com/northsea4/mdcx-docker/releases/download/latest/template-gui-base-src.zip)，解压到合适的位置后，进入项目目录，之后的操作，如无特殊说明，都是在该目录(假设名为`mdcx-docker`)内进行。
+下载 [示例项目](https://github.com/northsea4/mdcx-docker/releases/download/latest/template-gui-base-src.zip)，解压到合适的位置后，进入项目目录，之后的操作，如无特别说明，都是在该目录(假设名为`mdcx-docker`)内进行。
 
 ### 2.2 准备应用源码
    

@@ -1,5 +1,5 @@
 ## 0. 关于镜像
-`webtop-base`，即基于 [linuxserver/webtop](https://hub.docker.com/r/linuxserver/webtop) 构建的适合python+QT5应用运行的容器。
+`webtop-base`，是基于 [linuxserver/webtop](https://hub.docker.com/r/linuxserver/webtop) 构建的适合python+QT5应用运行的镜像。
 
 > `webtop-base`优点是`远程桌面`、`文件管理`和`浏览器`，缺点是资源占用相对高一些，上手难度也稍高。
 
@@ -10,7 +10,7 @@
 🔗 [stainless403/webtop-base_mdcx-src示例](#2-mdcx-src示例)
 
 ### 1.1 准备项目目录
-下载 [示例项目](https://github.com/northsea4/mdcx-docker/releases/download/latest/template-webtop-base-builtin.zip)，解压到合适的位置后，进入项目目录，如无特殊说明，之后的操作都是在该目录(假设名为`mdcx-docker`)内进行。
+下载 [示例项目](https://github.com/northsea4/mdcx-docker/releases/download/latest/template-webtop-base-builtin.zip)，解压到合适的位置后，进入项目目录，如无特别说明，之后的操作都是在该目录(假设名为`mdcx-docker`)内进行。
 
 整个项目的结构大致如下：
 ```
@@ -137,7 +137,7 @@ docker run -d --name mdcx \
 下面主要讲述`docker-compose`的部署方式。`docker-run`的方式也有简单的示例。
 
 ### 2.1 准备项目目录
-下载 [示例项目](https://github.com/northsea4/mdcx-docker/releases/download/latest/template-webtop-base-src.zip)，解压到合适的位置后，进入项目目录，如无特殊说明，之后的操作都是在该目录(假设名为`mdcx-docker`)内进行。
+下载 [示例项目](https://github.com/northsea4/mdcx-docker/releases/download/latest/template-webtop-base-src.zip)，解压到合适的位置后，进入项目目录，如无特别说明，之后的操作都是在该目录(假设名为`mdcx-docker`)内进行。
 
 ### 2.2 准备应用源码
    

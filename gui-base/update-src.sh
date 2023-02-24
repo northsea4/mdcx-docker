@@ -3,9 +3,10 @@
 if [ ! -f ".env" ]; then
   echo "⚠️ 当前目录缺少文件 .env。示例文件：https://github.com/northsea4/mdcx-docker/blob/main/gui-base/.env.sample"
   # exit 1
+else
+  . .env
 fi
 
-. .env
 
 FILE_INITIALIZED=".mdcx_initialized"
 
@@ -210,7 +211,7 @@ if [[ -n "$shouldUpdate" ]]; then
         echo "⏳ 重启容器..."
         docker restart $MDCX_SRC_CONTAINER_NAME
       else
-        echo "ℹ️ 执行以下命令重启容器"
+        echo "ℹ️ 如果已经部署过容器，执行以下命令重启容器"
         echo "docker restart $MDCX_SRC_CONTAINER_NAME"
       fi
     fi

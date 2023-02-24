@@ -5,36 +5,46 @@ on:
     branches:
       - main
     paths:
-      - "**.md"
+      - '**.md'
 
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        mdcx-builtin-gui-base:
-          repo: mdcx-builtin-gui-base
-          doc: gui-base/mdcx-builtin.md
-        mdcx-src-gui-base:
-          repo: mdcx-src-gui-base
-          doc: gui-base/mdcx-src.md
-        mdcx-builtin-webtop-base:
-          repo: mdcx-builtin-webtop-base
-          doc: webtop-base/mdcx-builtin.md
-        mdcx-src-webtop-base:
-          repo: mdcx-src-webtop-base
-          doc: webtop-base/mdcx-src.md
     steps:
       - 
         name: Checkout
         uses: actions/checkout@v3
       - 
-        name: Sync ${{ matrix.doc }}
+        name: Sync gui-base/mdcx-builtin.md
         uses: northsea4/sync-dockerhub-readme@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.repo }}
-          readme: ${{ matrix.doc }}
+          repository: ${{ secrets.DOCKERHUB_USERNAME }}/mdcx-builtin-gui-base
+          readme: gui-base/mdcx-builtin.md
+      - 
+        name: Sync gui-base/mdcx-src.md
+        uses: northsea4/sync-dockerhub-readme@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ secrets.DOCKERHUB_USERNAME }}/mdcx-src-gui-base
+          readme: gui-base/mdcx-src.md
+      - 
+        name: Sync webtop-base/mdcx-builtin.md
+        uses: northsea4/sync-dockerhub-readme@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ secrets.DOCKERHUB_USERNAME }}/mdcx-builtin-webtop-base
+          readme: webtop-base/mdcx-builtin.md
+      - 
+        name: Sync webtop-base/mdcx-src.md
+        uses: northsea4/sync-dockerhub-readme@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ secrets.DOCKERHUB_USERNAME }}/mdcx-src-webtop-base
+          readme: webtop-base/mdcx-src.md

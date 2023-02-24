@@ -1,0 +1,30 @@
+name: Sync docs to Docker Hub
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**.md"
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo: [mdcx-builtin-gui-base, mdcx-src-gui-base, mdcx-builtin-webtop-base, mdcx-src-webtop-base]
+        doc: [gui-base/mdcx-builtin.md, gui-base/mdcx-src.md, webtop-base/mdcx-builtin.md, webtop-base/mdcx-src.md]
+    steps:
+      - 
+        name: Checkout
+        uses: actions/checkout@v3
+      - 
+        name: Sync ${{ matrix.doc }}
+        uses: northsea4/sync-dockerhub-readme@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.repo }}
+          readme: ${{ matrix.doc }}

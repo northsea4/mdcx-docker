@@ -1,3 +1,9 @@
+[![GitHub stars](https://img.shields.io/github/stars/northsea4/mdcx-docker.svg?style=flat&label=Stars&maxAge=2592000)](https://GitHub.com/northsea4/mdcx-docker) [![GitHub release](https://img.shields.io/github/release/northsea4/mdcx-docker.svg?style=flat&label=Release)](https://github.com/northsea4/mdcx-docker/releases/tag/latest)
+
+
+
+
+
 ## 镜像
 ⚠️ 更改了镜像名称：`gui-base_mdcx-builtin` 更改为 `mdcx-builtin-gui-base`
 
@@ -9,11 +15,11 @@
 
 | 镜像 | 部署说明 | 网页查看 | 远程桌面 | 文件管理 | 浏览器 |
 | --- | --- | --- | --- | --- | --- |
-| [mdcx-builtin-gui-base](https://hub.docker.com/r/stainless403/mdcx-builtin-gui-base/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/docs/gui-base.md) | ✅ | ❌ | ❌ | ❌ |
-| [mdcx-builtin-webtop-base](https://hub.docker.com/r/stainless403/mdcx-builtin-webtop-base/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/docs/webtop-base.md) | ✅ | ✅ | ✅ | ✅ |
+| [mdcx-builtin-gui-base](https://hub.docker.com/r/stainless403/mdcx-builtin-gui-base/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/gui-base/mdcx-builtin.md) | ✅ | ❌ | ❌ | ❌ |
+| [mdcx-builtin-webtop-base](https://hub.docker.com/r/stainless403/mdcx-builtin-webtop-base/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/webtop-base/mdcx-builtin.md) | ✅ | ✅ | ✅ | ✅ |
 
 ### mdcx-builtin-gui-base示例
-⚠️ 这里只给出一个简单的运行示例，建议查看 [部署说明](https://github.com/northsea4/mdcx-docker/blob/main/docs/gui-base.md) 了解更多细节。
+⚠️ 这里只给出一个简单的运行示例，建议查看 [部署说明](https://github.com/northsea4/mdcx-docker/blob/main/gui-base/mdcx-builtin.md) 了解更多细节。
 
 ```bash
 # 选一个合适的目录
@@ -45,7 +51,7 @@ docker run -d --name mdcx \
 浏览器访问 http://192.168.1.100:5800 使用。
 
 ### mdcx-builtin-webtop-base示例
-⚠️ 这里只给出一个简单的运行示例，建议查看 [部署说明](https://github.com/northsea4/mdcx-docker/blob/main/docs/webtop-base.md) 了解更多细节。
+⚠️ 这里只给出一个简单的运行示例，建议查看 [部署说明](https://github.com/northsea4/mdcx-docker/blob/main/webtop-base/mdcx-builtin.md) 了解更多细节。
 
 ```bash
 MDCX_DOCKER_DIR=/path/to/mdcx-docker
@@ -55,7 +61,7 @@ mkdir -p mdcx-config logs data
 # 必须：配置文件目录标记文件
 echo "/mdcx-config/config.ini" > mdcx-config/MDCx.config
 
-docker run -d --name mdcx \
+docker run -d --name --security-opt seccomp=unconfined mdcx \
   -p 3000:3000 `#Web访问端口` \
   -p 3389:3389 `#RDP访问端口` \
   -v $(pwd)/data:/config `#容器系统数据` \
@@ -96,5 +102,7 @@ docker run -d --name mdcx \
 
 
 ## TODO 
+- [x] 镜像独立文档
 - [ ] 自动编译新版应用并发布
-- [ ] 解决docker/build-push-action缓存问题。超出10GB，构建速度会大幅下降。
+- [ ] 自动同步文档到Docker Hub
+- [ ] Github Actions缓存的利用

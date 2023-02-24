@@ -61,7 +61,7 @@ mkdir -p mdcx-config logs data
 # 必须：配置文件目录标记文件
 echo "/mdcx-config/config.ini" > mdcx-config/MDCx.config
 
-docker run -d --name --security-opt seccomp=unconfined mdcx \
+docker run -d --name mdcx \
   -p 3000:3000 `#Web访问端口` \
   -p 3389:3389 `#RDP访问端口` \
   -v $(pwd)/data:/config `#容器系统数据` \

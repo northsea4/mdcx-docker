@@ -121,8 +121,8 @@ docker run -d --name mdcx \
   -v /volume2:/volume2 `#影片目录` \
   -e TZ=Asia/Shanghai \
   -e AUTO_LOGIN=false `#使用默认密码(abc)，且通过网页访问时，是否自动登录(true/false)` \
-  -e USER_ID=$(id -u) `#运行应用的用户ID` \
-  -e GROUP_ID=$(id -g) `#运行应用的用户组ID` \
+  -e PUID=$(id -u) `#运行应用的用户ID` \
+  -e PGID=$(id -g) `#运行应用的用户组ID` \
   --restart unless-stopped \
   stainless403/mdcx-builtin-webtop-base:latest
 ```

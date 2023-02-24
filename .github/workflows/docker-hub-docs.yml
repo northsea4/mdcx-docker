@@ -14,8 +14,18 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        repo: [mdcx-builtin-gui-base, mdcx-src-gui-base, mdcx-builtin-webtop-base, mdcx-src-webtop-base]
-        doc: [gui-base/mdcx-builtin.md, gui-base/mdcx-src.md, webtop-base/mdcx-builtin.md, webtop-base/mdcx-src.md]
+        mdcx-builtin-gui-base:
+          repo: mdcx-builtin-gui-base
+          doc: gui-base/mdcx-builtin.md
+        mdcx-src-gui-base:
+          repo: mdcx-src-gui-base
+          doc: gui-base/mdcx-src.md
+        mdcx-builtin-webtop-base:
+          repo: mdcx-builtin-webtop-base
+          doc: webtop-base/mdcx-builtin.md
+        mdcx-src-webtop-base:
+          repo: mdcx-src-webtop-base
+          doc: webtop-base/mdcx-src.md
     steps:
       - 
         name: Checkout

@@ -8,7 +8,7 @@
 
 
 ## 1. mdcx-src示例
-[stainless403/mdcx-src-webtop-base](https://hub.docker.com/r/stainless403/mdcx-src-webtop-base)镜像没有内置MDCx，如果想使用内置的，请使用[stainless403/mdcx-builtin-webtop-base](https://hub.docker.com/r/stainless403/mdcx-builtin-webtop-base)镜像。
+[stainless403/mdcx-src-webtop-base](https://hub.docker.com/r/stainless403/mdcx-src-webtop-base)镜像没有内置MDCx，如果想使用内置的，请使用[stainless403/mdcx-builtin-webtop-base](https://hub.docker.com/r/stainless403/mdcx-builtin-webtop-base)镜像([🔗 查看部署说明](https://github.com/northsea4/mdcx-docker/blob/main/webtop-base/mdcx-builtin.md))。
 
 
 > Tips: mdcx-src-webtop-base支持运行已编译的应用，但mdcx-builtin-webtop-base默认情况下不能运行应用源码。

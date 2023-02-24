@@ -8,7 +8,7 @@
 
 
 ## 1. mdcx-builtin示例
-[stainless403/mdcx-builtin-gui-base](https://hub.docker.com/r/stainless403/mdcx-builtin-gui-base)镜像已内置编译好的MDCx。如果想使用本地MDCx源码版的，请使用[stainless403/mdcx-src-gui-base](https://hub.docker.com/r/stainless403/mdcx-src-gui-base)镜像。
+[stainless403/mdcx-builtin-gui-base](https://hub.docker.com/r/stainless403/mdcx-builtin-gui-base)镜像已内置编译好的MDCx。如果想使用本地MDCx源码版的，请使用[stainless403/mdcx-src-gui-base](https://hub.docker.com/r/stainless403/mdcx-src-gui-base)镜像([🔗 查看部署说明](https://github.com/northsea4/mdcx-docker/blob/main/gui-base/mdcx-src.md))。
 
 
 ### 1.1 准备项目目录

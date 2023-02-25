@@ -5,7 +5,7 @@ services:
     image: stainless403/mdcx-src-webtop-base:${MDCX_SRC_IMAGE_TAG}
     container_name: ${MDCX_SRC_CONTAINER_NAME}
     env_file:
-      - .env.webtop-base
+      - .env
     volumes:
       # 系统数据目录
       - ./data:/config

@@ -120,20 +120,11 @@ jobs:
             echo "newVersion=$newVersion" >> $GITHUB_OUTPUT
             echo "newTime=$newTime" >> $GITHUB_OUTPUT
 
-            # 暂时简单处理，先更新变量
-            updateVariable $VAR_TIME "$newTime"
-            
-            # updateVariable $VAR_VERSION "$newVersion"
-            # if [[ "$?" != "204" ]]; then
-            #   echo "❌ 更新变量 $VAR_VERSION 失败！"
-            #   exit 1
-            # fi
+            # 暂时简单处理，先更新变量 TODO 为什么
+            updateVariable $VAR_VERSION "$newVersion"
 
-            # code=$(updateVariable $VAR_TIME "$newTime")
-            # if [[ "$?" != "204" ]]; then
-            #   echo "❌ 更新变量 $VAR_TIME 失败！"
-            #   exit 1
-            # fi
+            # TODO 为什么单独更新能成功，但先更新$VAR_VERSION再更新这个，这个就会失败(400)？
+            updateVariable $VAR_TIME "$newTime"
 
             exit 0
           else

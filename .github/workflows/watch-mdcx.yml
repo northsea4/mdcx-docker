@@ -40,6 +40,9 @@ jobs:
         run: sudo apt-get install -y jq
       -
         name: Check if there is a new MDCx release
+        env:
+          GITHUB_CURRENT_REPO: ${{ env.GITHUB_CURRENT_REPO }}
+          GITHUB_API_TOKEN: ${{ env.GITHUB_API_TOKEN }}
         run: |
           source scripts/base.sh
           source scripts/github.sh

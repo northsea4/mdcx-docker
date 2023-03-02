@@ -103,6 +103,6 @@ docker run -d --name mdcx \
 
 ## TODO 
 - [x] 镜像独立文档
-- [ ] 自动编译新版应用并发布
-- [ ] 自动同步文档到Docker Hub
+- [x] 自动编译新版应用并发布
+- [x] 自动同步文档到Docker Hub
 - [ ] Github Actions缓存的利用

@@ -88,7 +88,7 @@ jobs:
 
           newVersion=""
           newTime=""
-          hasNewVersion=0
+          hasNewVersion=false
 
           # 获取最新版本信息
           info=($(getNewInfo))
@@ -103,24 +103,28 @@ jobs:
 
           # 任意一个变量为空，都不视为新版本
           if [[ -z "$latestVersion" || -z "$latestTime" ]]; then
-            hasNewVersion=0
+            hasNewVersion=false
           else
             # 如果版本号或者更新时间不同，视为新版本
             if [[ "$newVersion" != "$latestVersion" || "$newTime" != "$latestTime" ]]; then
-              hasNewVersion=1
+              hasNewVersion=true
             else
-              hasNewVersion=0
+              hasNewVersion=false
             fi
           fi
+
+
+          # 输出到GITHUB_OUTPUT 
+          echo "newVersion=$newVersion" >> $GITHUB_OUTPUT
+          echo "newTime=$newTime" >> $GITHUB_OUTPUT
+          echo "hasNewVersion=$hasNewVersion" >> $GITHUB_OUTPUT
+          echo "latestVersion=$latestVersion" >> $GITHUB_OUTPUT
+          echo "latestTime=$latestTime" >> $GITHUB_OUTPUT
    
-          if [[ -n "$hasNewVersion" ]]; then
+          if [[ "$hasNewVersion" == "true" ]]; then
             echo "🎉 发现新版本！"
             echo "📦 新版本号：$newVersion"
             echo "📅 更新时间：$newTime"
-
-            # 输出到GITHUB_OUTPUT 
-            echo "newVersion=$newVersion" >> $GITHUB_OUTPUT
-            echo "newTime=$newTime" >> $GITHUB_OUTPUT
 
             updateVariable $VAR_TIME "$newTime"
 
@@ -133,6 +137,7 @@ jobs:
           fi
       -
         uses: appleboy/telegram-action@master
+        # if: ${{ steps.check.outputs.hasNewVersion == 'true' }}
         with:
           to: ${{ secrets.TELE_CHAT_ID }}
           token: ${{ secrets.TELE_BOT_TOKEN }}
@@ -140,7 +145,15 @@ jobs:
             🎉 MDCx新版本！
             📦 新版本号：${{ steps.check.outputs.newVersion }}
             📅 更新时间：${{ steps.check.outputs.newTime }}
-            🔗 发布链接：${{ env.RELEASE_URL }}
+            🔗 发布链接：https://github.com/anyabc/something/releases/tag/MDCx
+      # -
+      #   uses: appleboy/telegram-action@master
+      #   if: ${{ steps.check.outputs.hasNewVersion == 'false' }}
+      #   with:
+      #     to: ${{ secrets.TELE_CHAT_ID }}
+      #     token: ${{ secrets.TELE_BOT_TOKEN }}
+      #     message: |
+      #       🔎 没有新版本，等待下一次检查...
       - 
         if: ${{ github.event.inputs.isDev == 'true' }}
         run: |

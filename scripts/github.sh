@@ -34,7 +34,7 @@ updateVariable() {
   local name=$1
   local value=$2
   local data=$(buildNameValueJson $name $value)
-  code=$(curl -L $CURL_VERBOSE -o /dev/null -w "%{http_code}" \
+  code=$(curl -L $CURL_VERBOSE  \
     -X PATCH \
     -H "Accept: application/vnd.github+json" \
     -H "Authorization: Bearer $GITHUB_API_TOKEN"\

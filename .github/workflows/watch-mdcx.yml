@@ -45,7 +45,7 @@ jobs:
         env:
           GITHUB_CURRENT_REPO: ${{ env.GITHUB_CURRENT_REPO }}
           GITHUB_API_TOKEN: ${{ env.GITHUB_API_TOKEN }}
-          CURL_VERBOSE: -vvv
+          CURL_VERBOSE: '-vvv'
         run: |
           source scripts/base.sh
           source scripts/github.sh

@@ -45,6 +45,7 @@ jobs:
         env:
           GITHUB_CURRENT_REPO: ${{ env.GITHUB_CURRENT_REPO }}
           GITHUB_API_TOKEN: ${{ env.GITHUB_API_TOKEN }}
+          CURL_VERBOSE: -vvv
         run: |
           source scripts/base.sh
           source scripts/github.sh
@@ -120,14 +121,14 @@ jobs:
             echo "newTime=$newTime" >> $GITHUB_OUTPUT
 
             # 暂时简单处理，先更新变量
-            code=$(updateVariable $VAR_VERSION "$newVersion")
-            if [[ "$code" != "204" ]]; then
+            updateVariable $VAR_VERSION "$newVersion"
+            if [[ "$?" != "204" ]]; then
               echo "❌ 更新变量 $VAR_VERSION 失败！"
               exit 1
             fi
 
             code=$(updateVariable $VAR_TIME "$newTime")
-            if [[ "$code" != "204" ]]; then
+            if [[ "$?" != "204" ]]; then
               echo "❌ 更新变量 $VAR_TIME 失败！"
               exit 1
             fi

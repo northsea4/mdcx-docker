@@ -3,6 +3,8 @@
 GITHUB_ACTIONS_API_URL="https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_CURRENT_REPO/actions"
 GITHUB_VARIABLES_API_URL="$GITHUB_ACTIONS_API_URL/variables"
 
+CURL_VERBOSE=${CURL_VERBOSE:--s}
+
 extractVariableValue() {
   local value=$(echo $1 | grep -oi 'value": "[^"]*' | sed 's/value": "//g')
   echo $value
@@ -17,7 +19,7 @@ buildNameValueJson() {
 createVariable() {
   # https://docs.github.com/en/rest/actions/variables?apiVersion=2022-11-28#create-a-repository-variable
   local data=$(buildNameValueJson $1 $2)
-  local code=$(curl -L -s -o /dev/null -w "%{http_code}" \
+  local code=$(curl -L $CURL_VERBOSE -o /dev/null -w "%{http_code}" \
     -X POST \
     -H "Accept: application/vnd.github+json" \
     -H "Authorization: Bearer $GITHUB_API_TOKEN"\
@@ -25,14 +27,14 @@ createVariable() {
     $GITHUB_VARIABLES_API_URL \
     -d "$data")
   # Status: 201
-  echo $code
+  return $code
 }
 
 updateVariable() {
   local name=$1
   local value=$2
   local data=$(buildNameValueJson $name $value)
-  code=$(curl -L -s -o /dev/null -w "%{http_code}" \
+  code=$(curl -L $CURL_VERBOSE -o /dev/null -w "%{http_code}" \
     -X PATCH \
     -H "Accept: application/vnd.github+json" \
     -H "Authorization: Bearer $GITHUB_API_TOKEN"\
@@ -40,7 +42,7 @@ updateVariable() {
     $GITHUB_VARIABLES_API_URL/$name \
     -d "$data")
   # Status: 204
-  echo $code
+  return $code
 }
 
 getVariable() {

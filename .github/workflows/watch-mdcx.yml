@@ -25,27 +25,14 @@ jobs:
     steps:
       -
         run: |
+          # TODO 在job上貌似不能读取env或者secrets
+
           if [[ "${{ env.ENABLE_WATCH }}" != "true" && "${{ github.event.inputs.isDev }}" != "true" ]]; then
             exit 1
           fi
       - 
         name: Checkout
         uses: actions/checkout@v3
-      - 
-        name: Check if workflow(Image build-mdcx CI) is running
-        id: preCheck
-        uses: LASER-Yi/workflow-status@v0.0.2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          workflow: build-mdcx.yml
-          branch: main
-      -
-        name: Determine should run watch
-        run: |
-          if [[ "${{ steps.preCheck.outputs.conclusion }}" != "success" ]]; then
-            echo "❌ workflow(Image build-mdcx CI)正在运行，跳过本次运行！"
-            exit 1
-          fi
       -
         name: Install apt packages
         run: sudo apt-get install -y jq

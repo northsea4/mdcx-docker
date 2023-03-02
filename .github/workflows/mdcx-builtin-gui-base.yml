@@ -38,6 +38,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # 如果是workflow_run(即Image build-mdcx CI)触发的，只有当上游workflow成功时才运行
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     steps:
       - 
         name: Checkout

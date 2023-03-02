@@ -16,12 +16,13 @@ on:
 
 env:
   RELEASE_URL: 'https://api.github.com/repos/anyabc/something/releases/latest'
+  ENABLE_WATCH: ${{ secrets.ENABLE_WATCH_MDCX_RELEASE }}
 
 jobs:
   # 检查是否有新版本
   watch:
     runs-on: ubuntu-latest
-    if: ${{ secrets.ENABLE_WATCH_MDCX_RELEASE == 'true' || github.event.inputs.isDev == 'true' }}
+    if: ${{ env.ENABLE_WATCH == 'true' || github.event.inputs.isDev == 'true' }}
     steps:
       - 
         name: Checkout
@@ -139,7 +140,7 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     needs: watch
-    if: ${{ secrets.ENABLE_WATCH_MDCX_RELEASE == 'true' || github.event.inputs.isDev == 'true' }}
+    if: ${{ env.ENABLE_WATCH == 'true' || github.event.inputs.isDev == 'true' }}
     steps:
       -
         uses: appleboy/telegram-action@master

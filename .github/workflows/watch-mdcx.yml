@@ -83,37 +83,32 @@ jobs:
 
           newVersion=""
           newTime=""
+          hasNewVersion=0
 
-          # 检查是否有新版本，返回值为true或false，true表示有新版本，false表示没有新版本
-          isNewRelease() {
-            # 获取最新版本信息
-            local info=($(getNewInfo))
-            newVersion=${info[0]}
-            newTime=${info[1]}
+          # 获取最新版本信息
+          local info=($(getNewInfo))
+          newVersion=${info[0]}
+          newTime=${info[1]}
 
-            # 获取已记录的版本信息
-            local latestVersion=$(getVariable $VAR_VERSION)
-            local latestTime=$(getVariable $VAR_TIME)
-            echo "📦 已记录的最新版本：$latestVersion"
-            echo "📅 已记录的更新时间：$latestTime"
+          # 获取已记录的版本信息
+          local latestVersion=$(getVariable $VAR_VERSION)
+          local latestTime=$(getVariable $VAR_TIME)
+          echo "📦 已记录的最新版本：$latestVersion"
+          echo "📅 已记录的更新时间：$latestTime"
 
-            # 任意一个变量为空，都不视为新版本
-            if [[ -z "$latestVersion" || -z "$latestTime" ]]; then
-              echo "false"
-              return 0
-            fi
-
+          # 任意一个变量为空，都不视为新版本
+          if [[ -z "$latestVersion" || -z "$latestTime" ]]; then
+            hasNewVersion=0
+          else
             # 如果版本号和更新时间都不同，视为新版本
             if [[ "$newVersion" != "$latestVersion" && "$newTime" != "$latestTime" ]]; then
-              echo "true"
-              return 1
+              hasNewVersion=1
             else
-              echo "false"
-              return 0
+              hasNewVersion=0
             fi
-          }
- 
-          if [[ $(isNewRelease) == "true" ]]; then
+          fi
+   
+          if [[ -n "$hasNewVersion" ]]; then
             echo "🎉 发现新版本！"
             echo "📦 新版本号：$newVersion"
             echo "📅 更新时间：$newTime"

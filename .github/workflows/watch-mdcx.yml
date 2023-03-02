@@ -103,8 +103,8 @@ jobs:
           if [[ -z "$latestVersion" || -z "$latestTime" ]]; then
             hasNewVersion=0
           else
-            # 如果版本号和更新时间都不同，视为新版本
-            if [[ "$newVersion" != "$latestVersion" && "$newTime" != "$latestTime" ]]; then
+            # 如果版本号或者更新时间不同，视为新版本
+            if [[ "$newVersion" != "$latestVersion" || "$newTime" != "$latestTime" ]]; then
               hasNewVersion=1
             else
               hasNewVersion=0

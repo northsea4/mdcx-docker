@@ -10,6 +10,15 @@ isoTimeToInt() {
   fi
 }
 
+# 格式化时间戳
+timestampToDatetime() {
+  if [[ "$(uname)" == "Darwin" ]]; then
+    echo $(date -j -f "%s" "$1" "+%Y-%m-%d %H:%M:%S")
+  else
+    echo $(date -d "@$1" "+%Y-%m-%d %H:%M:%S")
+  fi
+}
+
 # 比较前后两个版本号，等于返回0，大于返回1，小于返回-1
 compareVersion () {
   if [[ $1 == $2 ]]

@@ -17,6 +17,8 @@ on:
 env:
   RELEASE_URL: 'https://api.github.com/repos/anyabc/something/releases/latest'
   ENABLE_WATCH: ${{ secrets.ENABLE_WATCH_MDCX_RELEASE }}
+  GITHUB_CURRENT_REPO: ${{ github.event.repository.name }}
+  GITHUB_API_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 
 jobs:
   # 检查是否有新版本

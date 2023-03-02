@@ -97,7 +97,7 @@ jobs:
           latestVersion=$(getVariable $VAR_VERSION)
           latestTime=$(getVariable $VAR_TIME)
           echo "📦 已记录的最新版本：$latestVersion"
-          echo "📅 已记录的更新时间：$latestTime"
+          echo "📅 已记录的更新时间：$(timestampToTime $latestTime)"
 
           # 任意一个变量为空，都不视为新版本
           if [[ -z "$latestVersion" || -z "$latestTime" ]]; then
@@ -114,14 +114,13 @@ jobs:
           if [[ -n "$hasNewVersion" ]]; then
             echo "🎉 发现新版本！"
             echo "📦 新版本号：$newVersion"
-            echo "📅 更新时间：$newTime"
+            echo "📅 更新时间：$(timestampToTime $newTime)"
 
             # 输出到GITHUB_OUTPUT 
             echo "newVersion=$newVersion" >> $GITHUB_OUTPUT
             echo "newTime=$newTime" >> $GITHUB_OUTPUT
 
-            # TODO 为什么单独更新能成功？
-            updateVariable $VAR_TIME "$newTime"
+            updateVariable $VAR_TIME "$(isoTimeToInt $newTime)"
 
             updateVariable $VAR_VERSION "$newVersion"
 
@@ -138,7 +137,7 @@ jobs:
           message: |
             🎉 MDCx新版本！
             📦 新版本号：${{ steps.check.outputs.newVersion }}
-            📅 更新时间：${{ steps.check.outputs.newTime }}
+            📅 更新时间：$(timestampToTime "${{ steps.check.outputs.newTime }}")
             🔗 发布链接：${{ env.RELEASE_URL }}
       - 
         if: ${{ github.event.inputs.isDev == 'true' }}

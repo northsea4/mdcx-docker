@@ -41,6 +41,7 @@ jobs:
         run: sudo apt-get install -y jq
       -
         name: Check if there is a new MDCx release
+        id: check
         env:
           GITHUB_CURRENT_REPO: ${{ env.GITHUB_CURRENT_REPO }}
           GITHUB_API_TOKEN: ${{ env.GITHUB_API_TOKEN }}
@@ -119,20 +120,23 @@ jobs:
             echo "newTime=$newTime" >> $GITHUB_OUTPUT
 
             # 暂时简单处理，先更新变量
-            updateVariable $VAR_VERSION $newVersion
-            updateVariable $VAR_TIME $newTime
+            code=$(updateVariable $VAR_VERSION $newVersion)
+            if [[ "$code" != "204" ]]; then
+              echo "❌ 更新变量 $VAR_VERSION 失败！"
+              exit 1
+            fi
+
+            code=$(updateVariable $VAR_TIME $newTime)
+            if [[ "$code" != "204" ]]; then
+              echo "❌ 更新变量 $VAR_TIME 失败！"
+              exit 1
+            fi
 
             exit 0
           else
             echo "🔎 没有新版本，等待下一次检查..."
             exit 1
           fi
-
-  # 通知到telegram
-  notify:
-    runs-on: ubuntu-latest
-    needs: watch
-    steps:
       -
         uses: appleboy/telegram-action@master
         with:
@@ -140,10 +144,12 @@ jobs:
           token: ${{ secrets.TELE_BOT_TOKEN }}
           message: |
             🎉 MDCx新版本！
-            📦 新版本号：${{ needs.watch.outputs.newVersion }}
-            📅 更新时间：${{ needs.watch.outputs.newTime }}
+            📦 新版本号：${{ steps.check.outputs.newVersion }}
+            📅 更新时间：${{ steps.check.outputs.newTime }}
             🔗 发布链接：${{ env.RELEASE_URL }}
       - 
         if: ${{ github.event.inputs.isDev == 'true' }}
-        run: exit 1
+        run: |
+          echo "⚠️ Make it failure because of isDev"
+          exit 1
   

@@ -100,6 +100,13 @@ docker run -d --name mdcx \
 - [GPL LICENSE](https://github.com/northsea4/mdcx-docker/blob/main/LICENSE.md)
 - 若用户不同意上述条款任意一条，请勿使用本项目和项目成果
 
+## Experiments
+```bash
+sh -c "$(curl -fsSL https://github.com/northsea4/mdcx-docker/blob/main/install.sh)"
+```
+```bash
+sh -c "$(wget https://github.com/northsea4/mdcx-docker/blob/main/install.sh -O -)"
+```
 
 ## TODO 
 - [x] 镜像独立文档

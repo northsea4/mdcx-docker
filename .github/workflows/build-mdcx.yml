@@ -74,6 +74,10 @@ jobs:
             echo "latest=latest" >> $GITHUB_OUTPUT
             echo "version=${{ steps.prepare.outputs.APP_VERSION }}" >> $GITHUB_OUTPUT
           fi
+
+          baseImageTag=${{ github.event.inputs.baseImage }}
+          baseImageTag=${baseImageTag:-latest}
+          echo "baseImageTag=${baseImageTag}" >> $GITHUB_OUTPUT
       - 
         name: Build and push
         uses: docker/build-push-action@v3
@@ -85,7 +89,7 @@ jobs:
           build-args: |
             APT_SOURCE_HOST=
             PYPI_MIRROR=
-            BASE_IMAGE_TAG=${{ github.event.inputs.baseImage }}
+            BASE_IMAGE_TAG=${{ steps.imageInfo.outputs.baseImageTag }}
             APP_VERSION=${{ steps.prepare.outputs.APP_VERSION }}
           platforms: |
             linux/amd64

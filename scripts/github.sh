@@ -27,7 +27,11 @@ createVariable() {
     $GITHUB_VARIABLES_API_URL \
     -d "$data")
   # Status: 201
-  return $code
+  if [[ $code -eq 201 ]]; then
+    return "false"
+  else
+    return "true"
+  fi
 }
 
 updateVariable() {
@@ -42,7 +46,11 @@ updateVariable() {
     $GITHUB_VARIABLES_API_URL/$name \
     -d "$data")
   # Status: 204
-  return $code
+  if [[ $code -eq 204 ]]; then
+    return "false"
+  else
+    return "true"
+  fi
 }
 
 getVariable() {

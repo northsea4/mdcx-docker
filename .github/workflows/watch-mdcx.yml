@@ -19,6 +19,7 @@ env:
   ENABLE_WATCH: ${{ secrets.ENABLE_WATCH_MDCX_RELEASE }}
   GITHUB_CURRENT_REPO: ${{ github.event.repository.name }}
   GITHUB_API_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+  GITHUB_OWNER: ${{ github.repository_owner }}
 
 jobs:
   # 检查是否有新版本

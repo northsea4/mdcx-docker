@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GITHUB_ACTIONS_API_URL="https://api.github.com/repos/$GITHUB_CURRENT_REPO/actions"
+GITHUB_ACTIONS_API_URL="https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_CURRENT_REPO/actions"
 GITHUB_VARIABLES_API_URL="$GITHUB_ACTIONS_API_URL/variables"
 
 extractVariableValue() {

@@ -86,13 +86,13 @@ jobs:
           hasNewVersion=0
 
           # 获取最新版本信息
-          local info=($(getNewInfo))
+          info=($(getNewInfo))
           newVersion=${info[0]}
           newTime=${info[1]}
 
           # 获取已记录的版本信息
-          local latestVersion=$(getVariable $VAR_VERSION)
-          local latestTime=$(getVariable $VAR_TIME)
+          latestVersion=$(getVariable $VAR_VERSION)
+          latestTime=$(getVariable $VAR_TIME)
           echo "📦 已记录的最新版本：$latestVersion"
           echo "📅 已记录的更新时间：$latestTime"
 

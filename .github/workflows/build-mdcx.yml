@@ -5,12 +5,17 @@ on:
     branches:
       - none
 
+  workflow_run:
+    workflows: [Watch MDCx Release]
+    types: [completed]
+    branches: [main]
+
   workflow_dispatch:
     inputs:
       stage:
         description: Stage
         type: choice
-        default: dev
+        default: prod
         options:
           - dev
           - prod
@@ -25,6 +30,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # 如果是workflow_run(即Watch MDCx Release)触发的，只有当上游workflow成功时才运行
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     steps:
       - 
         name: Checkout

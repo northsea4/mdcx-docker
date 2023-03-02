@@ -1,0 +1,157 @@
+name: Watch MDCx Release
+
+on:
+  push:
+    branches:
+      - none
+  schedule:
+    # 每10分钟
+    - cron: '*/10 * * * *'
+  
+  workflow_dispatch:
+    inputs:
+      isDev:
+        description: Is Dev
+        type: boolean
+
+env:
+  RELEASE_URL: 'https://api.github.com/repos/anyabc/something/releases/latest'
+
+jobs:
+  # 检查是否有新版本
+  watch:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.ENABLE_WATCH_MDCX_RELEASE == 'true' || github.event.inputs.isDev == 'true' }}
+    steps:
+      - 
+        name: Checkout
+        uses: actions/checkout@v3
+      - 
+        name: Check if workflow(Image build-mdcx CI) is running
+        id: preCheck
+        uses: LASER-Yi/workflow-status@v0.0.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: build-mdcx.yml
+          branch: main
+      -
+        name: Determine should run watch
+        run: |
+          if [[ "${{ steps.preCheck.outputs.conclusion }}" != "success" ]]; then
+            echo "❌ workflow(Image build-mdcx CI)正在运行，跳过本次运行！"
+            exit 1
+          fi
+      -
+        name: Install apt packages
+        run: sudo apt-get install -y jq
+      -
+        name: Check if there is a new MDCx release
+        run: |
+          source scripts/base.sh
+          source scripts/github.sh
+
+          VAR_VERSION="MDCX_LATEST_VERSION"
+          VAR_TIME="MDCX_LATEST_TIME"
+
+          # 获取最新版本信息，返回值为数组，第一个元素为版本号，第二个元素为更新时间
+          getNewInfo() {
+            local content=$(curl -s "${{ env.RELEASE_URL }}")
+            local asset=$(echo $content | jq '.assets'| jq 'map(select(.browser_download_url | contains("-py-")))' | jq '.[0]')
+
+            if [[ -z "$asset" ]]; then
+              echo "❌ 查找不到符合条件的asset！"
+              return 1
+            fi
+
+            local archiveUrl=$(echo $asset | jq '.browser_download_url')
+            local updatedAt=$(echo $asset | jq '.updated_at')
+
+            if [[ -z "$archiveUrl" ]]; then
+              echo "❌ 获取下载链接失败！"
+              return 1
+            fi
+
+            if [[ -z "$updatedAt" ]]; then
+              echo "❌ 获取更新时间失败！"
+              return 1
+            fi
+
+            local archiveFullName=$(echo $archiveUrl | grep -oi 'MDCx-py-[a-z0-9]\+.[a-z]\+')
+            local archiveVersion=$(echo $archiveFullName | sed 's/MDCx-py-//g' | sed 's/\.[^.]*$//')
+
+            local info=("$archiveVersion" "$updatedAt")
+            echo "${info[@]}"
+            return 0
+          }
+
+          newVersion=""
+          newTime=""
+
+          # 检查是否有新版本，返回值为true或false，true表示有新版本，false表示没有新版本
+          isNewRelease() {
+            # 获取最新版本信息
+            local info=($(getNewInfo))
+            newVersion=${info[0]}
+            newTime=${info[1]}
+
+            # 获取已记录的版本信息
+            local latestVersion=$(getVariable $VAR_VERSION)
+            local latestTime=$(getVariable $VAR_TIME)
+            echo "📦 已记录的最新版本：$latestVersion"
+            echo "📅 已记录的更新时间：$latestTime"
+
+            # 任意一个变量为空，都不视为新版本
+            if [[ -z "$latestVersion" || -z "$latestTime" ]]; then
+              echo "false"
+              return 0
+            fi
+
+            # 如果版本号和更新时间都不同，视为新版本
+            if [[ "$newVersion" != "$latestVersion" && "$newTime" != "$latestTime" ]]; then
+              echo "true"
+              return 1
+            else
+              echo "false"
+              return 0
+            fi
+          }
+ 
+          if [[ $(isNewRelease) == "true" ]]; then
+            echo "🎉 发现新版本！"
+            echo "📦 新版本号：$newVersion"
+            echo "📅 更新时间：$newTime"
+
+            # 输出到GITHUB_OUTPUT 
+            echo "newVersion=$newVersion" >> $GITHUB_OUTPUT
+            echo "newTime=$newTime" >> $GITHUB_OUTPUT
+
+            # 暂时简单处理，先更新变量
+            updateVariable $VAR_VERSION $newVersion
+            updateVariable $VAR_TIME $newTime
+
+            exit 0
+          else
+            echo "🔎 没有新版本，等待下一次检查..."
+            exit 1
+          fi
+
+  # 通知到telegram
+  notify:
+    runs-on: ubuntu-latest
+    needs: watch
+    if: ${{ secrets.ENABLE_WATCH_MDCX_RELEASE == 'true' || github.event.inputs.isDev == 'true' }}
+    steps:
+      -
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELE_CHAT_ID }}
+          token: ${{ secrets.TELE_BOT_TOKEN }}
+          message: |
+            🎉 MDCx新版本！
+            📦 新版本号：${{ needs.watch.outputs.newVersion }}
+            📅 更新时间：${{ needs.watch.outputs.newTime }}
+            🔗 发布链接：${{ env.RELEASE_URL }}
+      - 
+        if: ${{ github.event.inputs.isDev == 'true' }}
+        run: exit 1
+  

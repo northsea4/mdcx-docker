@@ -121,17 +121,19 @@ jobs:
             echo "newTime=$newTime" >> $GITHUB_OUTPUT
 
             # 暂时简单处理，先更新变量
-            updateVariable $VAR_VERSION "$newVersion"
-            if [[ "$?" != "204" ]]; then
-              echo "❌ 更新变量 $VAR_VERSION 失败！"
-              exit 1
-            fi
+            updateVariable $VAR_TIME "$newTime"
+            
+            # updateVariable $VAR_VERSION "$newVersion"
+            # if [[ "$?" != "204" ]]; then
+            #   echo "❌ 更新变量 $VAR_VERSION 失败！"
+            #   exit 1
+            # fi
 
-            code=$(updateVariable $VAR_TIME "$newTime")
-            if [[ "$?" != "204" ]]; then
-              echo "❌ 更新变量 $VAR_TIME 失败！"
-              exit 1
-            fi
+            # code=$(updateVariable $VAR_TIME "$newTime")
+            # if [[ "$?" != "204" ]]; then
+            #   echo "❌ 更新变量 $VAR_TIME 失败！"
+            #   exit 1
+            # fi
 
             exit 0
           else

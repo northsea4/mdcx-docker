@@ -45,7 +45,7 @@ jobs:
         env:
           GITHUB_CURRENT_REPO: ${{ env.GITHUB_CURRENT_REPO }}
           GITHUB_API_TOKEN: ${{ env.GITHUB_API_TOKEN }}
-          CURL_VERBOSE: '-vvv'
+          CURL_VERBOSE: '-s'
         run: |
           source scripts/base.sh
           source scripts/github.sh
@@ -120,11 +120,10 @@ jobs:
             echo "newVersion=$newVersion" >> $GITHUB_OUTPUT
             echo "newTime=$newTime" >> $GITHUB_OUTPUT
 
-            # 暂时简单处理，先更新变量 TODO 为什么
-            updateVariable $VAR_VERSION "$newVersion"
-
-            # TODO 为什么单独更新能成功，但先更新$VAR_VERSION再更新这个，这个就会失败(400)？
+            # TODO 为什么单独更新能成功？
             updateVariable $VAR_TIME "$newTime"
+
+            updateVariable $VAR_VERSION "$newVersion"
 
             exit 0
           else

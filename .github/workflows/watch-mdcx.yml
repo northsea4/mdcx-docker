@@ -63,8 +63,10 @@ jobs:
               return 1
             fi
 
-            local archiveUrl=$(echo $asset | jq '.browser_download_url')
-            local updatedAt=$(echo $asset | jq '.updated_at')
+            # https://gitbook.curiouser.top/origin/linux-jq.html#%E4%B8%89%E3%80%81jq%E5%91%BD%E4%BB%A4%E5%8F%82%E6%95%B0
+            # -r    如果过滤的结果是一个字符串，那么直接写到标准输出（去掉字符串的引号）;
+            local archiveUrl=$(echo $asset | jq -r '.browser_download_url')
+            local updatedAt=$(echo $asset | jq -r '.updated_at')
 
             if [[ -z "$archiveUrl" ]]; then
               echo "❌ 获取下载链接失败！"
@@ -97,7 +99,7 @@ jobs:
           latestVersion=$(getVariable $VAR_VERSION)
           latestTime=$(getVariable $VAR_TIME)
           echo "📦 已记录的最新版本：$latestVersion"
-          echo "📅 已记录的更新时间：$(timestampToDatetime $latestTime)"
+          echo "📅 已记录的更新时间：$latestTime"
 
           # 任意一个变量为空，都不视为新版本
           if [[ -z "$latestVersion" || -z "$latestTime" ]]; then
@@ -114,13 +116,13 @@ jobs:
           if [[ -n "$hasNewVersion" ]]; then
             echo "🎉 发现新版本！"
             echo "📦 新版本号：$newVersion"
-            echo "📅 更新时间：$(timestampToDatetime $newTime)"
+            echo "📅 更新时间：$newTime"
 
             # 输出到GITHUB_OUTPUT 
             echo "newVersion=$newVersion" >> $GITHUB_OUTPUT
             echo "newTime=$newTime" >> $GITHUB_OUTPUT
 
-            updateVariable $VAR_TIME "$(isoTimeToInt $newTime)"
+            updateVariable $VAR_TIME "$newTime"
 
             updateVariable $VAR_VERSION "$newVersion"
 
@@ -137,7 +139,7 @@ jobs:
           message: |
             🎉 MDCx新版本！
             📦 新版本号：${{ steps.check.outputs.newVersion }}
-            📅 更新时间：$(timestampToDatetime "${{ steps.check.outputs.newTime }}")
+            📅 更新时间：${{ steps.check.outputs.newTime }}
             🔗 发布链接：${{ env.RELEASE_URL }}
       - 
         if: ${{ github.event.inputs.isDev == 'true' }}

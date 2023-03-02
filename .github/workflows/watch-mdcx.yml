@@ -22,8 +22,12 @@ jobs:
   # 检查是否有新版本
   watch:
     runs-on: ubuntu-latest
-    if: ${{ env.ENABLE_WATCH == 'true' || github.event.inputs.isDev == 'true' }}
     steps:
+      -
+        run: |
+          if [[ "${{ env.ENABLE_WATCH }}" != "true" && "${{ github.event.inputs.isDev }}" != "true" ]]; then
+            exit 1
+          fi
       - 
         name: Checkout
         uses: actions/checkout@v3
@@ -140,7 +144,6 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     needs: watch
-    if: ${{ env.ENABLE_WATCH == 'true' || github.event.inputs.isDev == 'true' }}
     steps:
       -
         uses: appleboy/telegram-action@master

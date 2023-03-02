@@ -121,7 +121,7 @@ jobs:
             echo "newTime=$newTime" >> $GITHUB_OUTPUT
 
             # TODO 为什么单独更新能成功？
-            updateVariable $VAR_TIME "$newTime"
+            updateVariable $VAR_TIME "why"
 
             updateVariable $VAR_VERSION "$newVersion"
 

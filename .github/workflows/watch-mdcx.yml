@@ -5,8 +5,8 @@ on:
     branches:
       - none
   schedule:
-    # 每10分钟
-    - cron: '*/10 * * * *'
+    # 每45分钟
+    - cron: '*/45 * * * *'
   
   workflow_dispatch:
     inputs:

@@ -137,7 +137,7 @@ jobs:
           fi
       -
         uses: appleboy/telegram-action@master
-        # if: ${{ steps.check.outputs.hasNewVersion == 'true' }}
+        if: ${{ steps.check.outputs.hasNewVersion == 'true' }}
         with:
           to: ${{ secrets.TELE_CHAT_ID }}
           token: ${{ secrets.TELE_BOT_TOKEN }}
@@ -154,9 +154,4 @@ jobs:
       #     token: ${{ secrets.TELE_BOT_TOKEN }}
       #     message: |
       #       🔎 没有新版本，等待下一次检查...
-      - 
-        if: ${{ github.event.inputs.isDev == 'true' }}
-        run: |
-          echo "⚠️ Make it failure because of isDev"
-          exit 1
   

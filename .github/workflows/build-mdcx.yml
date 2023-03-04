@@ -5,10 +5,10 @@ on:
     branches:
       - none
 
-  workflow_run:
-    workflows: [Watch MDCx Release]
-    types: [completed]
-    branches: [main]
+  # workflow_run:
+  #   workflows: [Watch MDCx Release]
+  #   types: [completed]
+  #   branches: [main]
 
   workflow_dispatch:
     inputs:

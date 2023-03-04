@@ -133,7 +133,6 @@ jobs:
             exit 0
           else
             echo "🔎 没有新版本，等待下一次检查..."
-            exit 1
           fi
       -
         uses: appleboy/telegram-action@master

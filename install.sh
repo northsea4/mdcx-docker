@@ -206,8 +206,8 @@ if [[ "$BASE" == "gui" ]]; then
   replace_in_file "s/USER_ID=[0-9]+/USER_ID=$USER_ID/g" .env
   replace_in_file "s/GROUP_ID=[0-9]+/GROUP_ID=$GROUP_ID/g" .env
 else
-  replace_in_file "s/PUID=[0-9]+/PUID=$PUID/g" .env
-  replace_in_file "s/PGID=[0-9]+/PGID=$PGID/g" .env
+  replace_in_file "s/PUID=[0-9]+/PUID=$USER_ID/g" .env
+  replace_in_file "s/PGID=[0-9]+/PGID=$GROUP_ID/g" .env
 fi
 
 

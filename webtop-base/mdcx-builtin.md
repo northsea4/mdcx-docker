@@ -51,10 +51,10 @@ mdcx-docker
 编辑`.env`文件，按需修改。
 文件里每个参数都有具体的说明，`.env.sample`文件里可以查看原始的数值。
 
-一般需要修改的参数：`RDP_PORT`, `WEB_PORT`, `PUID`, `PGID`
+一般需要修改的参数：`RDP_LISTEN_PORT`, `WEB_PORT`, `PUID`, `PGID`
 | 参数名称 | 说明 | 默认值 | 必填 |
 | --- | --- | --- | --- |
-| RDP_PORT | RDP远程桌面端口 | 3389 | 是 |
+| RDP_LISTEN_PORT | RDP远程桌面端口 | 3389 | 是 |
 | WEB_PORT | Web访问端口 | 3000 | 是 |
 | PUID | 运行应用的用户ID，通过`id -u`命令可以查看当前用户ID，`id -u user1`则可以查看用户user1的用户ID | 0 | 是 |
 | PGID | 运行应用的用户组ID，通过`id -g`命令可以查看当前用户组ID，`id -g user1`则可以查看用户user1的用户组ID | 0 | 是 |
@@ -86,7 +86,7 @@ services:
       - /path/to/movies:/movies
     ports:
       - ${WEB_PORT}:3000
-      - ${RDP_PORT}:3389
+      - ${RDP_LISTEN_PORT}:3389
     restart: unless-stopped
     network_mode: bridge
     stdin_open: true

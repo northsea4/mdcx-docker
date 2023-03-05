@@ -29,7 +29,7 @@ services:
       # - APP_VERSION=20230217
     ports:
       - ${WEB_PORT}:3000
-      - ${RDP_PORT}:3389
+      - ${RDP_LISTEN_PORT}:3389
     # devices:
     #   - /dev/dri:/dev/dri
     restart: unless-stopped

@@ -149,9 +149,9 @@ else
 
   echo ""
   echo "❓ 请输入RDP访问端口号， 默认为3389"
-  read -p "RDP_PORT: " RDP_PORT
-  RDP_PORT=${RDP_PORT:-3389}
-  # echo "📝 你输入的RDP访问端口号为：$RDP_PORT"
+  read -p "RDP_LISTEN_PORT: " RDP_LISTEN_PORT
+  RDP_LISTEN_PORT=${RDP_LISTEN_PORT:-3389}
+  # echo "📝 你输入的RDP访问端口号为：$RDP_LISTEN_PORT"
 fi
 
 
@@ -180,7 +180,7 @@ if [[ "$BASE" == "gui" ]]; then
   echo "🔘 VNC_PORT: $VNC_PORT"
 else
   echo "🔘 WEB_PORT: $WEB_PORT"
-  echo "🔘 RDP_PORT: $RDP_PORT"
+  echo "🔘 RDP_LISTEN_PORT: $RDP_LISTEN_PORT"
 fi
 
 
@@ -218,7 +218,7 @@ if [[ "$BASE" == "gui" ]]; then
   replace_in_file "s/VNC_PORT=[0-9]+/VNC_PORT=$VNC_PORT/g" .env
 else
   replace_in_file "s/WEB_PORT=[0-9]+/WEB_PORT=$WEB_PORT/g" .env
-  replace_in_file "s/RDP_PORT=[0-9]+/RDP_PORT=$RDP_PORT/g" .env
+  replace_in_file "s/RDP_LISTEN_PORT=[0-9]+/RDP_LISTEN_PORT=$RDP_LISTEN_PORT/g" .env
 fi
 
 echo "✅ 替换环境变量完成"

@@ -93,7 +93,7 @@ mkdir "$RANDOM_NAME"
 unzip "$ZIP_FILE" -d "$RANDOM_NAME"
 
 # 移动mdcx-docker目录并重命名为用户输入的目录名称
-mv "$RANDOM_NAME/mdcx-docker" ./"$DIR_NAME"
+mv "$RANDOM_NAME/mdcx-docker" "$DIR_NAME"
 # 删除临时目录和zip文件
 rm -rf "$RANDOM_NAME"
 rm "$ZIP_FILE"

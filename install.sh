@@ -101,6 +101,7 @@ rm "$ZIP_FILE"
 # 进入用户输入的目录名称
 cd "$DIR_NAME"
 
+source .env
 
 USER_ID=$(id -u)
 GROUP_ID=$(id -g)
@@ -284,6 +285,16 @@ if [[ "$TYPE" == "src" ]]; then
   echo "⏳ 下载源码..."
   downloadSrc
 fi
+
+# 询问输入容器名称
+echo ""
+echo "❓ 请输入容器名称（默认：${MDCX_CONTAINER_NAME}）"
+read -p "容器名称：" CONTAINER_NAME
+CONTAINER_NAME=${CONTAINER_NAME:-$MDCX_CONTAINER_NAME}
+
+echo "⏳ 替换容器名称..."
+replace_in_file "s/MDCX_CONTAINER_NAME=.*/MDCX_CONTAINER_NAME=$CONTAINER_NAME/g" .env
+echo "✅ 替换容器名称完成"
 
 echo ""
 read -p "❓ 是否运行容器？[y/n] " RUN_CONTAINER

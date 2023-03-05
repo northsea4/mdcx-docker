@@ -1,9 +1,9 @@
 version: '3'
 
 services:
-  mdcx_builtin_webtop:
+  mdcx:
     image: stainless403/mdcx-builtin-webtop-base:${MDCX_BUILTIN_IMAGE_TAG}
-    container_name: ${MDCX_BUILTIN_CONTAINER_NAME}
+    container_name: ${MDCX_CONTAINER_NAME}
     env_file:
       - .env
     volumes:

@@ -8,6 +8,21 @@
 
 
 ## 1. mdcx-src示例
+### 使用脚本部署
+复制以下命令到终端运行，第一步选择模版 `4) mdcx-src-webtop-base` ，然后根据提示输入几个参数即可完成部署。
+
+使用curl：
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/northsea4/mdcx-docker/main/install.sh)"
+```
+使用wget：
+```bash
+bash -c "$(wget https://raw.githubusercontent.com/northsea4/mdcx-docker/main/install.sh -O -)"
+```
+
+---
+> 以下的步骤是手动部署的详细说明，即使使用了脚本部署，也请务必阅读一下了解更多细节，如安全、更新等。
+
 [stainless403/mdcx-src-webtop-base](https://hub.docker.com/r/stainless403/mdcx-src-webtop-base)镜像没有内置MDCx，如果想使用内置的，请使用[stainless403/mdcx-builtin-webtop-base](https://hub.docker.com/r/stainless403/mdcx-builtin-webtop-base)镜像([🔗 查看部署说明](https://github.com/northsea4/mdcx-docker/blob/main/webtop-base/mdcx-builtin.md))。
 
 
@@ -72,9 +87,9 @@ mdcx-docker
 version: '3'
 
 services:
-  mdcx_src_webtop:
+  mdcx:
     image: stainless403/mdcx-src-webtop-base:${MDCX_SRC_IMAGE_TAG}
-    container_name: ${MDCX_SRC_CONTAINER_NAME}
+    container_name: ${MDCX_CONTAINER_NAME}
     env_file:
       - .env
     volumes:
@@ -106,8 +121,10 @@ services:
 ```bash
 docker-compose up -d
 
-# 查看容器日志
-# docker logs -f mdcx_src_webtop
+# 查看容器日志，容器名称请根据实际情况修改
+# docker logs -f mdcx_webtop
+# 或者
+# docker-compose logs -f
 ```
 
 > 首次运行时会自动安装依赖，并在app目录 和 容器内的`/tmp`目录生成一个名为`.mdcx_initialized`的标记文件。
@@ -117,7 +134,9 @@ docker-compose up -d
 ### 1.6 使用
 
 > ⚠️ 默认的账号密码是abc/abc。如果需要公网访问，请记得修改密码。
+
 > 修改密码方式1：docker exec -it mdcx_src_webtop passwd abc
+
 > 修改密码方式2：进入系统后，打开`konsole`，然后执行`passwd abc`
 
 `webtop-base`重点是支持[RDP](https://zh.wikipedia.org/zh-cn/%E9%81%A0%E7%AB%AF%E6%A1%8C%E9%9D%A2%E5%8D%94%E5%AE%9A)，也就是常说的`远程桌面`。默认端口是`3389`。

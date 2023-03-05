@@ -19,7 +19,8 @@ services:
       - ./logs:/app/Log
 
       # 影片目录
-      - /path/to/movies:/movies
+      # /path/to/movies:/movies
+      # VOLUMES_REPLACEMENT
     # environment:
     ports:
       - ${WEB_PORT}:3000

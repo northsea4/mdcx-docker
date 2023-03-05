@@ -1,0 +1,17 @@
+[Desktop Entry]
+Categories=System;FileManager;
+Comment=打开MDCx应用根目录
+Exec=dolphin /app/
+GenericName=
+Icon=folder-log
+MimeType=
+Name=应用根目录
+Path=
+StartupNotify=true
+Terminal=false
+TerminalOptions=
+Type=Application
+X-DBUS-ServiceName=
+X-DBUS-StartupType=
+X-KDE-SubstituteUID=false
+X-KDE-Username=

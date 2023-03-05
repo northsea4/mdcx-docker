@@ -1,0 +1,16 @@
+[Desktop Entry]
+Comment=更新MDCx源码到最新版
+Exec=konsole -e bash -c "/app-assets/scripts/update-src.sh; read -n1"
+GenericName=
+Icon=package-upgrade
+MimeType=
+Name=升级MDCx源码
+Path=/app
+StartupNotify=true
+Terminal=false
+TerminalOptions=
+Type=Application
+X-DBUS-ServiceName=
+X-DBUS-StartupType=
+X-KDE-SubstituteUID=false
+X-KDE-Username=

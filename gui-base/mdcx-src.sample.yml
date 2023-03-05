@@ -22,7 +22,8 @@ services:
       - ./logs:/app/Log
 
       # 影片目录
-      - /path/to/movies:/movies
+      # /path/to/movies:/movies
+      # VOLUMES_REPLACEMENT
     environment:
       - MEANINGLESS_ENV=
       # - APP_VERSION=20230217

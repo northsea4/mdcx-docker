@@ -1,4 +1,4 @@
-[![GitHub stars](https://img.shields.io/github/stars/northsea4/mdcx-docker.svg?style=flat&label=Stars&maxAge=2592000)](https://GitHub.com/northsea4/mdcx-docker) [![GitHub release](https://img.shields.io/github/release/northsea4/mdcx-docker.svg?style=flat&label=Release)](https://github.com/northsea4/mdcx-docker/releases/tag/latest)
+[![GitHub stars](https://img.shields.io/github/stars/northsea4/mdcx-docker.svg?style=flat&label=Stars&maxAge=3600)](https://GitHub.com/northsea4/mdcx-docker) [![GitHub release](https://img.shields.io/github/release/northsea4/mdcx-docker.svg?style=flat&label=Release)](https://github.com/northsea4/mdcx-docker/releases/tag/latest)
 
 
 
@@ -9,14 +9,36 @@
 
 ⚠️ 更改了镜像名称：`webtop-base_mdcx-builtin` 更改为 `mdcx-builtin-webtop-base`
 
-> 短期内旧名称镜像仍会存在，但建议尽快使用新名称镜像。
+> 请尽快使用新名称镜像！
 ---
 
+> 「builtin」表示内置已编译的应用，不需要额外下载安装包。
+> 「src」表示使用应用的python运行，需要额外下载源码。
+
+> 「gui」是最简单的版本，通过Web访问，且只能看到应用窗口。
+> 「webtop」有比较完整的桌面环境，可以通过Web访问或RDP访问。
 
 | 镜像 | 部署说明 | 网页查看 | 远程桌面 | 文件管理 | 浏览器 |
 | --- | --- | --- | --- | --- | --- |
 | [mdcx-builtin-gui-base](https://hub.docker.com/r/stainless403/mdcx-builtin-gui-base/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/gui-base/mdcx-builtin.md) | ✅ | ❌ | ❌ | ❌ |
 | [mdcx-builtin-webtop-base](https://hub.docker.com/r/stainless403/mdcx-builtin-webtop-base/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/webtop-base/mdcx-builtin.md) | ✅ | ✅ | ✅ | ✅ |
+| [mdcx-src-gui-base](https://hub.docker.com/r/stainless403/mdcx-src-gui-base/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/gui-base/mdcx-src.md) | ✅ | ❌ | ❌ | ❌ |
+| [mdcx-src-webtop-base](https://hub.docker.com/r/stainless403/mdcx-src-webtop-base/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/webtop-base/mdcx-src.md) | ✅ | ✅ | ✅ | ✅ |
+
+
+## 使用脚本部署
+复制以下命令到终端运行，根据提示输入几个参数即可完成部署。
+
+### 使用curl
+```bash
+bash -c "$(curl -fsSL https://github.com/northsea4/mdcx-docker/blob/main/install.sh)"
+```
+### 使用wget
+```bash
+bash -c "$(wget https://github.com/northsea4/mdcx-docker/blob/main/install.sh -O -)"
+```
+
+## 手动部署
 
 ### mdcx-builtin-gui-base示例
 ⚠️ 这里只给出一个简单的运行示例，建议查看 [部署说明](https://github.com/northsea4/mdcx-docker/blob/main/gui-base/mdcx-builtin.md) 了解更多细节。
@@ -86,8 +108,8 @@ docker run -d --name mdcx \
 
 | 镜像 | 默认 | 方式1 |
 | --- | --- | --- |
-| [mdcx-builtin-gui-base](https://hub.docker.com/r/stainless403/mdcx-builtin-gui-base/tags) | 空 | 设置环境变量`VNC_PASSWORD` |
-| [mdcx-builtin-webtop-base](https://hub.docker.com/r/stainless403/mdcx-builtin-webtop-base/tags) | abc/abc | `docker exec -it 容器名称 passwd abc`<br>或进入桌面使用命令行工具执行`passwd abc` |
+| [mdcx-builtin-gui-base](https://hub.docker.com/r/stainless403/mdcx-builtin-gui-base/tags)<br>[mdcx-src-gui-base](https://hub.docker.com/r/stainless403/mdcx-src-gui-base/tags) | 空 | 设置环境变量`VNC_PASSWORD` |
+| [mdcx-builtin-webtop-base](https://hub.docker.com/r/stainless403/mdcx-builtin-webtop-base/tags)<br>[mdcx-src-webtop-base](https://hub.docker.com/r/stainless403/mdcx-src-webtop-base/tags) | abc/abc | `docker exec -it 容器名称 passwd abc`<br>或进入桌面使用命令行工具执行`passwd abc` |
 
 
 ## 申明
@@ -100,13 +122,6 @@ docker run -d --name mdcx \
 - [GPL LICENSE](https://github.com/northsea4/mdcx-docker/blob/main/LICENSE.md)
 - 若用户不同意上述条款任意一条，请勿使用本项目和项目成果
 
-## Experiments
-```bash
-sh -c "$(curl -fsSL https://github.com/northsea4/mdcx-docker/blob/main/install.sh)"
-```
-```bash
-sh -c "$(wget https://github.com/northsea4/mdcx-docker/blob/main/install.sh -O -)"
-```
 
 ## TODO 
 - [x] 镜像独立文档

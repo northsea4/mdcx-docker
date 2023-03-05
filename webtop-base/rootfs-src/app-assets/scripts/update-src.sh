@@ -104,8 +104,8 @@ if [[ -f "$appPath/setup.py" ]]; then
   appVersion=$(cat $appPath/setup.py | grep -oi 'CFBundleShortVersionString.: "[a-z0-9]\+' | grep -oi '[a-z0-9]\+$')
   echo "ℹ️ 从 $appPath/setup.py 检测到应用版本为 $appVersion"
 else
-  echo "❌ 应用源码目录下没有setup.py文件！"
-  exit 1
+  echo "⚠️ 应用源码目录下没有setup.py文件！"
+  appVersion=0
 fi
 
 

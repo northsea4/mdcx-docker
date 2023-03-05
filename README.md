@@ -31,11 +31,11 @@
 
 ### 使用curl
 ```bash
-bash -c "$(curl -fsSL https://github.com/northsea4/mdcx-docker/blob/main/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/northsea4/mdcx-docker/main/install.sh)"
 ```
 ### 使用wget
 ```bash
-bash -c "$(wget https://github.com/northsea4/mdcx-docker/blob/main/install.sh -O -)"
+bash -c "$(wget https://raw.githubusercontent.com/northsea4/mdcx-docker/main/install.sh -O -)"
 ```
 
 ## 手动部署

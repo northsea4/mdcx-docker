@@ -83,6 +83,8 @@ while [ -d "$DIR_NAME" ]; do
   read -p "❌ 目录已存在，请输入其他目录名称：" DIR_NAME
 done
 
+echo "⏳ 正在下载模版文件，请稍候..."
+
 # 下载zip文件并保存为随机文件名
 RANDOM_NAME=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9-_\$' | fold -w 20 | sed 1q)
 ZIP_FILE="${RANDOM_NAME}.zip"
@@ -98,8 +100,11 @@ mv "$RANDOM_NAME/mdcx-docker" "$DIR_NAME"
 rm -rf "$RANDOM_NAME"
 rm "$ZIP_FILE"
 
+echo "🎉 模版文件下载完成！"
+
 # 进入用户输入的目录名称
 cd "$DIR_NAME"
+echo "📁 已进入目录：$(pwd)"
 
 source .env
 
@@ -296,6 +301,17 @@ echo "⏳ 替换容器名称..."
 replace_in_file "s/MDCX_CONTAINER_NAME=.*/MDCX_CONTAINER_NAME=$CONTAINER_NAME/g" .env
 echo "✅ 替换容器名称完成"
 
+# 拉取镜像
+echo ""
+echo "⏳ 拉取镜像..."
+docker-compose pull
+if [ $? -eq 0 ]; then
+  echo "✅ 拉取镜像完成"
+else
+  echo "❌ 拉取镜像失败，请检查错误日志"
+  exit 1
+fi
+
 echo ""
 read -p "❓ 是否运行容器？[y/n] " RUN_CONTAINER
 if [[ "$RUN_CONTAINER" =~ ^[Yy](es)?$ ]]; then
@@ -306,4 +322,6 @@ if [[ "$RUN_CONTAINER" =~ ^[Yy](es)?$ ]]; then
         echo "❌ 容器启动失败，请检查错误日志"
         exit 1
     fi
+else
+  echo "⚠️ 你可以之后通过 docker-compose up -d 启动容器"
 fi

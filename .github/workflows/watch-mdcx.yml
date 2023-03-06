@@ -166,6 +166,8 @@ jobs:
           if [[ -z "$WORKFLOW_ID" ]]; then
             echo "❌ 获取workflow id失败！"
             exit 1
+          else
+            echo "📦 workflow id：$WORKFLOW_ID"
           fi
 
           echo "🚀 触发构建..."

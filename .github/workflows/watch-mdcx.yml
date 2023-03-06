@@ -153,7 +153,7 @@ jobs:
           TOKEN="${{ env.GITHUB_API_TOKEN }}"
 
           # GitHub Repo名称
-          REPO="${{ env.GITHUB_CURRENT_REPO }}"
+          REPO="${{ env.GITHUB_OWNER }}/${{ env.GITHUB_CURRENT_REPO }}"
 
           # Workflow Name
           WORKFLOW_NAME="Image build-mdcx CI"

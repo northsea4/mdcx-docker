@@ -45,6 +45,7 @@ _content=$(curl -s "https://api.github.com/repos/anyabc/something/releases/lates
 
 archiveUrl=$(echo $_content | grep -oi 'https://[a-zA-Z0-9./?=_%:-]*MDCx-py-[a-z0-9]\+.[a-z]\+')
 
+# TODO github workflow里竟然会有比较大的概率获取失败
 if [[ -z "$archiveUrl" ]]; then
   echo "❌ 获取下载链接失败！"
   exit 1

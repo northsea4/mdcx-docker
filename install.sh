@@ -86,9 +86,9 @@ done
 echo "⏳ 正在下载模版文件，请稍候..."
 
 # 下载zip文件并保存为随机文件名
-RANDOM_NAME=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9-_\$' | fold -w 20 | sed 1q)
+RANDOM_NAME=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9-_' | fold -w 29 | sed 1q)
 ZIP_FILE="${RANDOM_NAME}.zip"
-curl -o "$ZIP_FILE" "$DOWNLOAD_URL" -L
+curl "$DOWNLOAD_URL" -L -o "$ZIP_FILE"
 
 # 创建以文件名为名称的目录并解压zip文件
 mkdir "$RANDOM_NAME"
@@ -123,13 +123,11 @@ echo ""
 echo "❓ 请输入${USER_ID_KEY}（容器使用的UID），默认为$(id -u)"
 read -p "${USER_ID_KEY}: " USER_ID
 USER_ID=${USER_ID:-$(id -u)}
-# echo "📝 你输入的${USER_ID_KEY}为：$USER_ID"
 
 echo ""
 echo "❓ 请输入${GROUP_ID_KEY}（容器使用的GID），默认为$(id -g)"
 read -p "${GROUP_ID_KEY}: " GROUP_ID
 GROUP_ID=${GROUP_ID:-$(id -g)}
-# echo "📝 你输入的${GROUP_ID_KEY}为：$GROUP_ID"
 
 
 # 不同的模版使用不同的端口环境变量名称
@@ -138,13 +136,11 @@ if [[ "$BASE" == "gui" ]]; then
   echo "❓ 请输入WEB访问端口号， 默认为5800"
   read -p "WEB_PORT: " WEB_PORT
   WEB_PORT=${WEB_PORT:-5800}
-  # echo "📝 你输入的WEB访问端口号为：$WEB_PORT"
 
   echo ""
   echo "❓ 请输入VNC端口号， 默认为5900"
   read -p "VNC_PORT: " VNC_PORT
-  VNC_PORT=${VNC_PORT:-3389}
-  # echo "📝 你输入的VNC_PORT端口号为：$VNC_PORT"
+  VNC_PORT=${VNC_PORT:-5900}
 else
   echo ""
   echo "❓ 请输入WEB访问端口号， 默认为3000"
@@ -156,7 +152,6 @@ else
   echo "❓ 请输入RDP访问端口号， 默认为3389"
   read -p "RDP_LISTEN_PORT: " RDP_LISTEN_PORT
   RDP_LISTEN_PORT=${RDP_LISTEN_PORT:-3389}
-  # echo "📝 你输入的RDP访问端口号为：$RDP_LISTEN_PORT"
 fi
 
 

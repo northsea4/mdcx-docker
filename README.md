@@ -127,4 +127,4 @@ docker run -d --name mdcx \
 - [x] 镜像独立文档
 - [x] 自动编译新版应用并发布
 - [x] 自动同步文档到Docker Hub
-- [ ] Github Actions缓存的利用
+- [ ] build-mdcx通知

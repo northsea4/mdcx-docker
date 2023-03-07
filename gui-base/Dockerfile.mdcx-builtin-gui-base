@@ -57,9 +57,7 @@ RUN mkdir -p "$MDCX_CONFIG_PATH" && \
 RUN echo "$MDCX_CONFIG_PATH/config.ini" > /app/MDCx.config
 
 # 复制已编译的文件
-COPY --from=provider /MDCx /app/MDCx
-
-RUN chmod +x /app/MDCx
+COPY --from=provider --chmod=+x /MDCx /app/MDCx
 
 # TODO app icon
 # RUN \

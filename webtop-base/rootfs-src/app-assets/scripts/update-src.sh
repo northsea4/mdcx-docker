@@ -1,5 +1,14 @@
 #!/bin/bash
 
+export LC_ALL=zh_CN.UTF-8
+
+# 检查是否有unrar命令
+if ! command -v unrar &> /dev/null
+then
+  echo "❌ 未找到unrar命令，请先安装unrar命令。"
+  exit 1
+fi
+
 FILE_INITIALIZED=".mdcx_initialized"
 
 # 应用版本
@@ -167,24 +176,20 @@ if [[ -n "$shouldUpdate" ]]; then
   echo "✅ 下载成功"
   echo "⏳ 开始解压..."
 
-  UNRAR_PATH=$(which unrar)
-  if [[ -z "$UNRAR_PATH" ]]; then
-    echo "❌ 没有unrar命令！"
-  else
-    # 解压
-    unrar x -o+ $archivePath
-    cp -rfp $archivePureName/* $appPath
-    # 删除压缩包
-    rm -f $archivePath
-    # 删除解压出来的目录
-    rm -rf $archivePureName
-    echo "✅ 源码已覆盖到 $appPath"
+  # 解压
+  unrar x -o+ $archivePath
+  cp -rfp $archivePureName/* $appPath
+  # 删除压缩包
+  rm -f $archivePath
+  # 删除解压出来的目录
+  rm -rf $archivePureName
+  echo "✅ 源码已覆盖到 $appPath"
 
-    echo "ℹ️ 删除标记文件 $appPath/$FILE_INITIALIZED"
-    rm -f "$appPath/$FILE_INITIALIZED"
+  echo "ℹ️ 删除标记文件 $appPath/$FILE_INITIALIZED"
+  rm -f "$appPath/$FILE_INITIALIZED"
 
-    echo "✅ 源码已更新成功！"
-  fi
+  echo "✅ 源码已更新成功！版本：$archiveVersion"
+  
 else
   if [[ $op == '<' ]]; then
     echo "ℹ️ 本地版本 较新于 已发布的最新版本"

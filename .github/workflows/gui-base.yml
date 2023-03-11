@@ -25,6 +25,7 @@ on:
 env:
   IMAGE_BASE: gui-base
   IMAGE_KEY: gui-base
+  APT_SOURCE_HOST: ''
 
 jobs:
   build:
@@ -72,7 +73,7 @@ jobs:
           # cache-to: type=gha,mode=min
           file: ${{ env.IMAGE_BASE }}/Dockerfile.${{ env.IMAGE_KEY }}
           build-args: |
-            APT_SOURCE_HOST=
+            APT_SOURCE_HOST=${{ env.APT_SOURCE_HOST }}
             BASE_IMAGE_TAG=${{ github.event.inputs.baseImage }}
           platforms: |
             linux/amd64
@@ -81,3 +82,26 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:${{ steps.imageInfo.outputs.latest }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:${{ steps.imageInfo.outputs.version }}
+      -
+        name: TG Notification
+        uses: appleboy/telegram-action@master
+        if: ${{ secrets.ENABLE_TG_NOTIFICATION == 'true' }}
+        with:
+          to: ${{ secrets.TELE_CHAT_ID }}
+          token: ${{ secrets.TELE_BOT_TOKEN }}
+          message: |
+            🎉 Workflow: ${{ github.workflow }} is completed!
+
+            🔘 Stage: ${{ github.event.inputs.stage }}
+
+            📦 Dockerfile: ${{ env.IMAGE_BASE }}/Dockerfile.${{ env.IMAGE_KEY }}
+            📦 Build Args:
+                  APT_SOURCE_HOST=${{ env.APT_SOURCE_HOST }}
+                  BASE_IMAGE_TAG=${{ github.event.inputs.baseImage }}
+
+            📦 Image: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}
+            📦 Tags: ${{ steps.imageInfo.outputs.latest }}, ${{ steps.imageInfo.outputs.version }}
+           
+           
+            📦 ImageId: ${{ steps.buildAndPush.outputs.imageid }}
+            📦 Digest: ${{ steps.buildAndPush.outputs.digest }}

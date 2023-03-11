@@ -3,8 +3,22 @@
 # 检查是否有unrar命令
 if ! command -v unrar &> /dev/null
 then
-    echo "❌ 未找到unrar命令，请先安装unrar命令。"
-    exit 1
+  echo "❌ 未找到unrar命令，请先安装unrar命令。"
+  exit 1
+fi
+
+# 检查是否有docker命令
+if ! command -v docker &> /dev/null
+then
+  echo "❌ 未找到docker命令，请先安装docker。"
+  exit 1
+fi
+
+# 检查是否有docker-compose命令
+if ! command -v docker-compose &> /dev/null
+then
+  echo "❌ 未找到docker-compose命令，请先安装docker-compose。"
+  exit 1
 fi
 
 OS=$(uname)
@@ -20,7 +34,7 @@ replace_in_file() {
   fi
 }
 
-#询问用户选择的模版
+# 询问用户选择的模版
 echo "📖 下面请你回答几个问题，以完成MDCx Docker版的安装。"
 echo ""
 echo "❓ 请选择容器部署模版（输入数字进行选择）："
@@ -310,13 +324,13 @@ fi
 echo ""
 read -p "❓ 是否运行容器？[y/n] " RUN_CONTAINER
 if [[ "$RUN_CONTAINER" =~ ^[Yy](es)?$ ]]; then
-    docker-compose up -d
-    if [ $? -eq 0 ]; then
-        echo "✅ 容器已经成功运行"
-    else
-        echo "❌ 容器启动失败，请检查错误日志"
-        exit 1
-    fi
+  docker-compose up -d
+  if [ $? -eq 0 ]; then
+      echo "✅ 容器已经成功运行"
+  else
+      echo "❌ 容器启动失败，请检查错误日志"
+      exit 1
+  fi
 else
   echo "⚠️ 你可以之后通过 docker-compose up -d 启动容器"
 fi

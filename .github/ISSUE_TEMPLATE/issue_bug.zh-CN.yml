@@ -1,0 +1,75 @@
+name: Bug r报告
+description: 创建报告以帮助我们改进
+title: "[BUG] <标题>"
+labels: [bug]
+body:
+  - type: checkboxes
+    attributes:
+      label: 是否存在已有问题？
+      description: 请搜索已有问题，以查看是否已存在与您遇到的缺陷相对应的问题。
+      options:
+        - label: 我已搜索现有的问题
+          required: true
+  - type: textarea
+    attributes:
+      label: 问题描述
+      description: 告诉我们发生了什么，而不是预期的表现。
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 预期表现
+      description: 告诉我们应该发生什么。
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 复现步骤
+      description: 复现该行为的步骤。
+      placeholder: |
+        1. 在此环境中...
+        2. 使用此配置...
+        3. 运行 '...'
+        4. 观察到错误...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 环境
+      description: |
+        示例：
+          - **操作系统**：Ubuntu 20.04
+          - **Docker服务安装方式**：发行版的包管理器
+      value: |
+        - 操作系统：
+        - Docker服务安装方式：
+      render: markdown
+    validations:
+      required: false
+  - type: dropdown
+    attributes:
+      label: CPU架构
+      options:
+        - amd64
+        - arm64
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Docker创建方式
+      description: |
+        用于创建Docker容器的命令
+        如果使用GUI创建容器，则提供您的Docker create/run命令或Compose YAML片段或设置屏幕截图。
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      description: |
+        提供完整的Docker日志，即"docker logs mdcx_xxx"的输出
+      label: 容器日志
+      placeholder: |
+        `docker logs mdcx_xxx`的输出
+      render: bash
+    validations:
+      required: true

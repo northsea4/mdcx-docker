@@ -1,0 +1,10 @@
+blank_issues_enabled: false
+contact_links:
+
+  - name: Docker Hub
+    url: https://hub.docker.com/u/stainless403
+    about: 镜像托管之处
+
+  - name: 文档
+    url: https://github.com/northsea4/mdcx-docker
+    about: 文档 - 详细的部署说明、FAQ等

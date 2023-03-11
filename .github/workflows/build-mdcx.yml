@@ -26,6 +26,8 @@ on:
 env:
   IMAGE_BASE: build-mdcx
   IMAGE_KEY: build-mdcx
+  PYPI_MIRROR: https://pypi.org/simple
+  APT_SOURCE_HOST: ''
 
 jobs:
   build:
@@ -87,8 +89,8 @@ jobs:
           # cache-to: type=gha,mode=min
           file: ${{ env.IMAGE_BASE }}/Dockerfile.${{ env.IMAGE_KEY }}
           build-args: |
-            APT_SOURCE_HOST=
-            PYPI_MIRROR=
+            APT_SOURCE_HOST=${{ env.APT_SOURCE_HOST }}
+            PYPI_MIRROR=${{ env.PYPI_MIRROR }}
             BASE_IMAGE_TAG=${{ steps.imageInfo.outputs.baseImageTag }}
             APP_VERSION=${{ steps.prepare.outputs.APP_VERSION }}
           platforms: |
@@ -98,3 +100,28 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:${{ steps.imageInfo.outputs.latest }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:${{ steps.imageInfo.outputs.version }}
+
+      -
+        name: TG Notification
+        uses: appleboy/telegram-action@master
+        if: ${{ secrets.ENABLE_TG_NOTIFICATION == 'true' }}
+        with:
+          to: ${{ secrets.TELE_CHAT_ID }}
+          token: ${{ secrets.TELE_BOT_TOKEN }}
+          message: |
+            🎉 Workflow: ${{ github.workflow }} is completed!
+
+            🔘 Stage: ${{ github.event.inputs.stage }}
+
+            📦 Dockerfile: ${{ env.IMAGE_BASE }}/Dockerfile.${{ env.IMAGE_KEY }}
+            📦 Build Args:
+                  APT_SOURCE_HOST=${{ env.APT_SOURCE_HOST }}
+                  PYPI_MIRROR=${{ env.PYPI_MIRROR }}
+                  BASE_IMAGE_TAG=${{ steps.imageInfo.outputs.baseImageTag }}
+                  APP_VERSION=${{ steps.prepare.outputs.APP_VERSION }}
+
+            📦 Image: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}
+            📦 Tags: ${{ steps.imageInfo.outputs.latest }}, ${{ steps.imageInfo.outputs.version }}
+           
+            📦 ImageId: ${{ steps.buildAndPush.outputs.imageid }}
+            📦 Digest: ${{ steps.buildAndPush.outputs.digest }}

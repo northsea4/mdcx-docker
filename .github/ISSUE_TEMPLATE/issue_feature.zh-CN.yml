@@ -1,0 +1,30 @@
+name: 功能请求
+description: 建议此项目的一个想法
+title: "[FEAT] <标题>"
+labels: [enhancement]
+body:
+  - type: checkboxes
+    attributes:
+      label: 这是一个新的功能请求吗？
+      description: 请搜索以查看是否已存在功能请求。
+      options:
+        - label: 我已搜索现有问题
+          required: true
+  - type: textarea
+    attributes:
+      label: 想要的变化
+      description: 告诉我们您想要发生什么。
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 变化的原因
+      description: 为什么要提出此请求？有什么好处？
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 建议的代码变更
+      description: 您有预期的代码变更吗？
+    validations:
+      required: false

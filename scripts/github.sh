@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+# actions里面的`${{ secrets.GITHUB_TOKEN }}`似乎没有权限创建变量，所以这里需要用自己的token
+# https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+
 GITHUB_ACTIONS_API_URL="https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_CURRENT_REPO/actions"
 GITHUB_VARIABLES_API_URL="$GITHUB_ACTIONS_API_URL/variables"
 

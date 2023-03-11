@@ -135,8 +135,9 @@ jobs:
             echo "🔎 没有新版本，等待下一次检查..."
           fi
       -
+        name: TG Notification
         uses: appleboy/telegram-action@master
-        if: ${{ steps.check.outputs.hasNewVersion == 'true' }}
+        if: ${{ steps.check.outputs.hasNewVersion == 'true' && secrets.ENABLE_TG_NOTIFICATION == 'true' }}
         with:
           to: ${{ secrets.TELE_CHAT_ID }}
           token: ${{ secrets.TELE_BOT_TOKEN }}
@@ -183,13 +184,4 @@ jobs:
             echo "❌ 触发构建失败！"
             exit 1
           fi
-
-      # -
-      #   uses: appleboy/telegram-action@master
-      #   if: ${{ steps.check.outputs.hasNewVersion == 'false' }}
-      #   with:
-      #     to: ${{ secrets.TELE_CHAT_ID }}
-      #     token: ${{ secrets.TELE_BOT_TOKEN }}
-      #     message: |
-      #       🔎 没有新版本，等待下一次检查...
   

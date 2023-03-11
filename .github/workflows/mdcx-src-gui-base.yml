@@ -25,7 +25,6 @@ on:
 env:
   IMAGE_BASE: gui-base
   IMAGE_KEY: mdcx-src-gui-base
-  DEPRECATED_IMAGE_KEY: gui-base_mdcx-src
   APT_SOURCE_HOST: ''
 
 jobs:
@@ -91,8 +90,6 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:${{ steps.imageInfo.outputs.latest }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:${{ steps.imageInfo.outputs.version }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DEPRECATED_IMAGE_KEY }}:${{ steps.imageInfo.outputs.latest }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DEPRECATED_IMAGE_KEY }}:${{ steps.imageInfo.outputs.version }}
       
       -
         name: TG Notification

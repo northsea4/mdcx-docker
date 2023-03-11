@@ -5,13 +5,6 @@
 
 
 ## 镜像
-⚠️ 更改了镜像名称：`gui-base_mdcx-builtin` 更改为 `mdcx-builtin-gui-base`
-
-⚠️ 更改了镜像名称：`webtop-base_mdcx-builtin` 更改为 `mdcx-builtin-webtop-base`
-
-> 请尽快使用新名称镜像！
----
-
 > 「builtin」表示内置已编译的应用，不需要额外下载安装包。
 > 「src」表示使用应用的python源码运行，需要额外下载源码。
 
@@ -20,20 +13,20 @@
 
 | 镜像 | 部署说明 | 网页查看 | 远程桌面 | 文件管理 | 浏览器 |
 | --- | --- | --- | --- | --- | --- |
-| [mdcx-builtin-gui-base](https://hub.docker.com/r/stainless403/mdcx-builtin-gui-base/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/gui-base/mdcx-builtin.md) | ✅ | ❌ | ❌ | ❌ |
+| [mdcx-builtin-gui-base](https://hub.docker.com/r/stainless403/mdcx-builtin-gui-base/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/gui-base/mdcx-builtin.md) | ✅ |  |  |  |
 | [mdcx-builtin-webtop-base](https://hub.docker.com/r/stainless403/mdcx-builtin-webtop-base/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/webtop-base/mdcx-builtin.md) | ✅ | ✅ | ✅ | ✅ |
-| [mdcx-src-gui-base](https://hub.docker.com/r/stainless403/mdcx-src-gui-base/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/gui-base/mdcx-src.md) | ✅ | ❌ | ❌ | ❌ |
+| [mdcx-src-gui-base](https://hub.docker.com/r/stainless403/mdcx-src-gui-base/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/gui-base/mdcx-src.md) | ✅ |  |  |  |
 | [mdcx-src-webtop-base](https://hub.docker.com/r/stainless403/mdcx-src-webtop-base/tags) | [查看](https://github.com/northsea4/mdcx-docker/blob/main/webtop-base/mdcx-src.md) | ✅ | ✅ | ✅ | ✅ |
 
 
 ## 使用脚本部署
 复制以下命令到终端运行，根据提示输入几个参数即可完成部署。
 
-### 使用curl
+使用curl:
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/northsea4/mdcx-docker/main/install.sh)"
 ```
-### 使用wget
+使用wget:
 ```bash
 bash -c "$(wget https://raw.githubusercontent.com/northsea4/mdcx-docker/main/install.sh -O -)"
 ```
@@ -127,4 +120,4 @@ docker run -d --name mdcx \
 - [x] 镜像独立文档
 - [x] 自动编译新版应用并发布
 - [x] 自动同步文档到Docker Hub
-- [ ] build-mdcx通知
+- [x] build-mdcx通知

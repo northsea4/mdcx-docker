@@ -25,7 +25,6 @@ on:
 env:
   IMAGE_BASE: webtop-base
   IMAGE_KEY: mdcx-src-webtop-base
-  DEPRECATED_IMAGE_KEY: webtop-base_mdcx-src
   APT_SOURCE_HOST: ''
 
 jobs:
@@ -83,8 +82,6 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:${{ steps.imageInfo.outputs.latest }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:${{ steps.imageInfo.outputs.version }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DEPRECATED_IMAGE_KEY }}:${{ steps.imageInfo.outputs.latest }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DEPRECATED_IMAGE_KEY }}:${{ steps.imageInfo.outputs.version }}
       
       -
         name: TG Notification

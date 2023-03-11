@@ -26,6 +26,7 @@ env:
   IMAGE_BASE: gui-base
   IMAGE_KEY: mdcx-src-gui-base
   APT_SOURCE_HOST: ''
+  ENABLE_TG_NOTIFICATION: ${{ secrets.ENABLE_TG_NOTIFICATION }}
 
 jobs:
   build:
@@ -94,7 +95,7 @@ jobs:
       -
         name: TG Notification
         uses: appleboy/telegram-action@master
-        if: ${{ secrets.ENABLE_TG_NOTIFICATION == 'true' }}
+        if: ${{ env.ENABLE_TG_NOTIFICATION == 'true' }}
         with:
           to: ${{ secrets.TELE_CHAT_ID }}
           token: ${{ secrets.TELE_BOT_TOKEN }}

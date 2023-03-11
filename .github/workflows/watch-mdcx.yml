@@ -5,8 +5,8 @@ on:
     branches:
       - none
   schedule:
-    # 每45分钟
-    - cron: '*/45 * * * *'
+    # 每30分钟
+    - cron: '*/30 * * * *'
   
   workflow_dispatch:
     inputs:
@@ -21,9 +21,11 @@ env:
   GITHUB_API_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
   GITHUB_OWNER: ${{ github.repository_owner }}
   ENABLE_TG_NOTIFICATION: ${{ secrets.ENABLE_TG_NOTIFICATION }}
+  SCHEDULE_INTERVAL: 30
 
 jobs:
   # 检查是否有新版本
+  # TODO 清理N天前的runs
   watch:
     runs-on: ubuntu-latest
     steps:
@@ -121,6 +123,10 @@ jobs:
           echo "hasNewVersion=$hasNewVersion" >> $GITHUB_OUTPUT
           echo "latestVersion=$latestVersion" >> $GITHUB_OUTPUT
           echo "latestTime=$latestTime" >> $GITHUB_OUTPUT
+          # 当前时间
+          echo "currentTime=$(date '+%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
+          # 下次检查时间
+          echo "nextCheckTime=$(date -d "+${{ env.SCHEDULE_INTERVAL }} minutes" '+%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
    
           if [[ "$hasNewVersion" == "true" ]]; then
             echo "🎉 发现新版本！"
@@ -136,7 +142,7 @@ jobs:
             echo "🔎 没有新版本，等待下一次检查..."
           fi
       -
-        name: TG Notification
+        name: TG Notification - For new version
         uses: appleboy/telegram-action@master
         if: ${{ steps.check.outputs.hasNewVersion == 'true' && env.ENABLE_TG_NOTIFICATION == 'true' }}
         with:
@@ -147,6 +153,19 @@ jobs:
             📦 新版本号：${{ steps.check.outputs.newVersion }}
             📅 更新时间：${{ steps.check.outputs.newTime }}
             🔗 发布链接：https://github.com/anyabc/something/releases/tag/MDCx
+      -
+        name: TG Notification - For no new version
+        uses: appleboy/telegram-action@master
+        if: ${{ steps.check.outputs.hasNewVersion == 'false' && env.ENABLE_TG_NOTIFICATION == 'true' }}
+        with:
+          to: ${{ secrets.TELE_CHAT_ID }}
+          token: ${{ secrets.TELE_BOT_TOKEN }}
+          message: |
+            🔔 MDCx新版本检查通知 - 没有新版本
+            📦 最新版本：${{ steps.check.outputs.latestVersion }}
+            📅 发布时间：${{ steps.check.outputs.latestTime }}
+            ⏰ 检查时间：${{ steps.check.outputs.currentTime }}
+            ⏰ 下次检查：${{ steps.check.outputs.nextCheckTime }}
       -
         name: Trigger "Image build-mdcx CI"
         if: ${{ steps.check.outputs.hasNewVersion == 'true' }}

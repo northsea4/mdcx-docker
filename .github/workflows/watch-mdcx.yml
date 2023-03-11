@@ -20,6 +20,7 @@ env:
   GITHUB_CURRENT_REPO: ${{ github.event.repository.name }}
   GITHUB_API_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
   GITHUB_OWNER: ${{ github.repository_owner }}
+  ENABLE_TG_NOTIFICATION: ${{ secrets.ENABLE_TG_NOTIFICATION }}
 
 jobs:
   # 检查是否有新版本
@@ -137,7 +138,7 @@ jobs:
       -
         name: TG Notification
         uses: appleboy/telegram-action@master
-        if: ${{ steps.check.outputs.hasNewVersion == 'true' && secrets.ENABLE_TG_NOTIFICATION == 'true' }}
+        if: ${{ steps.check.outputs.hasNewVersion == 'true' && env.ENABLE_TG_NOTIFICATION == 'true' }}
         with:
           to: ${{ secrets.TELE_CHAT_ID }}
           token: ${{ secrets.TELE_BOT_TOKEN }}

@@ -36,6 +36,11 @@ jobs:
           if [[ "${{ env.ENABLE_WATCH }}" != "true" && "${{ github.event.inputs.isDev }}" != "true" ]]; then
             exit 1
           fi
+      -
+        name: Set timezone
+        uses: szenius/set-timezone@v1.0
+        with:
+          timezoneLinux: "Asia/Shanghai"
       - 
         name: Checkout
         uses: actions/checkout@v3

@@ -114,6 +114,7 @@ jobs:
           fi
       - 
         name: Build and push
+        id: buildAndPush
         uses: docker/build-push-action@v3
         with:
           context: .

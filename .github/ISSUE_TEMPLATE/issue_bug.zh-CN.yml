@@ -63,8 +63,8 @@ body:
         - mdcx-src-gui-base
         - mdcx-builtin-webtop-base
         - mdcx-src-webtop-base
-      validations:
-        required: true
+    validations:
+      required: true
   - type: textarea
     attributes:
       label: Docker创建方式

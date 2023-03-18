@@ -54,7 +54,7 @@ body:
         - arm64
     validations:
       required: true
-  - type: checkboxes
+  - type: dropdown
     attributes:
       label: 使用的镜像
       description: 请勾选您使用的镜像

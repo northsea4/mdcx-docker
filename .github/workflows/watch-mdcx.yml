@@ -21,6 +21,7 @@ env:
   GITHUB_API_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
   GITHUB_OWNER: ${{ github.repository_owner }}
   ENABLE_TG_NOTIFICATION: ${{ secrets.ENABLE_TG_NOTIFICATION }}
+  ENABLE_TG_VERBOSE_NOTIFICATION: ${{ secrets.ENABLE_TG_VERBOSE_NOTIFICATION }}
   SCHEDULE_INTERVAL: 30
 
 jobs:
@@ -161,7 +162,7 @@ jobs:
       -
         name: TG Notification - For no new version
         uses: appleboy/telegram-action@master
-        if: ${{ steps.check.outputs.hasNewVersion == 'false' && env.ENABLE_TG_NOTIFICATION == 'true' }}
+        if: ${{ steps.check.outputs.hasNewVersion == 'false' && env.ENABLE_TG_VERBOSE_NOTIFICATION == 'true' }}
         with:
           to: ${{ secrets.TELE_CHAT_ID }}
           token: ${{ secrets.TELE_BOT_TOKEN }}

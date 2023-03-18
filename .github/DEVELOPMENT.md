@@ -7,6 +7,7 @@
 | ENABLE_WATCH_MDCX_RELEASE | 是否监控新版应用 | true | 是 |
 | MY_GITHUB_TOKEN | Github personal access token, 勾选`workflow` |  | 是 |
 | ENABLE_TG_NOTIFICATION | 是否发送TG通知 | false | 是 |
+| ENABLE_TG_VERBOSE_NOTIFICATION | 是否发送不重要的TG通知 | false | 是 |
 | TELE_BOT_TOKEN | TG Bot token |  | 否 |
 | TELE_CHAT_ID | TG 通知接收会话ID |  | 否 |
 

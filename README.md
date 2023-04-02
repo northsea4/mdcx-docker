@@ -121,3 +121,6 @@ docker run -d --name mdcx \
 - [x] 自动编译新版应用并发布
 - [x] 自动同步文档到Docker Hub
 - [x] build-mdcx通知
+
+## FAQ
+请查看 [FAQ](https://github.com/northsea4/mdcx-docker/blob/main/FAQ.md)

@@ -1,12 +1,19 @@
-#!/usr/bin/with-contenv bash
+#!/bin/bash
 
 # 获取容器环境变量(如PYPI_MIRROR)，需要使用with-contenv。
-# 但使用with-contenv，会改变`$HOME`为`/root`，导致莫名其妙的问题。
-# 解决方法是，使用「bash 脚本路径」来执行脚本，即: bash /path/to/script.sh
-if [ "$USER" != "root" -a "$HOME" = "/root" ]; then
-  echo "❌ 请以「bash 脚本路径」方式执行脚本，即: bash $0"
-  exit 1
-fi
+# 但使用with-contenv，会改变`$HOME`为`/root`。而且即使设置`$HOME`为`/config`，运行应用时也会提示缺少qt plugins。
+# https://stackoverflow.com/questions/68036484/qt6-qt-qpa-plugin-could-not-load-the-qt-platform-plugin-xcb-in-even-thou
+
+# 所以如果按照基础镜像文档里推荐的方式，即把脚本文件头改为`#!/usr/bin/with-contenv bash`，在当前场景是不可行的。
+# 新的解决思路：还是使用`#!/bin/bash`，但是在脚本中使用`/usr/bin/with-contenv`来获取容器环境变量。
+
+# 获取容器环境变量
+envText=$(/usr/bin/with-contenv env)
+# 解析环境变量文本并导出为环境变量
+while read -r line; do
+  export $line
+done <<< "$envText"
+
 
 if [ -n "$DEBUG_CONTAINER" ]; then
   echo "=========================!!!!!!!!=============================="
@@ -79,7 +86,7 @@ if [ $? -ne 0 ]; then
   rm -f ${FILE_INITIALIZED_INSIDE}
 
   if command -v konsole &> /dev/null; then
-    # 打开konsole，显示错误信息
+    # 使用konsole进行提示
     message="启动应用失败！请打开一个新的Konsole窗口，执行命令: bash /app-assets/scripts/run-src.sh"
     konsole --new-tab --separate --hold -e "echo ${message}" --geometry 800x600
   fi

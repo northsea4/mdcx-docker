@@ -65,3 +65,8 @@ echo "🚀 启动应用..."
 
 python3 MDCx_Main.py
 
+# 如果启动失败，就删除标记文件，下次启动时重新初始化
+if [ $? -ne 0 ]; then
+  rm -f ${FILE_INITIALIZED}
+  rm -f ${FILE_INITIALIZED_INSIDE}
+fi

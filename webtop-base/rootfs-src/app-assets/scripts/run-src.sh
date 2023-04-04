@@ -14,6 +14,9 @@ while read -r line; do
   export $line
 done <<< "$envText"
 
+# 设置`HOME`为`/config`
+export HOME=/config
+
 
 if [ -n "$DEBUG_CONTAINER" ]; then
   echo "=========================!!!!!!!!=============================="

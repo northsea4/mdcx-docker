@@ -8,6 +8,10 @@
 # #!/usr/bin/with-contenv bash
 # echo "PUID: $PUID, PGID: $PGID"
 
+# 需要注意的是，当使用`/usr/bin/with-contenv`时，直接执行 `/path/to/script.sh` ，会改变`HOME`为`/root`，
+# 这会导致一些奇怪的问题，比如python应用无法正常运行。
+# 解决方法是，使用`bash /path/to/script.sh`来执行脚本。
+
 prepare() {
   while true
   do

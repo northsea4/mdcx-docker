@@ -1,4 +1,12 @@
-#!/bin/sh
+#!/usr/bin/with-contenv bash
+
+# 获取容器环境变量(如PYPI_MIRROR)，需要使用with-contenv。
+# 但使用with-contenv，会改变`$HOME`为`/root`，导致莫名其妙的问题。
+# 解决方法是，使用「bash 脚本路径」来执行脚本，即: bash /path/to/script.sh
+if [ "$USER" != "root" -a "$HOME" = "/root" ]; then
+  echo "❌ 请以「bash 脚本路径」方式执行脚本，即: bash $0"
+  exit 1
+fi
 
 if [ -n "$DEBUG_CONTAINER" ]; then
   echo "=========================!!!!!!!!=============================="
@@ -63,3 +71,17 @@ echo "🚀 启动应用..."
 
 python3 MDCx_Main.py
 
+# 如果发生错误
+if [ $? -ne 0 ]; then
+  echo "❌ 启动应用失败"
+  # 删除`已初始化标记文件`
+  rm -f ${FILE_INITIALIZED}
+  rm -f ${FILE_INITIALIZED_INSIDE}
+
+  if command -v konsole &> /dev/null; then
+    # 打开konsole，显示错误信息
+    message="启动应用失败！请打开一个新的Konsole窗口，执行命令: bash /app-assets/scripts/run-src.sh"
+    konsole --new-tab --separate --hold -e "echo ${message}" --geometry 800x600
+  fi
+  exit 1
+fi

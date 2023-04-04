@@ -1,6 +1,6 @@
 [Desktop Entry]
 Comment=运行源码版
-Exec=/app-assets/scripts/run-src.sh
+Exec=bash /app-assets/scripts/run-src.sh
 GenericName=
 Icon=/app-assets/logo.ico
 MimeType=

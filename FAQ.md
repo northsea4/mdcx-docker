@@ -39,7 +39,7 @@ kwriteconfig5 --file $HOME/.config/kscreenlockerrc --group Daemon --key Timeout 
 
 
 ## 怎么修改UMASK?
-默认的`umask`是`022`，如果需要修改, 请通过环境变量`UMASK`来修改。
+默认的`umask`是`022`，可以通过环境变量`UMASK`设置。
 
 
 ## 怎么输入中文？
@@ -51,3 +51,30 @@ kwriteconfig5 --file $HOME/.config/kscreenlockerrc --group Daemon --key Timeout 
 暂时可以通过复制粘贴的方式输入中文。比如，先在控制主机上输入中文并复制，然后在容器桌面环境中粘贴。
 
 实际上这些镜像都是专用的（也就是只用来运行MDCx），个人觉得并没有太多需要输入中文的场景，所以暂时不打算花太多时间去解决这个问题。
+
+
+## 选择目录对话框卡顿
+如果你有跟 [这个issue](https://github.com/northsea4/mdcx-docker/issues/16) 相似的情况，即点击诸如「选择目录」进行选择时会卡顿，可以尝试以下方法。
+进入「设置 - 高级」，找到「选择对话框」，然后勾选「使用 QT 选择对话框」，接着「保存」即可。
+![image](https://user-images.githubusercontent.com/94440029/230776296-3cba7601-bc14-4e78-a5aa-83913869893b.png)
+
+
+## 重新部署容器后，黑屏，无法正常进入桌面
+如果你有跟 [这个issue](https://github.com/northsea4/mdcx-docker/issues/17) 相似的情况，即重新部署容器后，无法正常进入桌面，只看到如下图所示的界面(`To run a command as administrator (user "root"), use "sudo <command>".`)。
+![image](https://user-images.githubusercontent.com/73220226/232524022-167d8333-62b9-422d-bf90-e0bc07463c73.png)
+
+可以尝试以下解决方法：
+```bash
+# 进入部署目录
+cd /path/to/mdcx-docker
+# 停止容器
+docker-compose stop
+# 备份数据目录
+mv data data-backup
+# 创建新的数据目录
+mkdir data
+# 启动容器
+docker-compose up -d
+```
+
+> 容器数据目录存放的一般是用户数据，比如桌面环境的配置文件、一些运行时生成的文件等。比如需要找回之前在桌面放置的一些文件，可以在`data-backup`目录下的`Desktop`目录中找到。

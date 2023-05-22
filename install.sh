@@ -34,6 +34,23 @@ replace_in_file() {
   fi
 }
 
+# 发生错误时的退出处理
+on_error() {
+  local projectDir=$1
+  
+  echo ""
+  # 询问是否删除目录
+  read -p "❓ 是否删除项目目录 ${projectDir}？（y/n，默认为n）：" DELETE_DIR
+  DELETE_DIR=${DELETE_DIR:-n}
+  echo ""
+  if [ "$DELETE_DIR" = "y" ]; then
+    rm -rf "$projectDir"
+    echo "🗑 已删除目录：${projectDir}"
+  fi
+
+  exit 1
+}
+
 # 询问用户选择的模版
 echo "📖 下面请你回答几个问题，以完成MDCx Docker版的安装。"
 echo ""
@@ -86,6 +103,26 @@ DOWNLOAD_URL="https://github.com/northsea4/mdcx-docker/releases/download/latest/
 echo "🔗 模版文件下载链接：$DOWNLOAD_URL"
 echo ""
 
+echo "⏳ 正在下载模版文件，请稍候..."
+
+# 下载zip文件并保存为随机文件名
+RANDOM_NAME=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9-_' | fold -w 29 | sed 1q)
+ZIP_FILE="${RANDOM_NAME}.zip"
+curl "$DOWNLOAD_URL" -L --connect-timeout 30 --max-time 300 -o "$ZIP_FILE"
+
+if [ $? -ne 0 ]; then
+  echo "❌ 模版文件下载失败！"
+
+  on_error "${DIR_FULL_PATH}"
+fi
+
+# 创建以文件名为名称的目录并解压zip文件
+mkdir "$RANDOM_NAME"
+unzip "$ZIP_FILE" -d "$RANDOM_NAME"
+
+echo "🎉 模版文件下载完成！"
+echo ""
+
 
 # 询问用户目录名称，默认为 `mdcx-docker`
 echo "选择一个目录作为本docker项目的根目录(存放应用或容器的相关数据)，可以是目录路径或目录名称。"
@@ -97,28 +134,16 @@ while [ -d "$DIR_NAME" ]; do
   read -p "❌ 目录已存在，请输入其他目录名称：" DIR_NAME
 done
 
-echo "⏳ 正在下载模版文件，请稍候..."
-
-# 下载zip文件并保存为随机文件名
-RANDOM_NAME=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9-_' | fold -w 29 | sed 1q)
-ZIP_FILE="${RANDOM_NAME}.zip"
-curl "$DOWNLOAD_URL" -L -o "$ZIP_FILE"
-
-# 创建以文件名为名称的目录并解压zip文件
-mkdir "$RANDOM_NAME"
-unzip "$ZIP_FILE" -d "$RANDOM_NAME"
-
-# 移动mdcx-docker目录并重命名为用户输入的目录名称
+# 移动mdcx-docker模版目录并重命名为用户输入的目录名称
 mv "$RANDOM_NAME/mdcx-docker" "$DIR_NAME"
 # 删除临时目录和zip文件
 rm -rf "$RANDOM_NAME"
 rm "$ZIP_FILE"
 
-echo "🎉 模版文件下载完成！"
-
 # 进入用户输入的目录名称
 cd "$DIR_NAME"
-echo "📁 已进入目录：$(pwd)"
+DIR_FULL_PATH=$(pwd)
+echo "📁 已创建并进入目录：$(pwd)"
 
 source .env
 
@@ -210,8 +235,9 @@ echo ""
 read -p "❓ 确认信息是否填写正确（yes/y确认，no/n退出）：" CONFIRMED
 
 if [[ "$CONFIRMED" =~ ^[nN](o)?$ ]]; then
-  echo "⚠️ 操作已取消"
-  exit 0
+  echo "❗ 操作已取消"
+  
+  on_error "${DIR_FULL_PATH}"
 fi
 
 
@@ -243,17 +269,20 @@ if [[ -n "$VOLUMES" ]]; then
   replace_in_file "s|# VOLUMES_REPLACEMENT|$VOLUMES|" docker-compose.yml
   echo "✅ 替换挂载卷完成"
 else
-  echo "⚠️ 你没有指定映射影片目录，你可以之后在docker-compose.yml中手动添加。"
+  echo "❗ 你没有指定映射影片目录，你可以之后在docker-compose.yml中手动添加。"
 fi
 
 downloadSrc() {
-  local _content=$(curl -s "https://api.github.com/repos/anyabc/something/releases/latest")
+  local _url="https://api.github.com/repos/anyabc/something/releases/latest"
+  local _content=$(curl -s "$_url")
 
   local archiveUrl=$(echo $_content | grep -oi 'https://[a-zA-Z0-9./?=_%:-]*MDCx-py-[a-z0-9]\+.[a-z]\+')
 
   if [[ -z "$archiveUrl" ]]; then
-    echo "❌ 获取下载链接失败！"
-    exit 1
+    echo "❌ 请求Github API失败！"
+    echo "🔘 请求链接：$_url"
+    
+    on_error "${DIR_FULL_PATH}"
   fi
 
   local archiveFullName=$(echo $archiveUrl | grep -oi 'MDCx-py-[a-z0-9]\+.[a-z]\+')
@@ -262,11 +291,11 @@ downloadSrc() {
   local archivePureName=$(echo $archiveUrl | grep -oi 'MDCx-py-[a-z0-9]\+')
 
   echo "🔗 下载链接：$archiveUrl"
-  echo "ℹ️ 压缩包全名：$archiveFullName"
-  echo "ℹ️ 压缩包文件名：$archivePureName"
-  echo "ℹ️ 压缩包后缀名：$archiveExt"
+  echo "🔘 压缩包全名：$archiveFullName"
+  echo "🔘 压缩包文件名：$archivePureName"
+  echo "🔘 压缩包后缀名：$archiveExt"
 
-  echo "ℹ️ 已发布版本：$archiveVersion"
+  echo "🔘 已发布版本：$archiveVersion"
 
   archivePath="$archivePureName.rar"
 
@@ -287,7 +316,7 @@ downloadSrc() {
   rm -rf $archivePureName
   echo "✅ 源码已覆盖到 $appPath"
 
-  echo "ℹ️ 删除标记文件 $appPath/$FILE_INITIALIZED"
+  echo "🔘 删除标记文件 $appPath/$FILE_INITIALIZED"
   rm -f "$appPath/$FILE_INITIALIZED"
 
   echo "✅ 源码已更新成功！"
@@ -317,8 +346,12 @@ docker-compose pull
 if [ $? -eq 0 ]; then
   echo "✅ 拉取镜像完成"
 else
-  echo "❌ 拉取镜像失败，请检查错误日志"
-  exit 1
+  echo "❌ 拉取镜像失败，请检查错误日志。如果是网络问题，在解决后你可以使用以下命令重新拉取和运行: "
+  echo "cd ${DIR_FULL_PATH}"
+  echo "docker-compose pull"
+  echo "docker-compose up -d"
+
+  on_error "${DIR_FULL_PATH}"
 fi
 
 echo ""
@@ -327,10 +360,20 @@ if [[ "$RUN_CONTAINER" =~ ^[Yy](es)?$ ]]; then
   docker-compose up -d
   if [ $? -eq 0 ]; then
       echo "✅ 容器已经成功运行"
+      echo ""
+      echo "🔘 可以通过以下命令查看容器运行状态:"
+      echo "🔘 docker ps -a | grep $CONTAINER_NAME"
   else
       echo "❌ 容器启动失败，请检查错误日志"
-      exit 1
+
+      on_error "${DIR_FULL_PATH}"
   fi
 else
-  echo "⚠️ 你可以之后通过 docker-compose up -d 启动容器"
+  docker-compose create
+
+  echo "🔘 你可以之后通过以下命令启动容器:"
+  echo "cd ${DIR_FULL_PATH} && docker-compose up -d"
 fi
+
+echo ""
+echo "👋🏻 Enjoy!"

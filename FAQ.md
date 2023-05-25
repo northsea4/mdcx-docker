@@ -84,5 +84,5 @@ docker-compose up -d
 如果你有跟 [这个issue](https://github.com/northsea4/mdcx-docker/issues/18) 相似的情况，即启动失败或不能进入桌面，查看容器日志有`ImportError: libQt5Core.so.5: cannot open shared object file: No such file or directory`，可以尝试以下处理。
 
 1. 首先你需要使用`mdcx-src-gui-base`或者`mdcx-src-webtop-base`镜像，即源码版；
-2. 修改`.env`文件里的`STRIP_LIBQT5CORE`为`true`。如果在`.env`文件里没有找到这个变量，可以自行添加。[变量说明](https://github.com/northsea4/mdcx-docker/blob/a5917b63658e8fa810fc6db74a28fa25dbdf3485/gui-base/.env.sample#L58)。
+2. 修改`.env`文件里的`STRIP_LIBQT5CORE`为`true`。如果在`.env`文件里没有找到这个变量，可以自行添加。[变量说明](https://github.com/northsea4/mdcx-docker/blob/main/gui-base/.env.sample#L58)。
 3. 重新部署容器(`docker-compose up -d`)。

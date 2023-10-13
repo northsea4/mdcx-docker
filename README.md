@@ -117,10 +117,30 @@ docker run -d --name mdcx \
 
 
 ## TODO 
-- [x] 镜像独立文档
-- [x] 自动编译新版应用并发布
-- [x] 自动同步文档到Docker Hub
-- [x] build-mdcx通知
+- [ ] src-webtop 优化：升级前先停止已运行的应用，升级完成后自动启动应用（先进行pip install）。
+- [ ] 新增TODO: nginx反代，一分钟断线。解决：https://github.com/novnc/noVNC/issues/658
+- [ ] PVE-DSM7.1.1，mdcx-builtin-gui-base运行失败:
+```
+mdcx_gui | [supervisor  ] starting service 'nginx'...
+mdcx_gui | [nginx       ] Listening for HTTP connections on port 5800.
+mdcx_gui | [supervisor  ] starting service 'openbox'...
+mdcx_gui | [openbox     ] ObRender-Message: Unable to load the theme 'OpenboxTheme'
+mdcx_gui | [openbox     ] ObRender-Message: Falling back to the default theme 'Clearlooks'
+mdcx_gui | [openbox     ] ObRender-Message: Unable to load the theme 'Clearlooks'
+mdcx_gui | [openbox     ] Openbox-Message: Unable to load a theme.
+mdcx_gui | [supervisor  ] service 'openbox' failed to be started: not ready after 5000 msec, giving up.
+mdcx_gui | [supervisor  ] stopping service 'openbox'...
+mdcx_gui | [supervisor  ] service 'openbox' exited (with status 1).
+mdcx_gui | [supervisor  ] stopping service 'nginx'...
+mdcx_gui | [supervisor  ] service 'nginx' exited (with status 0).
+mdcx_gui | [supervisor  ] stopping service 'xvnc'...
+mdcx_gui | [xvnc        ] Mon Oct  9 01:13:39 2023
+mdcx_gui | [xvnc        ]  ComparingUpdateTracker: 0 pixels in / 0 pixels out
+mdcx_gui | [xvnc        ]  ComparingUpdateTracker: (1:-nan ratio)
+mdcx_gui | [supervisor  ] service 'xvnc' exited (with status 0).
+mdcx_gui | [finish      ] executing container finish scripts...
+mdcx_gui | [finish      ] all container finish scripts executed.
+```
 
 ## 更新日志
 请查看 [更新日志](https://github.com/northsea4/mdcx-docker/blob/main/CHANGELOG.md)

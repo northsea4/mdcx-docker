@@ -7,6 +7,13 @@ then
   exit 1
 fi
 
+# 必须有unzip或者7z
+if ! command -v unzip &> /dev/null && ! command -v 7z &> /dev/null
+then
+  echo "❌ 未找到unzip或7z命令，请先安装unzip或7z命令。"
+  exit 1
+fi
+
 # 检查是否有docker命令
 if ! command -v docker &> /dev/null
 then
@@ -118,7 +125,18 @@ fi
 
 # 创建以文件名为名称的目录并解压zip文件
 mkdir "$RANDOM_NAME"
-unzip "$ZIP_FILE" -d "$RANDOM_NAME"
+# 如果有7z命令，则使用7z解压
+if command -v 7z &> /dev/null; then
+  7z x "$ZIP_FILE" -o"$RANDOM_NAME"
+else
+  unzip "$ZIP_FILE" -d "$RANDOM_NAME"
+fi
+
+if [ $? -ne 0 ]; then
+  echo "❌ 模版文件解压失败！"
+
+  on_error "${DIR_FULL_PATH}"
+fi
 
 echo "🎉 模版文件下载完成！"
 echo ""

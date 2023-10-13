@@ -29,7 +29,9 @@ fi
 # 为了避免这种情况，我们将`/cert-for-mdcx/cacert.pem`文件复制到`/tmp/_MEIxxxxxx/curl_cffi`目录下。
 # 注意，这个`_MEIxxxxxx`目录名是随机的，所以我们需要先找到这个目录。
 
-# 从`/tmp`目录遍历全部`_`开头的目录，每个目录检查是否存在`curl_cffi`目录，如果存在，则将`/cert-for-mdcx/cacert.pem`复制到`curl_cffi`目录下。
+# 从`/tmp`目录遍历全部`_`开头的目录，每个目录检查是否存在`curl_cffi`目录，如果存在，则将`cacert.pem`复制到`curl_cffi`目录下。
+
+CACERT_PEM_SRC_PATH="/cert-patch/cacert.pem"
 
 ensureCacert() {
   # 遍历`/tmp`目录下的全部`_`开头的目录
@@ -46,8 +48,8 @@ ensureCacert() {
 
     # 如果`cacert.pem`文件不存在，则复制
     if [ ! -f "$dir/curl_cffi/cacert.pem" ]; then
-      cp /cert-for-mdcx/cacert.pem $dir/curl_cffi/cacert.pem
-      echo "✅ 已将/cert-for-mdcx/cacert.pem复制到$dir/curl_cffi/cacert.pem"
+      cp "$CACERT_PEM_SRC_PATH" $dir/curl_cffi/cacert.pem
+      echo "✅ 已复制cacert.pem文件到$dir/curl_cffi/cacert.pem"
       return 0
     fi
   done
@@ -71,4 +73,4 @@ runEnsureCacert() {
 }
 
 # 异步执行
-nohup runEnsureCacert > /dev/null 2>&1 &
+runEnsureCacert &

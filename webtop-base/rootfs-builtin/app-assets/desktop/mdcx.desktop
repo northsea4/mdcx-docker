@@ -1,6 +1,6 @@
 [Desktop Entry]
 Comment=运行已编译版本
-Exec=/app/MDCx
+Exec=/app-assets/start-mdcx.sh
 GenericName=
 Icon=/app-assets/logo.ico
 MimeType=

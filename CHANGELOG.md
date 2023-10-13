@@ -1,5 +1,8 @@
 ## 更新日志
 
+### [v0.6.18] - 2023-10-13
+- 1.修复: `mdcx-builtin-gui-base`和`mdcx-builtin-gui-base`镜像内的MDCx请求某些https链接时出现`cacert.pem`错误的问题，#25
+
 ### [v0.6.13] - 2023-05-25
 - 1.修复: `ImportError: libQt5Core.so.5: cannot open shared object file: No such file or directory`错误，#18
 

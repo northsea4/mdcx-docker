@@ -86,3 +86,8 @@ docker-compose up -d
 1. 首先你需要使用`mdcx-src-gui-base`或者`mdcx-src-webtop-base`镜像，即源码版；
 2. 修改`.env`文件里的`STRIP_LIBQT5CORE`为`true`。如果在`.env`文件里没有找到这个变量，可以自行添加。[变量说明](https://github.com/northsea4/mdcx-docker/blob/main/gui-base/.env.sample#L58)。
 3. 重新部署容器(`docker-compose up -d`)。
+
+
+## 通过nginx反代访问时，一分钟断线
+如果你通过nginx反代访问`mdcx-builtin/src-gui-base`容器时，发现一分钟左右就断线了，可以尝试以下方法。
+https://github.com/novnc/noVNC/issues/658 ，更详细的说明请参考[这里](https://github.com/novnc/noVNC/wiki/Proxying-with-nginx)。

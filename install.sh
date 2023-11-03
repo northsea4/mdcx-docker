@@ -64,8 +64,8 @@ echo ""
 echo "❓ 请选择容器部署模版（输入数字进行选择）："
 echo " 1) mdcx-builtin-gui-base      轻量版，内置编译版应用，通过网页使用"
 echo " 2) mdcx-builtin-webtop-base   重量版，内置编译版应用，通过网页和远程桌面使用"
-echo " 3) mdcx-src-gui-base          轻量版，自部署源码，通过网页使用"
-echo " 4) mdcx-src-webtop-base       重量版，自部署源码，通过网页和远程桌面使用"
+echo " 3) mdcx-src-gui-base          [已失效] 轻量版，自部署源码，通过网页使用"
+echo " 4) mdcx-src-webtop-base       [已失效] 重量版，自部署源码，通过网页和远程桌面使用"
 
 read -p "📌 请输入数字（1-4）: " TEMPLATE_NUM
 

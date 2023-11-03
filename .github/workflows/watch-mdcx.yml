@@ -4,9 +4,10 @@ on:
   push:
     branches:
       - none
-  schedule:
-    # 每30分钟
-    - cron: '*/30 * * * *'
+  # The source project MDCx is no longer exists.
+  # schedule:
+  #   # 每30分钟
+  #   - cron: '*/30 * * * *'
   
   workflow_dispatch:
     inputs:

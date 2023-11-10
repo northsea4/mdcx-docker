@@ -113,7 +113,14 @@ echo ""
 echo "⏳ 正在下载模版文件，请稍候..."
 
 # 下载zip文件并保存为随机文件名
-RANDOM_NAME=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9-_' | fold -w 29 | sed 1q)
+# RANDOM_NAME=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9-_' | fold -w 29 | sed 1q)
+# fold命令在某些系统上不支持，使用head命令代替
+RANDOM_NAME=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9-_' | head -c 29)
+if [ $? -ne 0 ]; then
+  echo "❌ 生成随机文件名失败！"
+  exit 1
+fi
+
 ZIP_FILE="${RANDOM_NAME}.zip"
 curl "$DOWNLOAD_URL" -L --connect-timeout 30 --max-time 300 -o "$ZIP_FILE"
 

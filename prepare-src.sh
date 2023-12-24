@@ -2,6 +2,14 @@
 
 # 脚本说明：下载应用源码并解压到指定的目录(通过`context`指定)下的`.mdcx_src`目录
 # 一般只用于构建镜像流程，普通用户可以忽略。
+# UPDATE 2023-12-24 17:08:03 使用新的源码仓库:https://github.com/sqzw-x/mdcx
+
+# 检查是否有jq命令
+if ! command -v jq &> /dev/null
+then
+  echo "❌ 请先安装jq命令！参考：https://command-not-found.com/jq"
+  exit 1
+fi
 
 while [[ $# -gt 0 ]]
 do
@@ -41,26 +49,32 @@ cd $context
 
 echo "ℹ️ 将从发布仓库下载源码进行构建"
 
-_content=$(curl -s "https://api.github.com/repos/anyabc/something/releases/latest")
-
-archiveUrl=$(echo $_content | grep -oi 'https://[a-zA-Z0-9./?=_%:-]*MDCx-py-[a-z0-9]\+.[a-z]\+')
+_url="https://api.github.com/repos/sqzw-x/mdcx/releases/latest"
+_content=$(curl -s "$_url")
 
 # TODO github workflow里竟然会有比较大的概率获取失败
-if [[ -z "$archiveUrl" ]]; then
-  echo "❌ 获取下载链接失败！"
+if [[ -z "$_content" ]]; then
+  echo "❌ 请求 $_url 失败！"
   exit 1
 fi
 
-archiveFullName=$(echo $archiveUrl | grep -oi 'MDCx-py-[a-z0-9]\+.[a-z]\+')
-archiveExt=$(echo $archiveFullName | grep -oi '[a-z]\+$')
-archiveVersion=$(echo $archiveFullName | sed 's/MDCx-py-//g' | sed 's/\.[^.]*$//')
-archivePureName=$(echo $archiveUrl | grep -oi 'MDCx-py-[a-z0-9]\+')
+# tag名称，作为版本号
+tagName=$(printf '%s' $_content | jq -r ".tag_name")
+archiveVersion=$(echo $tagName | sed 's/v//g')
+
+# 源码压缩包(tar格式)链接
+archiveUrl=$(printf '%s' $_content | jq -r ".tarball_url")
+
+if [[ -z "$archiveUrl" ]]; then
+  echo "❌ 从请求结果获取源码压缩包文件下载链接失败！"
+  echo "🔘 请求链接：$_url"
+  echo "🔘 请求结果：$_content"
+  exit 1
+fi
 
 if [[ -n "$verbose" ]]; then
+  echo "ℹ️ TAG名称: $tagName"
   echo "🔗 下载链接: $archiveUrl"
-  echo "ℹ️ 压缩包全名: $archiveFullName"
-  echo "ℹ️ 压缩包文件名: $archivePureName"
-  echo "ℹ️ 压缩包后缀名: $archiveExt"
 fi
 echo "ℹ️ 已发布版本: $archiveVersion"
 
@@ -71,7 +85,7 @@ fi
 
 echo "⏳ 下载文件..."
 
-archivePath="$archivePureName.rar"
+archivePath="$archiveVersion.tar.gz"
 srcDir=".mdcx_src"
 
 if [[ -n "$verbose" ]]; then
@@ -83,22 +97,12 @@ fi
 echo "✅ 下载成功"
 echo "⏳ 开始解压..."
 
-UNRAR_PATH=$(which unrar)
-if [[ -z "$UNRAR_PATH" ]]; then
-  echo "❌ 没有unrar命令！"
-  exit 1
-else
-  rm -rf $srcDir
-  # 解压
-  unrar x -o+ $archivePath
-  mkdir -p $srcDir
-  cp -rfp $archivePureName/* $srcDir
-  # 删除压缩包
-  rm -f $archivePath
-  # 删除解压出来的目录
-  rm -rf $archivePureName
-  echo "✅ 源码已解压到 $srcDir"
-fi
+# 使用tar命令解压
+rm -rf $srcDir
+mkdir -p $srcDir
+tar -zxvf $archivePath -C $srcDir --strip-components 1
+rm -f $archivePath
+echo "✅ 源码已解压到 $srcDir"
 
 if [ -n "$GITHUB_ACTIONS" ]; then
   echo "APP_VERSION=$archiveVersion" >> $GITHUB_OUTPUT

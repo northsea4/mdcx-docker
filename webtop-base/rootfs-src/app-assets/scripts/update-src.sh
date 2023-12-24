@@ -2,10 +2,10 @@
 
 export LC_ALL=zh_CN.UTF-8
 
-# 检查是否有unrar命令
-if ! command -v unrar &> /dev/null
+# 检查是否有jq命令
+if ! command -v jq &> /dev/null
 then
-  echo "❌ 未找到unrar命令，请先安装unrar命令。"
+  echo "❌ 请先安装jq命令！参考：https://command-not-found.com/jq"
   exit 1
 fi
 
@@ -117,28 +117,33 @@ else
   appVersion=0
 fi
 
+_url="https://api.github.com/repos/sqzw-x/mdcx/releases/latest"
+_content=$(curl -s "$_url")
 
-_content=$(curl -s "https://api.github.com/repos/anyabc/something/releases/latest")
-
-archiveUrl=$(echo $_content | grep -oi 'https://[a-zA-Z0-9./?=_%:-]*MDCx-py-[a-z0-9]\+.[a-z]\+')
-
-if [[ -z "$archiveUrl" ]]; then
-  echo "❌ 获取下载链接失败！"
+# TODO github workflow里竟然会有比较大的概率获取失败
+if [[ -z "$_content" ]]; then
+  echo "❌ 请求 $_url 失败！"
   exit 1
 fi
 
-archiveFullName=$(echo $archiveUrl | grep -oi 'MDCx-py-[a-z0-9]\+.[a-z]\+')
-archiveExt=$(echo $archiveFullName | grep -oi '[a-z]\+$')
-archiveVersion=$(echo $archiveFullName | sed 's/MDCx-py-//g' | sed 's/\.[^.]*$//')
-archivePureName=$(echo $archiveUrl | grep -oi 'MDCx-py-[a-z0-9]\+')
+# tag名称，作为版本号
+tagName=$(printf '%s' $_content | jq -r ".tag_name")
+archiveVersion=$(echo $tagName | sed 's/v//g')
+
+# 源码压缩包(tar格式)链接
+archiveUrl=$(printf '%s' $_content | jq -r ".tarball_url")
+
+if [[ -z "$archiveUrl" ]]; then
+  echo "❌ 从请求结果获取源码压缩包文件下载链接失败！"
+  echo "🔘 请求链接：$_url"
+  exit 1
+fi
 
 if [[ -n "$verbose" ]]; then
-  echo " 下载链接：$archiveUrl"
-  echo "ℹ️ 压缩包全名：$archiveFullName"
-  echo "ℹ️ 压缩包文件名：$archivePureName"
-  echo "ℹ️ 压缩包后缀名：$archiveExt"
+  echo "ℹ️ TAG名称: $tagName"
+  echo "🔗 下载链接: $archiveUrl"
 fi
-echo "ℹ️ 已发布版本：$archiveVersion"
+echo "ℹ️ 已发布版本: $archiveVersion"
 
 
 compareVersion $archiveVersion $appVersion
@@ -165,7 +170,7 @@ if [[ -n "$shouldUpdate" ]]; then
     exit 0
   fi
 
-  archivePath="$archivePureName.rar"
+  archivePath="$archiveVersion.tar.gz"
 
   if [[ -n "$verbose" ]]; then
     curl -o $archivePath $archiveUrl -L
@@ -176,13 +181,10 @@ if [[ -n "$shouldUpdate" ]]; then
   echo "✅ 下载成功"
   echo "⏳ 开始解压..."
 
-  # 解压
-  unrar x -o+ $archivePath
-  cp -rfp $archivePureName/* $appPath
+  # 解压新的源码到app目录
+  tar -zxvf $archivePath -C $appPath --strip-components 1
   # 删除压缩包
   rm -f $archivePath
-  # 删除解压出来的目录
-  rm -rf $archivePureName
   echo "✅ 源码已覆盖到 $appPath"
 
   echo "ℹ️ 删除标记文件 $appPath/$FILE_INITIALIZED"

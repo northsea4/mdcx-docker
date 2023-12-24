@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# 检查是否有unrar命令
-if ! command -v unrar &> /dev/null
+# 检查是否有jq命令
+if ! command -v jq &> /dev/null
 then
-  echo "❌ 未找到unrar命令，请先安装unrar命令。"
+  echo "❌ 请先安装jq命令！参考：https://command-not-found.com/jq"
   exit 1
 fi
 
@@ -298,31 +298,36 @@ else
 fi
 
 downloadSrc() {
-  local _url="https://api.github.com/repos/anyabc/something/releases/latest"
+  local _url="https://api.github.com/repos/sqzw-x/mdcx/releases/latest"
   local _content=$(curl -s "$_url")
 
-  local archiveUrl=$(echo $_content | grep -oi 'https://[a-zA-Z0-9./?=_%:-]*MDCx-py-[a-z0-9]\+.[a-z]\+')
+  # TODO github workflow里竟然会有比较大的概率获取失败
+  if [[ -z "$_content" ]]; then
+    echo "❌ 请求 $_url 失败！"
+    exit 1
+  fi
+
+  # tag名称，作为版本号
+  tagName=$(printf '%s' $_content | jq -r ".tag_name")
+  archiveVersion=$(echo $tagName | sed 's/v//g')
+
+  # 源码压缩包(tar格式)链接
+  archiveUrl=$(printf '%s' $_content | jq -r ".tarball_url")
 
   if [[ -z "$archiveUrl" ]]; then
-    echo "❌ 请求Github API失败！"
+    echo "❌ 从请求结果获取源码压缩包文件下载链接失败！"
     echo "🔘 请求链接：$_url"
     
     on_error "${DIR_FULL_PATH}"
   fi
 
-  local archiveFullName=$(echo $archiveUrl | grep -oi 'MDCx-py-[a-z0-9]\+.[a-z]\+')
-  local archiveExt=$(echo $archiveFullName | grep -oi '[a-z]\+$')
-  local archiveVersion=$(echo $archiveFullName | sed 's/MDCx-py-//g' | sed 's/\.[^.]*$//')
-  local archivePureName=$(echo $archiveUrl | grep -oi 'MDCx-py-[a-z0-9]\+')
+  if [[ -n "$verbose" ]]; then
+    echo "ℹ️ TAG名称: $tagName"
+    echo "🔗 下载链接: $archiveUrl"
+  fi
+  echo "ℹ️ 已发布版本: $archiveVersion"
 
-  echo "🔗 下载链接：$archiveUrl"
-  echo "🔘 压缩包全名：$archiveFullName"
-  echo "🔘 压缩包文件名：$archivePureName"
-  echo "🔘 压缩包后缀名：$archiveExt"
-
-  echo "🔘 已发布版本：$archiveVersion"
-
-  archivePath="$archivePureName.rar"
+  archivePath="$archiveVersion.tar.gz"
 
   curl -o $archivePath $archiveUrl -L
 
@@ -333,12 +338,9 @@ downloadSrc() {
   mkdir -p $appPath
 
   # 解压
-  unrar x -o+ $archivePath
-  cp -rfp $archivePureName/* $appPath
+  tar -zxvf $archivePath -C $appPath --strip-components 1
   # 删除压缩包
   rm -f $archivePath
-  # 删除解压出来的目录
-  rm -rf $archivePureName
   echo "✅ 源码已覆盖到 $appPath"
 
   echo "🔘 删除标记文件 $appPath/$FILE_INITIALIZED"

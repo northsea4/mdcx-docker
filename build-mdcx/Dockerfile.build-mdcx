@@ -48,11 +48,16 @@ RUN python3 -m pip install -r requirements.txt --verbose -i $PYPI_MIRROR
 RUN pyinstaller -n MDCx \
   # 图标是macOS和Windows专属
   # -i Img/MDCx.ico \
-  -F -w MDCx_Main.py \
-  --add-data "Data:." \
-  --add-data "Img:Img" \
+  -F -w main.py \
+  -p "./src" \
+  # --add-data "Data:." \
+  # --add-data "Img:Img" \
+  --add-data "resources:resources" \
+  --add-data "libs:." \
   --hidden-import socks \
-  --hidden-import urllib3
+  --hidden-import urllib3 \
+  --hidden-import _cffi_backend \
+  --collect-all curl_cffi
 
 RUN pyinstaller MDCx.spec
 

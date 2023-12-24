@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-ARG BASE_IMAGE_TAG="ubuntu-22.04"
+ARG BASE_IMAGE_TAG="ubuntu-kde-22.04"
 
 # 已编译应用的镜像tag
 ARG MDCX_BIN_IMAGE_TAG="latest"

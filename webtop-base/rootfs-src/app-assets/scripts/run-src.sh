@@ -42,6 +42,9 @@ echo "🐍 Python版本: $PYTHON_VERSION"
 
 cd /app
 
+# 模块路径在/app/src，所以需要将/app/src加入到PYTHONPATH
+export PYTHONPATH=/app/src:$PYTHONPATH
+
 if [ -f "${FILE_INITIALIZED}" -a -f "${FILE_INITIALIZED_INSIDE}" ]; then
   echo "✅ 应用已初始化"
 else
@@ -79,7 +82,7 @@ fi
 
 echo "🚀 启动应用..."
 
-python3 MDCx_Main.py
+python3 main.py
 
 # 如果发生错误
 if [ $? -ne 0 ]; then

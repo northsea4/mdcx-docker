@@ -166,6 +166,8 @@ mkdir -p $MDCX_DOCKER_DIR && cd $MDCX_DOCKER_DIR
 mkdir -p app mdcx-config logs data
 # 必须：配置文件目录标记文件
 echo "/mdcx-config/config.ini" > mdcx-config/MDCx.config
+# 确保有config.ini文件
+touch mdcx-config/config.ini
 
 # ！！！下载源码！！！最方便的就是使用`update-src.sh`脚本，自动下载源码文件到`app`目录
 ./update-src.sh

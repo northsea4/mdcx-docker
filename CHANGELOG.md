@@ -1,5 +1,8 @@
 ## 更新日志
 
+### [v0.7.0] - 2023-12-24
+- 1.更改上游源码项目为`sqzw-x/mdcx`，#32
+
 ### [v0.6.18] - 2023-10-13
 - 1.修复: `mdcx-builtin-gui-base`和`mdcx-builtin-gui-base`镜像内的MDCx请求某些https链接时出现`cacert.pem`错误的问题，#25
 

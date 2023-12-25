@@ -16,7 +16,7 @@ on:
         type: boolean
 
 env:
-  RELEASE_URL: 'https://api.github.com/repos/anyabc/something/releases/latest'
+  RELEASE_URL: 'https://api.github.com/repos/sqzw-x/mdcx/releases/latest'
   ENABLE_WATCH: ${{ secrets.ENABLE_WATCH_MDCX_RELEASE }}
   GITHUB_CURRENT_REPO: ${{ github.event.repository.name }}
   GITHUB_API_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
@@ -65,31 +65,34 @@ jobs:
 
           # 获取最新版本信息，返回值为数组，第一个元素为版本号，第二个元素为更新时间
           getNewInfo() {
-            local content=$(curl -s "${{ env.RELEASE_URL }}")
-            local asset=$(echo $content | jq '.assets'| jq 'map(select(.browser_download_url | contains("-py-")))' | jq '.[0]')
+            local _content=$(curl -s "${{ env.RELEASE_URL }}")
+            
+            # tag名称，作为版本号
+            local tagName=$(printf '%s' $_content | jq -r ".tag_name")
+            local archiveVersion=$(echo $tagName | sed 's/v//g')
 
-            if [[ -z "$asset" ]]; then
-              echo "❌ 查找不到符合条件的asset！"
-              return 1
+            # 源码压缩包(tar格式)链接
+            local archiveUrl=$(printf '%s' $_content | jq -r ".tarball_url")
+
+            if [[ -z "$archiveUrl" ]]; then
+              echo "❌ 从请求结果获取源码压缩包文件下载链接失败！"
+              echo "🔘 请求链接：$_url"
+              echo "🔘 请求结果：$_content"
+              exit 1
             fi
 
             # https://gitbook.curiouser.top/origin/linux-jq.html#%E4%B8%89%E3%80%81jq%E5%91%BD%E4%BB%A4%E5%8F%82%E6%95%B0
             # -r    如果过滤的结果是一个字符串，那么直接写到标准输出（去掉字符串的引号）;
-            local archiveUrl=$(echo $asset | jq -r '.browser_download_url')
-            local updatedAt=$(echo $asset | jq -r '.updated_at')
-
-            if [[ -z "$archiveUrl" ]]; then
-              echo "❌ 获取下载链接失败！"
-              return 1
+            local updatedAt=$(printf '%s' $_content | jq -r '.updated_at')
+            # 如果没有`updated_at`，则取`published_at`
+            if [[ -z "$updatedAt" ]]; then
+              updatedAt=$(printf '%s' $_content | jq -r '.published_at')
             fi
 
             if [[ -z "$updatedAt" ]]; then
               echo "❌ 获取更新时间失败！"
               return 1
             fi
-
-            local archiveFullName=$(echo $archiveUrl | grep -oi 'MDCx-py-[a-z0-9]\+.[a-z]\+')
-            local archiveVersion=$(echo $archiveFullName | sed 's/MDCx-py-//g' | sed 's/\.[^.]*$//')
 
             local info=("$archiveVersion" "$updatedAt")
             echo "${info[@]}"
@@ -159,7 +162,7 @@ jobs:
             🎉 MDCx新版本！
             📦 新版本号：${{ steps.check.outputs.newVersion }}
             📅 更新时间：${{ steps.check.outputs.newTime }}
-            🔗 发布链接：https://github.com/anyabc/something/releases/tag/MDCx
+            🔗 发布链接：https://github.com/sqzw-x/mdcx/releases/tag/latest
       -
         name: TG Notification - For no new version
         uses: appleboy/telegram-action@master

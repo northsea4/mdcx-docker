@@ -7,6 +7,13 @@ else
   . .env
 fi
 
+# 检查是否有jq命令
+if ! command -v jq &> /dev/null
+then
+  echo "❌ 请先安装jq命令！参考：https://command-not-found.com/jq"
+  exit 1
+fi
+
 
 FILE_INITIALIZED=".mdcx_initialized"
 
@@ -62,7 +69,7 @@ if [ -n "$help" ]; then
   echo "示例-检查并更新:    ./update-src.sh"
   echo ""
   echo "参数说明："
-  echo "--restart                 更新后重启容器，默认true。可选参数值: 1, 0; true, false"
+  echo "--restart                 更新后重启容器，默认false。可选参数值: 1, 0; true, false"
   echo "--force                   强制更新。默认情况下当已发布版本较新于本地版本时才会更新。"
   echo "--dry                     只检查，不更新"
   echo "-h, --help                显示帮助信息"
@@ -123,27 +130,33 @@ else
   exit 1
 fi
 
-_content=$(curl -s "https://api.github.com/repos/anyabc/something/releases/latest")
+_url="https://api.github.com/repos/sqzw-x/mdcx/releases/latest"
+_content=$(curl -s "$_url")
 
-archiveUrl=$(echo $_content | grep -oi 'https://[a-zA-Z0-9./?=_%:-]*MDCx-py-[a-z0-9]\+.[a-z]\+')
-
-if [[ -z "$archiveUrl" ]]; then
-  echo "❌ 获取下载链接失败！"
+# TODO github workflow里竟然会有比较大的概率获取失败
+if [[ -z "$_content" ]]; then
+  echo "❌ 请求 $_url 失败！"
   exit 1
 fi
 
-archiveFullName=$(echo $archiveUrl | grep -oi 'MDCx-py-[a-z0-9]\+.[a-z]\+')
-archiveExt=$(echo $archiveFullName | grep -oi '[a-z]\+$')
-archiveVersion=$(echo $archiveFullName | sed 's/MDCx-py-//g' | sed 's/\.[^.]*$//')
-archivePureName=$(echo $archiveUrl | grep -oi 'MDCx-py-[a-z0-9]\+')
+# tag名称，作为版本号
+tagName=$(printf '%s' $_content | jq -r ".tag_name")
+archiveVersion=$(echo $tagName | sed 's/v//g')
+
+# 源码压缩包(tar格式)链接
+archiveUrl=$(printf '%s' $_content | jq -r ".tarball_url")
+
+if [[ -z "$archiveUrl" ]]; then
+  echo "❌ 从请求结果获取源码压缩包文件下载链接失败！"
+  echo "🔘 请求链接：$_url"
+  exit 1
+fi
 
 if [[ -n "$verbose" ]]; then
-  echo "🔗 下载链接：$archiveUrl"
-  echo "ℹ️ 压缩包全名：$archiveFullName"
-  echo "ℹ️ 压缩包文件名：$archivePureName"
-  echo "ℹ️ 压缩包后缀名：$archiveExt"
+  echo "ℹ️ TAG名称: $tagName"
+  echo "🔗 下载链接: $archiveUrl"
 fi
-echo "ℹ️ 已发布版本：$archiveVersion"
+echo "ℹ️ 已发布版本: $archiveVersion"
 
 # exit
 
@@ -171,7 +184,7 @@ if [[ -n "$shouldUpdate" ]]; then
     exit 0
   fi
 
-  archivePath="$archivePureName.rar"
+  archivePath="$archiveVersion.tar.gz"
 
   if [[ -n "$verbose" ]]; then
     curl -o $archivePath $archiveUrl -L
@@ -182,38 +195,32 @@ if [[ -n "$shouldUpdate" ]]; then
   echo "✅ 下载成功"
   echo "⏳ 开始解压..."
 
-  UNRAR_PATH=$(which unrar)
-  if [[ -z "$UNRAR_PATH" ]]; then
-    echo "❌ 没有unrar命令！"
-  else
-    # 解压
-    unrar x -o+ $archivePath
-    cp -rfp $archivePureName/* $appPath
-    # 删除压缩包
-    rm -f $archivePath
-    # 删除解压出来的目录
-    rm -rf $archivePureName
-    echo "✅ 源码已覆盖到 $appPath"
+  # 解压新的源码到app目录
+  tar -zxvf $archivePath -C $appPath --strip-components 1
+  # 删除压缩包
+  rm -f $archivePath
+  echo "✅ 源码已覆盖到 $appPath"
 
-    if [ -f ".env.versions" ]; then
-      echo "✅ 更新 .env.versions MDCX_APP_VERSION=$archiveVersion"
-      sed -i -e "s/MDCX_APP_VERSION=[0-9.]\+/MDCX_APP_VERSION=$archiveVersion/" .env.versions
-    fi
+  if [ -f ".env.versions" ]; then
+    echo "✅ 更新 .env.versions MDCX_APP_VERSION=$archiveVersion"
+    sed -i -e "s/MDCX_APP_VERSION=[0-9.]\+/MDCX_APP_VERSION=$archiveVersion/" .env.versions
+  fi
 
+  if [ -f ".env" ]; then
     echo "✅ 更新 .env APP_VERSION=$archiveVersion"
     sed -i -e "s/APP_VERSION=[0-9.]\+/APP_VERSION=$archiveVersion/" .env
+  fi
 
-    echo "ℹ️ 删除标记文件 $appPath/$FILE_INITIALIZED"
-    rm -f "$appPath/$FILE_INITIALIZED"
+  echo "ℹ️ 删除标记文件 $appPath/$FILE_INITIALIZED"
+  rm -f "$appPath/$FILE_INITIALIZED"
 
-    if [[ -n "MDCX_SRC_CONTAINER_NAME" ]]; then
-      if [[ "$restart" == "1" || "$restart" == "true" ]]; then
-        echo "⏳ 重启容器..."
-        docker restart $MDCX_SRC_CONTAINER_NAME
-      else
-        echo "ℹ️ 如果已经部署过容器，执行以下命令重启容器"
-        echo "docker restart $MDCX_SRC_CONTAINER_NAME"
-      fi
+  if [[ -n "MDCX_SRC_CONTAINER_NAME" ]]; then
+    if [[ "$restart" == "1" || "$restart" == "true" ]]; then
+      echo "⏳ 重启容器..."
+      docker restart $MDCX_SRC_CONTAINER_NAME
+    else
+      echo "ℹ️ 如果已经部署过容器，执行以下命令重启容器"
+      echo "docker restart $MDCX_SRC_CONTAINER_NAME"
     fi
   fi
 else

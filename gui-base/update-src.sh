@@ -7,6 +7,13 @@ else
   . .env
 fi
 
+# 检查是否有jq命令
+if ! command -v jq &> /dev/null
+then
+  echo "❌ 请先安装jq命令！参考：https://command-not-found.com/jq"
+  exit 1
+fi
+
 
 FILE_INITIALIZED=".mdcx_initialized"
 
@@ -62,7 +69,7 @@ if [ -n "$help" ]; then
   echo "示例-检查并更新:    ./update-src.sh"
   echo ""
   echo "参数说明："
-  echo "--restart                 更新后重启容器，默认true。可选参数值: 1, 0; true, false"
+  echo "--restart                 更新后重启容器，默认false。可选参数值: 1, 0; true, false"
   echo "--force                   强制更新。默认情况下当已发布版本较新于本地版本时才会更新。"
   echo "--dry                     只检查，不更新"
   echo "-h, --help                显示帮助信息"

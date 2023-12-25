@@ -69,7 +69,7 @@ if [ -n "$help" ]; then
   echo "示例-检查并更新:    ./update-src.sh"
   echo ""
   echo "参数说明："
-  echo "--restart                 更新后重启容器，默认true。可选参数值: 1, 0; true, false"
+  echo "--restart                 更新后重启容器，默认false。可选参数值: 1, 0; true, false"
   echo "--force                   强制更新。默认情况下当已发布版本较新于本地版本时才会更新。"
   echo "--dry                     只检查，不更新"
   echo "-h, --help                显示帮助信息"
@@ -195,7 +195,7 @@ if [[ -n "$shouldUpdate" ]]; then
   echo "✅ 下载成功"
   echo "⏳ 开始解压..."
 
-  # 解压
+  # 解压新的源码到app目录
   tar -zxvf $archivePath -C $appPath --strip-components 1
   # 删除压缩包
   rm -f $archivePath
@@ -223,7 +223,6 @@ if [[ -n "$shouldUpdate" ]]; then
       echo "docker restart $MDCX_SRC_CONTAINER_NAME"
     fi
   fi
-
 else
   if [[ $op == '<' ]]; then
     echo "ℹ️ 本地版本 较新于 已发布的最新版本"

@@ -63,7 +63,7 @@ docker run ...
 
 简单来说，下载新版源码，拉取新版镜像，然后重新部署即可。
 
-> 注意`.env`里的`MDCX_BUILTIN_IMAGE_TAG`应该是`latest`或者最新的版本号。
+> 注意`.env`里的`MDCX_SRC_IMAGE_TAG`应该是`latest`或者最新的版本号。
 
 > 建议先备份配置文件等数据，以免部署失败或未知问题导致数据丢失。
 
@@ -247,3 +247,6 @@ docker run -d --name mdcx \
 
 ## FAQ
 请查看 [FAQ](https://github.com/northsea4/mdcx-docker/blob/main/FAQ.md)
+
+## TODOs
+- [ ] 更新部署文档

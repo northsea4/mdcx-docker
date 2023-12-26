@@ -5,8 +5,6 @@
 
 > 优点是`远程桌面`、`文件管理`和`浏览器`，缺点是资源占用相对高一些，上手难度也稍高。
 
-> ⚠️ 请注意，因为上游项目已删库，所以已不支持部署`mdcx-src-webtop-base`镜像。
-
 
 
 ## 1. mdcx-src示例
@@ -46,15 +44,12 @@ bash -c "$(wget https://raw.githubusercontent.com/northsea4/mdcx-docker/main/ins
 ```
 mdcx-docker
   |-- app   ------应用源码目录
-    |-- Data
-    |-- Function
-    |-- Getter
-    |-- Img
-    |-- LICENSE
-    |-- MDCx_Main.py
+    |-- libs
+    |-- resources
+    |-- src
+    |-- main.py
     |-- requirements.txt
     |-- setup.py
-    |-- Ui
     ...
   |-- data ------容器系统数据
     ...

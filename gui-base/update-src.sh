@@ -107,6 +107,20 @@ compareVersion () {
   return 0
 }
 
+# 从`appPath/config.ini.default`获取应用版本
+# [modified_time]
+# modified_time = 2023-12-19 23:53:41
+# version = 120231219
+getAppVersionFromConfig () {
+  local configPath="$1"
+  if [[ -f "$configPath" ]]; then
+    local version=$(cat $configPath | grep -oi 'version\s*=\s*[0-9]\+' | grep -oi '[0-9]\+$')
+    echo $version
+  else
+    echo 0
+  fi
+}
+
 appPath=$(echo "$appPath" | sed 's:/*$::')
 isEmpty=0
 
@@ -115,14 +129,13 @@ if [[ -n "${appPath}" ]]; then
     echo "⚠️ $appPath 不存在，现在创建"
     mkdir -p $appPath
   else
-    if [[ -f "$appPath/setup.py" ]]; then
-      # 'CFBundleShortVersionString': "20230201",
-      appVersion=$(cat $appPath/setup.py | grep -oi 'CFBundleShortVersionString.: "[a-z0-9]\+' | grep -oi '[a-z0-9]\+$')
-      echo "ℹ️ 从 $appPath/setup.py 检测到应用版本为 $appVersion"
-    else
+    appConfigPath="$appPath/config.ini.default"
+    appVersion=$(getAppVersionFromConfig "$appConfigPath")
+    if [[ $appVersion == 0 ]]; then
       isEmpty=1
-      appVersion=0
       echo "ℹ️ 本地应用版本: $appVersion"
+    else
+      echo "ℹ️ 从 $appConfigPath 检测到应用版本为 $appVersion"
     fi
   fi
 else

@@ -247,6 +247,3 @@ docker run -d --name mdcx \
 
 ## FAQ
 请查看 [FAQ](https://github.com/northsea4/mdcx-docker/blob/main/FAQ.md)
-
-## TODOs
-- [ ] 更新部署文档

@@ -121,6 +121,8 @@ mkdir -p $MDCX_DOCKER_DIR && cd $MDCX_DOCKER_DIR
 mkdir -p mdcx-config logs data
 # 必须：配置文件目录标记文件
 echo "/mdcx-config/config.ini" > mdcx-config/MDCx.config
+# 确保有config.ini文件
+touch mdcx-config/config.ini
 
 docker run -d --name mdcx \
   -p 5800:5800 `#Web访问端口` \

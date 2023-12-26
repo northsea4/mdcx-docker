@@ -4,10 +4,9 @@ on:
   push:
     branches:
       - none
-  # The source project MDCx is no longer exists.
-  # schedule:
-  #   # 每30分钟
-  #   - cron: '*/30 * * * *'
+  schedule:
+    # 每30分钟
+    - cron: '*/30 * * * *'
   
   workflow_dispatch:
     inputs:
@@ -85,7 +84,7 @@ jobs:
             # -r    如果过滤的结果是一个字符串，那么直接写到标准输出（去掉字符串的引号）;
             local updatedAt=$(printf '%s' $_content | jq -r '.updated_at')
             # 如果没有`updated_at`，则取`published_at`
-            if [[ -z "$updatedAt" ]]; then
+            if [[ -z "$updatedAt" || "$updatedAt" == 'null' ]]; then
               updatedAt=$(printf '%s' $_content | jq -r '.published_at')
             fi
 

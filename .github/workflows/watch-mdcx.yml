@@ -69,6 +69,11 @@ jobs:
             # tag名称，作为版本号
             local tagName=$(printf '%s' $_content | jq -r ".tag_name")
             local archiveVersion=$(echo $tagName | sed 's/v//g')
+            
+            if [[ -z "$archiveVersion" || "$archiveVersion" == "null" ]]; then
+              echo "❌ 获取版本号失败！"
+              return 1
+            fi
 
             # 源码压缩包(tar格式)链接
             local archiveUrl=$(printf '%s' $_content | jq -r ".tarball_url")
@@ -84,11 +89,11 @@ jobs:
             # -r    如果过滤的结果是一个字符串，那么直接写到标准输出（去掉字符串的引号）;
             local updatedAt=$(printf '%s' $_content | jq -r '.updated_at')
             # 如果没有`updated_at`，则取`published_at`
-            if [[ -z "$updatedAt" || "$updatedAt" == 'null' ]]; then
+            if [[ -z "$updatedAt" || "$updatedAt" == "null" ]]; then
               updatedAt=$(printf '%s' $_content | jq -r '.published_at')
             fi
 
-            if [[ -z "$updatedAt" ]]; then
+            if [[ -z "$updatedAt" || "$updatedAt" == "null" ]]; then
               echo "❌ 获取更新时间失败！"
               return 1
             fi

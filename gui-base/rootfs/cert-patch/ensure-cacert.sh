@@ -24,6 +24,9 @@ if [ ! -f "/app/MDCx" ]; then
   exit 0
 fi
 
+# UPDATE: 2024-02-02
+# 现在看来，应该是使用pyinstaller打包时，没有`--collect-all curl_cffi`参数导致的。
+
 # 正常情况下，`cacert.pem`文件应该存在于`/tmp/_MEIxxxxxx/curl_cffi`目录下。
 # 但是由于未知原因，有时会出现`cacert.pem`文件不存在的情况。
 # 为了避免这种情况，我们将`/cert-for-mdcx/cacert.pem`文件复制到`/tmp/_MEIxxxxxx/curl_cffi`目录下。

@@ -4,7 +4,7 @@
 
 ## 怎么关闭webtop镜像的自动锁屏？
 进入桌面后，打开Konsole，执行以下命令，然后重启容器。
-> ⚠️ 配置文件位于容器数据目录下，所以即使更新镜像也不会丢失配置。
+> ⚠️ 配置文件等数据实际是存放在宿主的目录，所以即使更新镜像也不会丢失配置。
 
 参考资料: [kscreenlockersettings.kcfg](https://github.com/KDE/kscreenlocker/blob/master/settings/kscreenlockersettings.kcfg), [kwin.kcfg](https://github.com/KDE/kwin/blob/master/src/kwin.kcfg)
 
@@ -26,7 +26,7 @@ kwriteconfig5 --file $HOME/.config/kwinrc --group Compositing --key Enabled true
 
 ## 怎么设置webtop镜像的自动锁屏时间？
 进入桌面后，打开Konsole，执行以下命令，然后重启容器。
-> ⚠️ 配置文件位于容器数据目录下，所以即使更新镜像也不会丢失配置。
+> ⚠️ 配置文件等数据实际是存放在宿主的目录，所以即使更新镜像也不会丢失配置。
 
 参考资料: [kscreenlockersettings.kcfg](https://github.com/KDE/kscreenlocker/blob/master/settings/kscreenlockersettings.kcfg)
 
@@ -39,7 +39,7 @@ kwriteconfig5 --file $HOME/.config/kscreenlockerrc --group Daemon --key Timeout 
 
 
 ## 怎么修改UMASK?
-默认的`umask`是`022`，可以通过环境变量`UMASK`设置。
+默认的`umask`是`022`，可以通过修改容器环境变量`UMASK`进行设置。
 
 
 ## 怎么输入中文？
@@ -50,7 +50,7 @@ kwriteconfig5 --file $HOME/.config/kscreenlockerrc --group Daemon --key Timeout 
 
 暂时可以通过复制粘贴的方式输入中文。比如，先在控制主机上输入中文并复制，然后在容器桌面环境中粘贴。
 
-实际上这些镜像都是专用的（也就是只用来运行MDCx），个人觉得并没有太多需要输入中文的场景，所以暂时不打算花太多时间去解决这个问题。
+实际上这些镜像都是专用的（也就是只用来运行MDCx），个人觉得并没有太多需要输入中文的场景，暂时不会去解决这个问题。
 
 
 ## 选择目录对话框卡顿
@@ -61,6 +61,7 @@ kwriteconfig5 --file $HOME/.config/kscreenlockerrc --group Daemon --key Timeout 
 
 ## 重新部署容器后，黑屏，无法正常进入桌面
 如果你有跟 [这个issue](https://github.com/northsea4/mdcx-docker/issues/17) 相似的情况，即重新部署容器后，无法正常进入桌面，只看到如下图所示的界面(`To run a command as administrator (user "root"), use "sudo <command>".`)。
+
 ![image](https://user-images.githubusercontent.com/73220226/232524022-167d8333-62b9-422d-bf90-e0bc07463c73.png)
 
 可以尝试以下解决方法：

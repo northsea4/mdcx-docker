@@ -136,5 +136,4 @@ docker run -d --name mdcx \
 
 
 ## TODO
-- [x] 上游源码采用了daily release自动发布，看能不能跟随
 - [ ] 一键脚本github镜像加速

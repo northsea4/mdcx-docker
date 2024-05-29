@@ -91,7 +91,7 @@ get_release_info() {
     echo "❌ 找不到 tag_name=${tag_name} 的release！"
     return 1
 
-  local tag_name=(printf '%s' $release | jq -r '.tag_name')
+  local tag_name=$(printf '%s' $release | jq -r '.tag_name')
   if [[ -z "$tag_name" ]]; then
     echo "❌ 找不到 tag_name！"
     return 1

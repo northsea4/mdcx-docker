@@ -33,8 +33,8 @@ generate_app_version() {
   # 去除非数字字符
   published_at=$(echo "$published_at" | tr -dc '0-9')
   
-  # 取前8位数字作为年月日，前缀为1
-  echo "1${published_at:0:8}"
+  # 取前8位数字作为年月日，前缀为d
+  echo "d${published_at:0:8}"
 }
 
 find_release_by_tag_name() {

@@ -133,3 +133,8 @@ docker run -d --name mdcx \
 
 ## FAQ
 请查看 [FAQ](https://github.com/northsea4/mdcx-docker/blob/main/FAQ.md)
+
+
+## TODO
+- [x] 上游源码采用了daily release自动发布，看能不能跟随
+- [ ] 一键脚本github镜像加速

@@ -39,7 +39,7 @@ generate_app_version() {
 
 find_release_by_tag_name() {
   local repo=$1
-  local local target_tag_name=$2
+  local target_tag_name=$2
   
   local url="https://api.github.com/repos/${repo}/releases"
 
@@ -56,7 +56,7 @@ find_release_by_tag_name() {
     local releases=$(printf '%s' $response | jq -c '.[]')
     for release in $releases; do
       local tag_name=$(printf '%s' $release | jq -r '.tag_name')
-      local if [[ "$tag_name" == "$target_tag_name" ]]; then
+      if [[ "$tag_name" == "$target_tag_name" ]]; then
         found=true
         echo $release
         break
@@ -84,22 +84,22 @@ get_release_info() {
   local repo="$1"
   local tag_name="$2"
 
-  local echo "⏳ 正在获取仓库 ${repo} 中 tag_name=${tag_name} 的release..."
+  echo "⏳ 正在获取仓库 ${repo} 中 tag_name=${tag_name} 的release..."
   local release=$(find_release_by_tag_name "$repo" "$tag_name")
 
   if [[ -z "$release" ]]; then
-    local echo "❌ 找不到 tag_name=${tag_name} 的release！"
+    echo "❌ 找不到 tag_name=${tag_name} 的release！"
     return 1
 
   local tag_name=(printf '%s' $release | jq -r '.tag_name')
-  local if [[ -z "$tag_name" ]]; then
-    local echo "❌ 找不到 tag_name！"
+  if [[ -z "$tag_name" ]]; then
+    echo "❌ 找不到 tag_name！"
     return 1
   fi
 
   published_at=$(printf '%s' $release | jq -r '.published_at')
   if [[ -z "$published_at" ]]; then
-    local echo "❌ 找不到 published_at！"
+    echo "❌ 找不到 published_at！"
     return 1
   fi
 
@@ -107,7 +107,7 @@ get_release_info() {
 
   tar_url=$(printf '%s' $release | jq -r '.tarball_url')
   if [[ -z "$tar_url" ]]; then
-    local echo "❌ 从请求结果获取源码压缩包文件下载链接失败！"
+    echo "❌ 从请求结果获取源码压缩包文件下载链接失败！"
     return 1
   fi
 

@@ -133,3 +133,7 @@ docker run -d --name mdcx \
 
 ## FAQ
 请查看 [FAQ](https://github.com/northsea4/mdcx-docker/blob/main/FAQ.md)
+
+
+## TODO
+- [ ] 一键脚本github镜像加速

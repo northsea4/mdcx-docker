@@ -84,7 +84,7 @@ get_release_info() {
   local repo="$1"
   local tag_name="$2"
 
-  echo "⏳ 正在获取仓库 ${repo} 中 tag_name=${tag_name} 的release..."
+  # echo "⏳ 正在获取仓库 ${repo} 中 tag_name=${tag_name} 的release..."
   local release=$(find_release_by_tag_name "$repo" "$tag_name")
 
   if [[ -z "$release" ]]; then

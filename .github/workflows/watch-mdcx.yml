@@ -91,7 +91,6 @@ jobs:
           hasNewVersion=false
 
           # 获取最新版本信息
-          info=($(getNewInfo))
           newVersion="$release_version"
           newTime="$published_at"
 

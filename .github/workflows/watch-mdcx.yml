@@ -58,59 +58,41 @@ jobs:
         run: |
           source scripts/base.sh
           source scripts/github.sh
+          source scripts/release-utils.sh
 
           VAR_VERSION="MDCX_LATEST_VERSION"
           VAR_TIME="MDCX_LATEST_TIME"
 
-          # 获取最新版本信息，返回值为数组，第一个元素为版本号，第二个元素为更新时间
-          getNewInfo() {
-            local _content=$(curl -s "${{ env.RELEASE_URL }}")
-            
-            # tag名称，作为版本号
-            local tagName=$(printf '%s' $_content | jq -r ".tag_name")
-            local archiveVersion=$(echo $tagName | sed 's/v//g')
-            
-            if [[ -z "$archiveVersion" || "$archiveVersion" == "null" ]]; then
-              echo "❌ 获取版本号失败！"
-              return 1
-            fi
+          REPO="sqzw-x/mdcx"
+          TAG_NAME="daily_release"
 
-            # 源码压缩包(tar格式)链接
-            local archiveUrl=$(printf '%s' $_content | jq -r ".tarball_url")
+          REPO="sqzw-x/mdcx"
+          TAG_NAME="daily_release"
 
-            if [[ -z "$archiveUrl" ]]; then
-              echo "❌ 从请求结果获取源码压缩包文件下载链接失败！"
-              echo "🔘 请求链接：$_url"
-              echo "🔘 请求结果：$_content"
-              exit 1
-            fi
+          info=$(get_release_info "$REPO" "$TAG_NAME")
+          if [[ $? -ne 0 ]]; then
+            echo "❌ 获取仓库 ${REPO} 中 tag_name=${TAG_NAME} 的release信息失败！"
+            exit 1
+          else
+            echo "✅ 获取仓库 ${REPO} 中 tag_name=${TAG_NAME} 的release信息成功！"
+          fi
+          echo $info | jq
 
-            # https://gitbook.curiouser.top/origin/linux-jq.html#%E4%B8%89%E3%80%81jq%E5%91%BD%E4%BB%A4%E5%8F%82%E6%95%B0
-            # -r    如果过滤的结果是一个字符串，那么直接写到标准输出（去掉字符串的引号）;
-            local updatedAt=$(printf '%s' $_content | jq -r '.updated_at')
-            # 如果没有`updated_at`，则取`published_at`
-            if [[ -z "$updatedAt" || "$updatedAt" == "null" ]]; then
-              updatedAt=$(printf '%s' $_content | jq -r '.published_at')
-            fi
+          # 发布时间
+          published_at=$(printf '%s' $info | jq -r ".published_at")
+          echo "📅 发布时间: $published_at"
 
-            if [[ -z "$updatedAt" || "$updatedAt" == "null" ]]; then
-              echo "❌ 获取更新时间失败！"
-              return 1
-            fi
-
-            local info=("$archiveVersion" "$updatedAt")
-            echo "${info[@]}"
-            return 0
-          }
+          # 版本号
+          release_version=$(printf '%s' $info | jq -r ".release_version")
+          echo "🔢 版本号: $release_version"
 
           newVersion=""
           newTime=""
           hasNewVersion=false
 
           # 获取最新版本信息
-          info=($(getNewInfo))
-          newVersion=${info[0]}
-          newTime=${info[1]}
+          newVersion="$release_version"
+          newTime="$published_at"
 
           # 获取已记录的版本信息
           latestVersion=$(getVariable $VAR_VERSION)

@@ -1,5 +1,8 @@
 ## 更新日志
 
+### [v0.8.0] - 2024-05-29
+- 1.跟进daily_release。[#40](https://github.com/northsea4/mdcx-docker/issues/40)
+
 ### [v0.7.0] - 2023-12-24
 - 1.更改上游源码项目为`sqzw-x/mdcx`，#32
 

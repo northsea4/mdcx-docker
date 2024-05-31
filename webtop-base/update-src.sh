@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# 脚本说明: 当使用源码部署时，使用该脚本自动完成更新源码的处理。
+
+# DEV:
+# - gui-base/update-src.sh
+# - webtop-base/update-src.sh
+# - webtop-base/rootfs-src/app-assets/scripts/update-src.sh
+# 除了.env提示不同外，其余部分基本相同。
+# webtop-base/rootfs-src/app-assets/scripts/update-src.sh 中 appPath=/app; 没有restart容器处理。
+
 if [ ! -f ".env" ]; then
   echo "⚠️ 当前目录缺少文件 .env。示例文件：https://github.com/northsea4/mdcx-docker/blob/main/webtop-base/.env.sample"
   # exit 1
@@ -40,10 +49,6 @@ do
       shift
       shift
       ;;
-    --force)
-      force=1
-      shift
-      ;;
     --dry)
       dry=1
       shift
@@ -66,184 +71,212 @@ done
 if [ -n "$help" ]; then
   echo "脚本功能：更新自部署的应用源码"
   echo ""
-  echo "示例-检查并更新:    ./update-src.sh"
+  echo "示例-检查并更新:    $0"
   echo ""
   echo "参数说明："
   echo "--restart                 更新后重启容器，默认false。可选参数值: 1, 0; true, false"
-  echo "--force                   强制更新。默认情况下当已发布版本较新于本地版本时才会更新。"
   echo "--dry                     只检查，不更新"
   echo "-h, --help                显示帮助信息"
   exit 0
 fi
 
-compareVersion () {
-  if [[ $1 == $2 ]]
-  then
-    return 0
+generate_app_version() {
+  local published_at="$1"
+
+  # 去除非数字字符
+  published_at=$(echo "$published_at" | tr -dc '0-9')
+
+  # 取前8位数字作为年月日，前缀为d
+  echo "d${published_at:0:8}"
+}
+
+find_release_by_tag_name() {
+  local repo=$1
+  local target_tag_name=$2
+  
+  local url="https://api.github.com/repos/${repo}/releases"
+
+  # echo "URL: $url"
+
+  local target_release=""
+
+  let found=false
+  local page=1
+  while true; do
+    local response=$(curl -s "${url}?per_page=100&page=${page}")
+    if [[ -z "$response" ]]; then
+      break
+    fi
+
+    local releases=$(printf '%s' $response | jq -c '.[]')
+    for release in $releases; do
+      tag_name=$(printf '%s' $release | jq -r '.tag_name')
+      if [[ "$tag_name" == "$target_tag_name" ]]; then
+        found=true
+        echo $release
+        break
+      fi
+    done
+
+    if [[ $found ]]; then
+      break
+    fi
+
+    page=$((page + 1))
+  done
+}
+
+# 获取指定仓库和tag_name的release，并解析得到release信息
+# 返回json对象:
+# {
+#   "tag_name": "v1.0.0",
+#   "published_at": "2022-01-01T00:00:00Z",
+#   "release_version": "120220101",
+#   "tar_url": "https://api.github.com/repos/sqzw-x/mdcx/tarball/daily_release",
+#   "zip_url": "https://api.github.com/repos/sqzw-x/mdcx/zipball/daily_release"
+# }
+get_release_info() {
+  local repo="$1"
+  local tag_name="$2"
+
+  # echo "⏳ 正在获取仓库 ${repo} 中 tag_name=${tag_name} 的release..."
+  local release=$(find_release_by_tag_name "$repo" "$tag_name")
+
+  if [[ -z "$release" ]]; then
+    echo "❌ 找不到 tag_name=${tag_name} 的release！"
+    return 1
   fi
-  local IFS=.
-  local i ver1=($1) ver2=($2)
-  # fill empty fields in ver1 with zeros
-  for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
-  do
-    ver1[i]=0
-  done
-  for ((i=0; i<${#ver1[@]}; i++))
-  do
-    if [[ -z ${ver2[i]} ]]
-    then
-      # fill empty fields in ver2 with zeros
-      ver2[i]=0
-    fi
-    if ((10#${ver1[i]} > 10#${ver2[i]}))
-    then
-      return 1
-    fi
-    if ((10#${ver1[i]} < 10#${ver2[i]}))
-    then
-      return 2
-    fi
-  done
+
+  tag_name=$(printf '%s' $release | jq -r '.tag_name')
+  if [[ -z "$tag_name" ]]; then
+    echo "❌ 找不到 tag_name！"
+    return 1
+  fi
+
+  published_at=$(printf '%s' $release | jq -r '.published_at')
+  if [[ -z "$published_at" ]]; then
+    echo "❌ 找不到 published_at！"
+    return 1
+  fi
+
+  release_version=$(generate_app_version "$published_at")
+
+  tar_url=$(printf '%s' $release | jq -r '.tarball_url')
+  if [[ -z "$tar_url" ]]; then
+    echo "❌ 从请求结果获取源码压缩包文件下载链接失败！"
+    return 1
+  fi
+
+  zip_url=$(printf '%s' $release | jq -r '.zipball_url')
+  if [[ -z "$zip_url" ]]; then
+    echo "❌ 从请求结果获取源码压缩包文件下载链接失败！"
+    return 1
+  fi
+
+  # 构建一个json对象
+  local data="{
+    \"tag_name\": \"${tag_name}\",
+    \"published_at\": \"${published_at}\",
+    \"release_version\": \"${release_version}\",
+    \"tar_url\": \"${tar_url}\",
+    \"zip_url\": \"${zip_url}\"
+  }"
+  echo $data
   return 0
 }
 
-# 从`appPath/config.ini.default`获取应用版本
-# [modified_time]
-# modified_time = 2023-12-19 23:53:41
-# version = 120231219
-getAppVersionFromConfig () {
-  local configPath="$1"
-  if [[ -f "$configPath" ]]; then
-    local version=$(cat $configPath | grep -oi 'version\s*=\s*[0-9]\+' | grep -oi '[0-9]\+$')
-    echo $version
-  else
-    echo 0
-  fi
-}
-
 appPath=$(echo "$appPath" | sed 's:/*$::')
-isEmpty=0
 
 if [[ -n "${appPath}" ]]; then
   if [[ ! -d "${appPath}" ]]; then
     echo "⚠️ $appPath 不存在，现在创建"
     mkdir -p $appPath
   else
-    appConfigPath="$appPath/config.ini.default"
-    appVersion=$(getAppVersionFromConfig "$appConfigPath")
-    if [[ $appVersion == 0 ]]; then
-      isEmpty=1
-      echo "ℹ️ 本地应用版本: $appVersion"
-    else
-      echo "ℹ️ 从 $appConfigPath 检测到应用版本为 $appVersion"
-    fi
+    echo "✅ $appPath 已经存在"
   fi
 else
-  echo "❌ 应用源码目录不能为空！"
+  echo "❌ 应用源码目录参数不能为空！"
   exit 1
 fi
 
-_url="https://api.github.com/repos/sqzw-x/mdcx/releases/latest"
-_content=$(curl -s "$_url")
+REPO="sqzw-x/mdcx"
+TAG_NAME="daily_release"
 
-# TODO github workflow里竟然会有比较大的概率获取失败
-if [[ -z "$_content" ]]; then
-  echo "❌ 请求 $_url 失败！"
+info=$(get_release_info "$REPO" "$TAG_NAME")
+if [[ $? -ne 0 ]]; then
+  echo "❌ 获取仓库 ${REPO} 中 tag_name=${TAG_NAME} 的release信息失败！"
+  exit 1
+else
+  echo "✅ 获取仓库 ${REPO} 中 tag_name=${TAG_NAME} 的release信息成功！"
+fi
+echo $info | jq
+# exit 0
+
+# 发布时间
+published_at=$(printf '%s' $info | jq -r ".published_at")
+echo "📅 发布时间: $published_at"
+
+# 版本号
+release_version=$(printf '%s' $info | jq -r ".release_version")
+echo "🔢 版本号: $release_version"
+
+# 源码链接
+file_url=$(printf '%s' $info | jq -r ".tar_url")
+echo "🔗 下载链接: $file_url"
+
+
+if [[ -z "$file_url" ]]; then
+  echo "❌ 从请求结果获取下载链接失败！"
   exit 1
 fi
 
-# tag名称，作为版本号
-tagName=$(printf '%s' $_content | jq -r ".tag_name")
-archiveVersion=$(echo $tagName | sed 's/v//g')
-
-# 源码压缩包(tar格式)链接
-archiveUrl=$(printf '%s' $_content | jq -r ".tarball_url")
-
-if [[ -z "$archiveUrl" ]]; then
-  echo "❌ 从请求结果获取源码压缩包文件下载链接失败！"
-  echo "🔘 请求链接：$_url"
-  exit 1
+if [[ -n "$dry" ]]; then
+  exit 0
 fi
+
+file_path="$release_version.tar.gz"
 
 if [[ -n "$verbose" ]]; then
-  echo "ℹ️ TAG名称: $tagName"
-  echo "🔗 下载链接: $archiveUrl"
-fi
-echo "ℹ️ 已发布版本: $archiveVersion"
-
-# exit
-
-compareVersion $archiveVersion $appVersion
-case $? in
-  0) op='=';;
-  1) op='>';;
-  2) op='<';;
-esac
-
-shouldUpdate=
-if [[ $op == '>' ]]; then
-  echo "🆕 已发布的最新版本 较新于 本地版本"
-  shouldUpdate=1
-fi
-
-if [[ -n "$force" ]]; then
-  echo "ℹ️ 强制更新"
-  shouldUpdate=1
-fi
-
-if [[ -n "$shouldUpdate" ]]; then
-
-  if [[ -n "$dry" ]]; then
-    exit 0
-  fi
-
-  archivePath="$archiveVersion.tar.gz"
-
-  if [[ -n "$verbose" ]]; then
-    curl -o $archivePath $archiveUrl -L
-  else
-    curl -so $archivePath $archiveUrl -L
-  fi
-
-  echo "✅ 下载成功"
-  echo "⏳ 开始解压..."
-
-  # 解压新的源码到app目录
-  tar -zxvf $archivePath -C $appPath --strip-components 1
-  # 删除压缩包
-  rm -f $archivePath
-  echo "✅ 源码已覆盖到 $appPath"
-
-  if [ -f ".env.versions" ]; then
-    echo "✅ 更新 .env.versions MDCX_APP_VERSION=$archiveVersion"
-    sed -i -e "s/MDCX_APP_VERSION=[0-9.]\+/MDCX_APP_VERSION=$archiveVersion/" .env.versions
-  fi
-
-  if [ -f ".env" ]; then
-    echo "✅ 更新 .env APP_VERSION=$archiveVersion"
-    sed -i -e "s/APP_VERSION=[0-9.]\+/APP_VERSION=$archiveVersion/" .env
-  fi
-
-  echo "ℹ️ 删除标记文件 $appPath/$FILE_INITIALIZED"
-  rm -f "$appPath/$FILE_INITIALIZED"
-
-  if [[ -n "MDCX_SRC_CONTAINER_NAME" ]]; then
-    if [[ "$restart" == "1" || "$restart" == "true" ]]; then
-      echo "⏳ 重启容器..."
-      docker restart $MDCX_SRC_CONTAINER_NAME
-    else
-      echo "ℹ️ 如果已经部署过容器，执行以下命令重启容器"
-      echo "docker restart $MDCX_SRC_CONTAINER_NAME"
-    fi
-  fi
+  curl -o $file_path $file_url -L
 else
-  if [[ $op == '<' ]]; then
-    echo "ℹ️ 本地版本 较新于 已发布的最新版本"
+  curl -so $file_path $file_url -L
+fi
+
+if [[ $? -ne 0 ]]; then
+  echo "❌ 下载源码压缩包失败！"
+  exit 1
+fi
+
+echo "✅ 下载成功"
+echo "⏳ 开始解压..."
+
+# 解压新的源码到app目录
+tar -zxvf $file_path -C $appPath --strip-components 1
+# 删除压缩包
+rm -f $file_path
+echo "✅ 源码已覆盖到 $appPath"
+
+if [ -f ".env.versions" ]; then
+  echo "✅ 更新 .env.versions MDCX_APP_VERSION=$release_version"
+  sed -i -e "s/MDCX_APP_VERSION=[0-9.]\+/MDCX_APP_VERSION=$release_version/" .env.versions
+fi
+
+if [ -f ".env" ]; then
+  echo "✅ 更新 .env APP_VERSION=$release_version"
+  sed -i -e "s/APP_VERSION=[0-9.]\+/APP_VERSION=$release_version/" .env
+fi
+
+echo "ℹ️ 删除标记文件 $appPath/$FILE_INITIALIZED"
+rm -f "$appPath/$FILE_INITIALIZED"
+
+if [[ -n "MDCX_SRC_CONTAINER_NAME" ]]; then
+  if [[ "$restart" == "1" || "$restart" == "true" ]]; then
+    echo "⏳ 重启容器..."
+    docker restart $MDCX_SRC_CONTAINER_NAME
   else
-    echo "ℹ️ 本地版本 已是最新版本"
+    echo "ℹ️ 如果已经部署过容器，执行以下命令重启容器"
+    echo "docker restart $MDCX_SRC_CONTAINER_NAME"
   fi
 fi
 
-if [ -n "$GITHUB_ACTIONS" ]; then
-  echo "APP_VERSION=$archiveVersion" >> $GITHUB_OUTPUT
-fi
+echo "🎉 Enjoy~"

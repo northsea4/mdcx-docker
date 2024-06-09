@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "mdcx-builtin-gui-base",
+			"path": "../../home/gitpod/mdcx-builtin-gui-base"
+		},
+		{
+			"name": "mdcx-builtin-gui-base",
+			"path": "../../home/gitpod/mdcx-builtin-gui-base/mdcx-builtin-gui-base"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			".env.versions": "env",
+			".env.sample": "env"
+		}
+	}
+}

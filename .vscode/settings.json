@@ -2,5 +2,6 @@
   "files.associations": {
     ".env.versions": "env",
     ".env.sample": "env"
-  }
+  },
+  "zowe.security.secureCredentialsEnabled": false
 }

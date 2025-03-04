@@ -5,7 +5,6 @@ on:
     branches:
       - none
   schedule:
-    # 每30分钟
     - cron: '*/30 * * * *'
   
   workflow_dispatch:
@@ -200,4 +199,19 @@ jobs:
             echo "❌ 触发构建失败！"
             exit 1
           fi
+
+  del_runs:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ env.GITHUB_API_TOKEN }}
+          repository: ${{ github.repository }}
+          retain_days: 5
+          keep_minimum_runs: 10
+          delete_workflow_pattern: 'Watch MDCx Release'
   

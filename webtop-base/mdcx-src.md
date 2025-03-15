@@ -98,7 +98,7 @@ services:
 
       # 配置文件目录
       - ./mdcx-config:/mdcx-config
-      # `配置文件目录`标记文件
+      # `配置文件目录`标记文件（纯文本文件，内容为当前使用的配置文件路径，默认/mdcx-config/config.ini）
       - ./mdcx-config/MDCx.config:/app/MDCx.config
 
       # 日志目录

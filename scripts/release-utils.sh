@@ -53,12 +53,13 @@ find_release_by_tag_name() {
       break
     fi
 
-    local releases=$(printf '%s' $response | jq -c '.[]')
+    local releases=$(printf '%s' "$response" | jq -c '.[]')
     for release in $releases; do
-      local tag_name=$(printf '%s' $release | jq -r '.tag_name')
+      local tag_name=$(printf '%s' "$release" | jq -r '.tag_name')
       if [[ "$tag_name" == "$target_tag_name" ]]; then
         found=true
-        echo $release
+        # 确保输出为压缩的单行JSON
+        printf '%s' "$release" | jq -c '.'
         break
       fi
     done
@@ -69,6 +70,37 @@ find_release_by_tag_name() {
 
     page=$((page + 1))
   done
+}
+
+# 直接获取指定tag_name的release信息
+fetch_release_info() {
+  local repo="$1"
+  local tag_name="$2"
+  
+  local url="https://api.github.com/repos/${repo}/releases/${tag_name}"
+  
+  # 使用临时文件来处理包含换行符的JSON响应
+  local temp_file=$(mktemp)
+  
+  curl -s "${url}" > "$temp_file"
+  if [[ ! -s "$temp_file" ]]; then
+    rm -f "$temp_file"
+    echo "❌ 无法获取release信息！"
+    return 1
+  fi
+  
+  # 检查是否返回错误
+  local message=$(cat "$temp_file" | jq -r '.message // empty' 2>/dev/null)
+  if [[ -n "$message" ]]; then
+    rm -f "$temp_file"
+    echo "❌ API错误：$message"
+    return 1
+  fi
+  
+  # 压缩JSON，移除换行符和多余空格，确保输出为单行
+  cat "$temp_file" | jq -c '.'
+  rm -f "$temp_file"
+  return 0
 }
 
 # 获取指定仓库和tag_name的release，并解析得到release信息
@@ -84,43 +116,55 @@ get_release_info() {
   local repo="$1"
   local tag_name="$2"
 
-  # echo "⏳ 正在获取仓库 ${repo} 中 tag_name=${tag_name} 的release..."
-  local release=$(find_release_by_tag_name "$repo" "$tag_name")
+  local release=""
+  
+  # 如果tag_name为latest，直接调用API获取最新release
+  if [[ "$tag_name" == "latest" ]]; then
+    # echo "⏳ 正在获取仓库 ${repo} 的最新release..."
+    release=$(fetch_release_info "$repo" "$tag_name")
+    if [[ $? -ne 0 ]]; then
+      return 1
+    fi
+    # echo $release
+  else
+    # echo "⏳ 正在获取仓库 ${repo} 中 tag_name=${tag_name} 的release..."
+    release=$(find_release_by_tag_name "$repo" "$tag_name")
+  fi
 
   if [[ -z "$release" ]]; then
     echo "❌ 找不到 tag_name=${tag_name} 的release！"
     return 1
   fi
 
-  local tag_name=$(printf '%s' $release | jq -r '.tag_name')
-  if [[ -z "$tag_name" ]]; then
+  local tag_name_from_json=$(printf '%s' "$release" | jq -r '.tag_name')
+  if [[ -z "$tag_name_from_json" || "$tag_name_from_json" == "null" ]]; then
     echo "❌ 找不到 tag_name！"
     return 1
   fi
 
-  published_at=$(printf '%s' $release | jq -r '.published_at')
-  if [[ -z "$published_at" ]]; then
+  published_at=$(printf '%s' "$release" | jq -r '.published_at')
+  if [[ -z "$published_at" || "$published_at" == "null" ]]; then
     echo "❌ 找不到 published_at！"
     return 1
   fi
 
   release_version=$(generate_app_version "$published_at")
 
-  tar_url=$(printf '%s' $release | jq -r '.tarball_url')
-  if [[ -z "$tar_url" ]]; then
+  tar_url=$(printf '%s' "$release" | jq -r '.tarball_url')
+  if [[ -z "$tar_url" || "$tar_url" == "null" ]]; then
     echo "❌ 从请求结果获取源码压缩包文件下载链接失败！"
     return 1
   fi
 
-  zip_url=$(printf '%s' $release | jq -r '.zipball_url')
-  if [[ -z "$zip_url" ]]; then
+  zip_url=$(printf '%s' "$release" | jq -r '.zipball_url')
+  if [[ -z "$zip_url" || "$zip_url" == "null" ]]; then
     echo "❌ 从请求结果获取源码压缩包文件下载链接失败！"
     return 1
   fi
 
   # 构建一个json对象
   local data="{
-    \"tag_name\": \"${tag_name}\",
+    \"tag_name\": \"${tag_name_from_json}\",
     \"published_at\": \"${published_at}\",
     \"release_version\": \"${release_version}\",
     \"tar_url\": \"${tar_url}\",

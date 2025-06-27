@@ -114,6 +114,37 @@ find_release_by_tag_name() {
   done
 }
 
+# 直接获取指定tag_name的release信息
+fetch_release_info() {
+  local repo="$1"
+  local tag_name="$2"
+  
+  local url="https://api.github.com/repos/${repo}/releases/${tag_name}"
+  
+  # 使用临时文件来处理包含换行符的JSON响应
+  local temp_file=$(mktemp)
+  
+  curl -s "${url}" > "$temp_file"
+  if [[ ! -s "$temp_file" ]]; then
+    rm -f "$temp_file"
+    echo "❌ 无法获取release信息！"
+    return 1
+  fi
+  
+  # 检查是否返回错误
+  local message=$(cat "$temp_file" | jq -r '.message // empty' 2>/dev/null)
+  if [[ -n "$message" ]]; then
+    rm -f "$temp_file"
+    echo "❌ API错误：$message"
+    return 1
+  fi
+  
+  # 压缩JSON，移除换行符和多余空格，确保输出为单行
+  cat "$temp_file" | jq -c '.'
+  rm -f "$temp_file"
+  return 0
+}
+
 # 获取指定仓库和tag_name的release，并解析得到release信息
 # 返回json对象:
 # {
@@ -127,8 +158,20 @@ get_release_info() {
   local repo="$1"
   local tag_name="$2"
 
-  # echo "⏳ 正在获取仓库 ${repo} 中 tag_name=${tag_name} 的release..."
-  local release=$(find_release_by_tag_name "$repo" "$tag_name")
+  local release=""
+
+  # 如果tag_name为latest，直接调用API获取最新release
+  if [[ "$tag_name" == "latest" ]]; then
+    # echo "⏳ 正在获取仓库 ${repo} 的最新release..."
+    release=$(fetch_release_info "$repo" "$tag_name")
+    if [[ $? -ne 0 ]]; then
+      return 1
+    fi
+    # echo $release
+  else
+    # echo "⏳ 正在获取仓库 ${repo} 中 tag_name=${tag_name} 的release..."
+    release=$(find_release_by_tag_name "$repo" "$tag_name")
+  fi
 
   if [[ -z "$release" ]]; then
     echo "❌ 找不到 tag_name=${tag_name} 的release！"

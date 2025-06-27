@@ -32,6 +32,9 @@ appVersion=0
 # 源码存放目录
 appPath="./app"
 
+# release tag
+tagName="daily_release"
+
 # 更新源码后，是否重启容器
 restart=false
 
@@ -43,6 +46,10 @@ do
       appPath="$2"
       shift 2
       shift
+      ;;
+    -t|--tag)
+      tagName="$2"
+      shift 2
       ;;
     --restart)
       restart="$2"
@@ -74,6 +81,8 @@ if [ -n "$help" ]; then
   echo "示例-检查并更新:    $0"
   echo ""
   echo "参数说明："
+  echo "--src, --path, -p         指定源码存放目录，默认 ./app"
+  echo "--tag                     指定要更新的版本标签，默认daily_release"
   echo "--restart                 更新后重启容器，默认false。可选参数值: 1, 0; true, false"
   echo "--dry                     只检查，不更新"
   echo "-h, --help                显示帮助信息"
@@ -200,7 +209,7 @@ else
 fi
 
 REPO="sqzw-x/mdcx"
-TAG_NAME="daily_release"
+TAG_NAME="${tagName}"
 
 info=$(get_release_info "$REPO" "$TAG_NAME")
 if [[ $? -ne 0 ]]; then

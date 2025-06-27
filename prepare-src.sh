@@ -12,6 +12,8 @@ then
   exit 1
 fi
 
+release_tag="daily_release"
+
 while [[ $# -gt 0 ]]
 do
   key="$1"
@@ -20,6 +22,10 @@ do
       context="$2"
       shift
       shift
+      ;;
+    --tag)
+      release_tag="$2"
+      shift 2
       ;;
     --verbose)
       verbose=1
@@ -38,6 +44,13 @@ do
       ;;
   esac
 done
+
+if [[ -n "$release_tag" ]]; then
+  echo "✅ 使用指定的版本标签: $release_tag"
+else
+  echo "❌ 未指定版本标签"
+  exit 1
+fi
 
 if [[ -z "$context" ]]; then
   echo "❌ context is required!"
@@ -161,7 +174,7 @@ get_release_info() {
 }
 
 REPO="sqzw-x/mdcx"
-TAG_NAME="daily_release"
+TAG_NAME="${release_tag}"
 
 info=$(get_release_info "$REPO" "$TAG_NAME")
 if [[ $? -ne 0 ]]; then

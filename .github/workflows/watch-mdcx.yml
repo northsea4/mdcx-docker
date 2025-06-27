@@ -16,6 +16,7 @@ on:
 env:
   RELEASE_URL: 'https://api.github.com/repos/sqzw-x/mdcx/releases/latest'
   ENABLE_WATCH: ${{ secrets.ENABLE_WATCH_MDCX_RELEASE }}
+  MDCX_TAG: ${{ vars.MDCX_TAG }}
   GITHUB_CURRENT_REPO: ${{ github.event.repository.name }}
   GITHUB_API_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
   GITHUB_OWNER: ${{ github.repository_owner }}
@@ -63,10 +64,7 @@ jobs:
           VAR_TIME="MDCX_LATEST_TIME"
 
           REPO="sqzw-x/mdcx"
-          TAG_NAME="daily_release"
-
-          REPO="sqzw-x/mdcx"
-          TAG_NAME="daily_release"
+          TAG_NAME="${{ env.MDCX_TAG || 'latest' }}"
 
           info=$(get_release_info "$REPO" "$TAG_NAME")
           if [[ $? -ne 0 ]]; then

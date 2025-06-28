@@ -45,6 +45,16 @@ do
   esac
 done
 
+# 显示帮助
+if [[ -n "$help" ]]; then
+  echo "用法: $0 [--context <context>] [--tag <release_tag>] [--verbose] [--dry]"
+  echo "  --context <context>   指定源码解压目录，默认为当前目录"
+  echo "  --tag <release_tag>   指定要下载的版本标签，默认为'daily_release'"
+  echo "  --verbose             显示详细的下载过程"
+  echo "  --dry                 只进行检查，不实际下载"
+  exit 0
+fi
+
 if [[ -n "$release_tag" ]]; then
   echo "✅ 使用指定的版本标签: $release_tag"
 else
@@ -88,30 +98,40 @@ find_release_by_tag_name() {
 
   local target_release=""
 
-  let found=false
+  local found=false
   local page=1
   while true; do
     local response=$(curl -s "${url}?per_page=100&page=${page}")
     if [[ -z "$response" ]]; then
       break
     fi
-
-    local releases=$(printf '%s' $response | jq -c '.[]')
-    for release in $releases; do
-      tag_name=$(printf '%s' $release | jq -r '.tag_name')
-      if [[ "$tag_name" == "$target_tag_name" ]]; then
-        found=true
-        echo $release
-        break
-      fi
-    done
-
-    if [[ $found ]]; then
+    
+    # 检查是否为空数组或错误信息
+    local array_size=$(printf '%s' "$response" | jq 'length')
+    if [[ "$array_size" == "0" ]]; then
+      break
+    fi
+    
+    # 使用临时文件来处理包含换行符的JSON响应
+    local temp_file=$(mktemp)
+    printf '%s' "$response" > "$temp_file"
+    
+    # 直接使用jq过滤匹配的tag_name
+    local matched_release=$(cat "$temp_file" | jq -c --arg tag "$target_tag_name" '.[] | select(.tag_name == $tag)')
+    rm -f "$temp_file"
+    
+    if [[ -n "$matched_release" ]]; then
+      printf '%s' "$matched_release"
+      found=true
       break
     fi
 
     page=$((page + 1))
   done
+  
+  if [[ "$found" == "false" ]]; then
+    return 1
+  fi
 }
 
 # 直接获取指定tag_name的release信息
@@ -119,10 +139,15 @@ fetch_release_info() {
   local repo="$1"
   local tag_name="$2"
   
-  local url="https://api.github.com/repos/${repo}/releases/${tag_name}"
-  
-  # 使用临时文件来处理包含换行符的JSON响应
   local temp_file=$(mktemp)
+  
+  # 先尝试通过tags API获取release信息
+  local url="https://api.github.com/repos/${repo}/releases/tags/${tag_name}"
+  
+  # 对于latest标签，使用latest endpoint
+  if [[ "$tag_name" == "latest" ]]; then
+    url="https://api.github.com/repos/${repo}/releases/latest"
+  fi
   
   curl -s "${url}" > "$temp_file"
   if [[ ! -s "$temp_file" ]]; then
@@ -160,16 +185,12 @@ get_release_info() {
 
   local release=""
 
-  # 如果tag_name为latest，直接调用API获取最新release
-  if [[ "$tag_name" == "latest" ]]; then
-    # echo "⏳ 正在获取仓库 ${repo} 的最新release..."
-    release=$(fetch_release_info "$repo" "$tag_name")
-    if [[ $? -ne 0 ]]; then
-      return 1
-    fi
-    # echo $release
-  else
-    # echo "⏳ 正在获取仓库 ${repo} 中 tag_name=${tag_name} 的release..."
+  # 先尝试通过fetch_release_info获取
+  # echo "⏳ 正在通过API直接获取仓库 ${repo} 的标签 ${tag_name}..."
+  release=$(fetch_release_info "$repo" "$tag_name")
+  if [[ $? -ne 0 || -z "$release" ]]; then
+    # 如果获取失败，尝试通过find_release_by_tag_name获取
+    # echo "⏳ 通过API直接获取失败，尝试在所有releases中查找 ${tag_name}..."
     release=$(find_release_by_tag_name "$repo" "$tag_name")
   fi
 
@@ -178,28 +199,28 @@ get_release_info() {
     return 1
   fi
 
-  tag_name=$(printf '%s' $release | jq -r '.tag_name')
-  if [[ -z "$tag_name" ]]; then
+  tag_name=$(printf '%s' "$release" | jq -r '.tag_name')
+  if [[ -z "$tag_name" || "$tag_name" == "null" ]]; then
     echo "❌ 找不到 tag_name！"
     return 1
   fi
 
-  published_at=$(printf '%s' $release | jq -r '.published_at')
-  if [[ -z "$published_at" ]]; then
+  published_at=$(printf '%s' "$release" | jq -r '.published_at')
+  if [[ -z "$published_at" || "$published_at" == "null" ]]; then
     echo "❌ 找不到 published_at！"
     return 1
   fi
 
   release_version=$(generate_app_version "$published_at")
 
-  tar_url=$(printf '%s' $release | jq -r '.tarball_url')
-  if [[ -z "$tar_url" ]]; then
+  tar_url=$(printf '%s' "$release" | jq -r '.tarball_url')
+  if [[ -z "$tar_url" || "$tar_url" == "null" ]]; then
     echo "❌ 从请求结果获取源码压缩包文件下载链接失败！"
     return 1
   fi
 
-  zip_url=$(printf '%s' $release | jq -r '.zipball_url')
-  if [[ -z "$zip_url" ]]; then
+  zip_url=$(printf '%s' "$release" | jq -r '.zipball_url')
+  if [[ -z "$zip_url" || "$zip_url" == "null" ]]; then
     echo "❌ 从请求结果获取源码压缩包文件下载链接失败！"
     return 1
   fi
@@ -230,15 +251,15 @@ echo $info | jq
 # exit 0
 
 # 发布时间
-published_at=$(printf '%s' $info | jq -r ".published_at")
+published_at=$(printf '%s' "$info" | jq -r ".published_at")
 echo "📅 发布时间: $published_at"
 
 # 版本号
-release_version=$(printf '%s' $info | jq -r ".release_version")
+release_version=$(printf '%s' "$info" | jq -r ".release_version")
 echo "🔢 版本号: $release_version"
 
 # 源码链接
-file_url=$(printf '%s' $info | jq -r ".tar_url")
+file_url=$(printf '%s' "$info" | jq -r ".tar_url")
 echo "🔗 下载链接: $file_url"
 
 

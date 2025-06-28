@@ -45,31 +45,40 @@ find_release_by_tag_name() {
 
   local target_release=""
 
-  let found=false
+  local found=false
   local page=1
   while true; do
     local response=$(curl -s "${url}?per_page=100&page=${page}")
     if [[ -z "$response" ]]; then
       break
     fi
-
-    local releases=$(printf '%s' "$response" | jq -c '.[]')
-    for release in $releases; do
-      local tag_name=$(printf '%s' "$release" | jq -r '.tag_name')
-      if [[ "$tag_name" == "$target_tag_name" ]]; then
-        found=true
-        # 确保输出为压缩的单行JSON
-        printf '%s' "$release" | jq -c '.'
-        break
-      fi
-    done
-
-    if [[ $found ]]; then
+    
+    # 检查是否为空数组或错误信息
+    local array_size=$(printf '%s' "$response" | jq 'length')
+    if [[ "$array_size" == "0" ]]; then
+      break
+    fi
+    
+    # 使用临时文件来处理包含换行符的JSON响应
+    local temp_file=$(mktemp)
+    printf '%s' "$response" > "$temp_file"
+    
+    # 直接使用jq过滤匹配的tag_name
+    local matched_release=$(cat "$temp_file" | jq -c --arg tag "$target_tag_name" '.[] | select(.tag_name == $tag)')
+    rm -f "$temp_file"
+    
+    if [[ -n "$matched_release" ]]; then
+      printf '%s' "$matched_release"
+      found=true
       break
     fi
 
     page=$((page + 1))
   done
+  
+  if [[ "$found" == "false" ]]; then
+    return 1
+  fi
 }
 
 # 直接获取指定tag_name的release信息
@@ -77,10 +86,15 @@ fetch_release_info() {
   local repo="$1"
   local tag_name="$2"
   
-  local url="https://api.github.com/repos/${repo}/releases/${tag_name}"
-  
-  # 使用临时文件来处理包含换行符的JSON响应
   local temp_file=$(mktemp)
+  
+  # 先尝试通过tags API获取release信息
+  local url="https://api.github.com/repos/${repo}/releases/tags/${tag_name}"
+  
+  # 对于latest标签，使用latest endpoint
+  if [[ "$tag_name" == "latest" ]]; then
+    url="https://api.github.com/repos/${repo}/releases/latest"
+  fi
   
   curl -s "${url}" > "$temp_file"
   if [[ ! -s "$temp_file" ]]; then
@@ -118,16 +132,12 @@ get_release_info() {
 
   local release=""
   
-  # 如果tag_name为latest，直接调用API获取最新release
-  if [[ "$tag_name" == "latest" ]]; then
-    # echo "⏳ 正在获取仓库 ${repo} 的最新release..."
-    release=$(fetch_release_info "$repo" "$tag_name")
-    if [[ $? -ne 0 ]]; then
-      return 1
-    fi
-    # echo $release
-  else
-    # echo "⏳ 正在获取仓库 ${repo} 中 tag_name=${tag_name} 的release..."
+  # 先尝试通过fetch_release_info获取
+  # echo "⏳ 正在通过API直接获取仓库 ${repo} 的标签 ${tag_name}..."
+  release=$(fetch_release_info "$repo" "$tag_name")
+  if [[ $? -ne 0 || -z "$release" ]]; then
+    # 如果获取失败，尝试通过find_release_by_tag_name获取
+    # echo "⏳ 通过API直接获取失败，尝试在所有releases中查找 ${tag_name}..."
     release=$(find_release_by_tag_name "$repo" "$tag_name")
   fi
 

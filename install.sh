@@ -21,12 +21,19 @@ then
   exit 1
 fi
 
-# 检查是否有docker-compose命令
-if ! command -v docker-compose &> /dev/null
+# 检查docker-compose命令（兼容 v1 和 v2）
+if command -v docker-compose &> /dev/null
 then
-  echo "❌ 未找到docker-compose命令，请先安装docker-compose。"
+  DOCKER_COMPOSE="docker-compose"
+elif docker compose version &> /dev/null
+then
+  DOCKER_COMPOSE="docker compose"
+else
+  echo "❌ 未找到docker-compose或docker compose命令，请先安装docker compose。"
   exit 1
 fi
+
+echo "✅ 使用命令: $DOCKER_COMPOSE"
 
 OS=$(uname)
 FILE_INITIALIZED=".mdcx_initialized"
@@ -474,14 +481,14 @@ echo "✅ 替换容器名称完成"
 # 拉取镜像
 echo ""
 echo "⏳ 拉取镜像..."
-docker-compose pull
+$DOCKER_COMPOSE pull
 if [ $? -eq 0 ]; then
   echo "✅ 拉取镜像完成"
 else
   echo "❌ 拉取镜像失败，请检查错误日志。如果是网络问题，在解决后你可以使用以下命令重新拉取和运行: "
   echo "cd ${DIR_FULL_PATH}"
-  echo "docker-compose pull"
-  echo "docker-compose up -d"
+  echo "$DOCKER_COMPOSE pull"
+  echo "$DOCKER_COMPOSE up -d"
 
   on_error "${DIR_FULL_PATH}"
 fi
@@ -489,7 +496,7 @@ fi
 echo ""
 read -p "❓ 是否运行容器？[y/n] " RUN_CONTAINER
 if [[ "$RUN_CONTAINER" =~ ^[Yy](es)?$ ]]; then
-  docker-compose up -d
+  $DOCKER_COMPOSE up -d
   if [ $? -eq 0 ]; then
       echo "✅ 容器已经成功运行"
       echo ""
@@ -501,10 +508,10 @@ if [[ "$RUN_CONTAINER" =~ ^[Yy](es)?$ ]]; then
       on_error "${DIR_FULL_PATH}"
   fi
 else
-  docker-compose create
+  $DOCKER_COMPOSE create
 
   echo "🔘 你可以之后通过以下命令启动容器:"
-  echo "cd ${DIR_FULL_PATH} && docker-compose up -d"
+  echo "cd ${DIR_FULL_PATH} && $DOCKER_COMPOSE up -d"
 fi
 
 echo ""

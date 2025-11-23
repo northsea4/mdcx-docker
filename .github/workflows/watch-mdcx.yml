@@ -15,13 +15,13 @@ on:
 
 env:
   RELEASE_URL: 'https://api.github.com/repos/sqzw-x/mdcx/releases/latest'
-  ENABLE_WATCH: ${{ secrets.ENABLE_WATCH_MDCX_RELEASE }}
+  ENABLE_WATCH: ${{ vars.ENABLE_WATCH_MDCX_RELEASE }}
   MDCX_TAG: ${{ vars.MDCX_TAG }}
   GITHUB_CURRENT_REPO: ${{ github.event.repository.name }}
   GITHUB_API_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
   GITHUB_OWNER: ${{ github.repository_owner }}
-  ENABLE_TG_NOTIFICATION: ${{ secrets.ENABLE_TG_NOTIFICATION }}
-  ENABLE_TG_VERBOSE_NOTIFICATION: ${{ secrets.ENABLE_TG_VERBOSE_NOTIFICATION }}
+  ENABLE_TG_NOTIFICATION: ${{ vars.ENABLE_TG_NOTIFICATION }}
+  ENABLE_TG_VERBOSE_NOTIFICATION: ${{ vars.ENABLE_TG_VERBOSE_NOTIFICATION }}
   SCHEDULE_INTERVAL: 30
 
 jobs:

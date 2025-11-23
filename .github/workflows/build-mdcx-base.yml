@@ -27,7 +27,7 @@ env:
   IMAGE_KEY: build-mdcx-base
   PYPI_MIRROR: https://pypi.org/simple
   APT_SOURCE_HOST: ''
-  ENABLE_TG_NOTIFICATION: ${{ secrets.ENABLE_TG_NOTIFICATION }}
+  ENABLE_TG_NOTIFICATION: ${{ vars.ENABLE_TG_NOTIFICATION }}
 
 jobs:
   build:

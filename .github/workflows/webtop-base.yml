@@ -26,7 +26,7 @@ env:
   IMAGE_BASE: webtop-base
   IMAGE_KEY: webtop-base
   APT_SOURCE_HOST: ''
-  ENABLE_TG_NOTIFICATION: ${{ secrets.ENABLE_TG_NOTIFICATION }}
+  ENABLE_TG_NOTIFICATION: ${{ vars.ENABLE_TG_NOTIFICATION }}
 
 jobs:
   build:

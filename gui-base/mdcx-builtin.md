@@ -24,7 +24,7 @@ bash -c "$(wget https://raw.githubusercontent.com/northsea4/mdcx-docker/main/ins
 > 以下的步骤是手动部署的详细说明，即使使用了脚本部署，也请务必阅读一下了解更多细节，如安全、更新等。
 
 
-[stainless403/mdcx-builtin-gui-base](https://hub.docker.com/r/stainless403/mdcx-builtin-gui-base)镜像已内置编译好的MDCx。如果想使用本地MDCx源码版的，请使用[stainless403/mdcx-src-gui-base](https://hub.docker.com/r/stainless403/mdcx-src-gui-base)镜像([🔗 查看部署说明](https://github.com/northsea4/mdcx-docker/blob/main/gui-base/mdcx-src.md))。
+[stainless403/mdcx-builtin-gui-base](https://hub.docker.com/r/stainless403/mdcx-builtin-gui-base)镜像已内置编译好的MDCx，直接部署即可使用。
 
 
 ### 1.1 准备项目目录
@@ -36,14 +36,13 @@ mdcx-docker
   |-- data ------容器系统数据
     ...
   |-- mdcx-config --------应用配置文件目录
-    |-- config.ini
+    |-- config.v2.json
     |-- MDCx.config
   |-- logs --------应用日志目录
     |-- 2023-02-04-01-15-00.txt
   |-- .env ------环境变量文件
   |-- .env.sample ------环境变量示例文件
   |-- .env.versions ------应用版本文件
-  |-- gui-base-src.sample.yml
   |-- gui-base-builtin.sample.yml -------容器部署配置示例
   |-- docker-compose.yml -------容器部署配置
 ```
@@ -81,7 +80,7 @@ services:
           
       # 配置文件目录
       - ./mdcx-config:/mdcx-config
-      # `配置文件目录`标记文件（纯文本文件，内容为当前使用的配置文件路径，默认/mdcx-config/config.ini）
+      # `配置文件目录`标记文件（纯文本文件，内容为当前使用的配置文件路径，默认/mdcx-config/config.v2.json）
       - ./mdcx-config/MDCx.config:/app/MDCx.config
 
       # 日志目录
@@ -120,9 +119,8 @@ mkdir -p $MDCX_DOCKER_DIR && cd $MDCX_DOCKER_DIR
 # 必须：相关数据或日志目录
 mkdir -p mdcx-config logs data
 # 必须：配置文件目录标记文件
-echo "/mdcx-config/config.ini" > mdcx-config/MDCx.config
-# 确保有config.ini文件
-touch mdcx-config/config.ini
+echo "/mdcx-config/config.v2.json" > mdcx-config/MDCx.config
+# 不需要手动创建配置文件，程序会自动创建
 
 docker run -d --name mdcx \
   -p 5800:5800 `#Web访问端口` \

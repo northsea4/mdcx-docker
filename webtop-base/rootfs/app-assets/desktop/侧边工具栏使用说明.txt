@@ -1,0 +1,27 @@
+侧边工具栏使用说明
+
+1. 展开工具栏
+- 把鼠标移动到屏幕左侧，点击 "Open Dashboard" 按钮即可展开侧边工具栏。
+
+2. 进入屏幕设置
+- 在侧边工具栏中打开 "Screen Settings"。
+
+3. 常用选项说明
+- HiDPI (Pixel Perfect): 高分屏显示优化，推荐在高分辨率屏幕开启。
+- Anti-aliasing: 抗锯齿，让文字和图形边缘更平滑。
+- Use CSS cursors: 使用浏览器 CSS 光标，部分环境下可改善光标显示。
+- UI Scaling: 按比例缩放界面（如 100%、125%、150%）。
+- Preset: 快速选择常见分辨率。
+- Width / Height: 手动输入分辨率宽高。
+
+4. 分辨率调整
+- Set Manual Resolution: 应用当前手动输入的宽高。
+- Reset to Window: 将分辨率重置为当前窗口大小。
+
+5. Scale Locally
+- Scale Locally: ON 表示优先在本地浏览器侧缩放，通常更流畅。
+
+6. 使用建议
+- 如果界面太小：优先提高 UI Scaling。
+- 如果画面模糊：尝试开启 HiDPI 并关闭过高缩放。
+- 如果浏览器窗口大小变化后显示不协调：使用 Reset to Window。

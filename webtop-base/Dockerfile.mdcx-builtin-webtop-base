@@ -3,8 +3,8 @@
 ARG BASE_IMAGE_TAG="ubuntu-kde-22.04"
 
 # 已编译应用的镜像tag
-ARG MDCX_BIN_IMAGE_TAG="latest"
-FROM stainless403/build-mdcx:$MDCX_BIN_IMAGE_TAG as provider
+ARG MDCX_BIN_IMAGE_TAG="v2-latest-pyqt6"
+FROM stainless403/build-mdcx:$MDCX_BIN_IMAGE_TAG AS provider
 
 
 FROM stainless403/webtop-base:$BASE_IMAGE_TAG
@@ -28,20 +28,10 @@ ARG BUILDOS
 ARG BUILDARCH
 ARG BUILDVARIANT
 
-RUN echo "-----Image target platform details:"
-RUN echo "TARGETPLATFORM    : $TARGETPLATFORM"
-RUN echo "TARGETOS          : $TARGETOS"
-RUN echo "TARGETARCH        : $TARGETARCH"
-RUN echo "TARGETVARIANT     : $TARGETVARIANT"
-
-RUN echo "-----Image build platform details:"
-RUN echo "BUILDPLATFORM     : $BUILDPLATFORM"
-RUN echo "BUILDOS           : $BUILDOS"
-RUN echo "BUILDARCH         : $BUILDARCH"
-RUN echo "BUILDVARIANT      : $BUILDVARIANT"
-
-RUN apt-get update -y
-RUN apt-get install unrar curl -y
+# 输出构建信息
+RUN echo "-----Image platform details:" && \
+  echo "Target: $TARGETPLATFORM ($TARGETOS/$TARGETARCH/$TARGETVARIANT)" && \
+  echo "Build: $BUILDPLATFORM ($BUILDOS/$BUILDARCH/$BUILDVARIANT)"
 
 WORKDIR /app
 
@@ -53,7 +43,7 @@ RUN mkdir -p "$MDCX_CONFIG_PATH" && \
   chmod -R 777 "$MDCX_CONFIG_PATH"
 
 # 写入默认的`配置文件目录`标记文件
-RUN echo "$MDCX_CONFIG_PATH/config.ini" > /app/MDCx.config
+RUN echo "$MDCX_CONFIG_PATH/config.v2.json" > /app/MDCx.config
 
 # 复制已编译的文件
 COPY --from=provider --chmod=+x /MDCx /app/MDCx

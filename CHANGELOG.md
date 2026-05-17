@@ -1,5 +1,12 @@
 ## 更新日志
 
+### [v0.9.1] - 2026-05-17
+- 1.统一 MDCx v2 默认配置文件路径为 `config.v2.json`。
+- 2.更新部署文档与 Dockerfile，移除手动创建空配置文件的步骤。
+
+### [v0.9.0] - 2026-05-17
+- v2
+
 ### [v0.8.0] - 2024-05-29
 - 1.跟进daily_release。[#40](https://github.com/northsea4/mdcx-docker/issues/40)
 

@@ -1,10 +1,12 @@
 # syntax=docker/dockerfile:1.4
 
-ARG BASE_IMAGE_TAG="ubuntu-22.04"
-FROM stainless403/baseimage-gui:$BASE_IMAGE_TAG
+ARG BASE_IMAGE_TAG="ubuntu-24.04-v4"
+FROM jlesage/baseimage-gui:$BASE_IMAGE_TAG
+
+ARG BASE_IMAGE_TAG
 
 LABEL maintainer="stainless403"
-LABEL description="base on stainless403/baseimage-gui:$BASE_IMAGE_TAG"
+LABEL description="base on jlesage/baseimage-gui:$BASE_IMAGE_TAG"
 
 ARG TARGETPLATFORM
 ARG TARGETOS
@@ -16,50 +18,80 @@ ARG BUILDOS
 ARG BUILDARCH
 ARG BUILDVARIANT
 
-RUN echo "-----Image target platform details:"
-RUN echo "TARGETPLATFORM    : $TARGETPLATFORM"
-RUN echo "TARGETOS          : $TARGETOS"
-RUN echo "TARGETARCH        : $TARGETARCH"
-RUN echo "TARGETVARIANT     : $TARGETVARIANT"
-
-RUN echo "-----Image build platform details:"
-RUN echo "BUILDPLATFORM     : $BUILDPLATFORM"
-RUN echo "BUILDOS           : $BUILDOS"
-RUN echo "BUILDARCH         : $BUILDARCH"
-RUN echo "BUILDVARIANT      : $BUILDVARIANT"
+# 输出构建信息
+RUN echo "-----Image platform details:" && \
+  echo "Target: $TARGETPLATFORM ($TARGETOS/$TARGETARCH/$TARGETVARIANT)" && \
+  echo "Build: $BUILDPLATFORM ($BUILDOS/$BUILDARCH/$BUILDVARIANT)"
 
 ARG APP_VERSION
 
-ENV APP_NAME        "TigerVNC APP"
-ENV APP_VERSION     $APP_VERSION
+ENV APP_NAME="TigerVNC APP"
+ENV APP_VERSION=$APP_VERSION
 
-ENV USER_ID         1000
-ENV GROUP_ID        1000
+ENV USER_ID=1000
+ENV GROUP_ID=1000
 
 # 启用cjk字体
-ENV ENABLE_CJK_FONT 1
+ENV ENABLE_CJK_FONT=1
 
 # 宽度(px)
-ENV DISPLAY_WIDTH   "1200"
+ENV DISPLAY_WIDTH="1200"
 # 高度(px)
-ENV DISPLAY_HEIGHT  "750"
+ENV DISPLAY_HEIGHT="750"
 
 ARG APT_SOURCE_HOST="mirrors.ustc.edu.cn"
 
-RUN if [[ -n "$APT_SOURCE_HOST" ]]; then \
-    sed -i "s/archive.ubuntu.com/${APT_SOURCE_HOST}/g" /etc/apt/sources.list; \
-  fi
+# TODO 配置apt源
 
-RUN apt-get update -y
-
-# 安装一些必须的软件包
-RUN apt-get install -y \
-    curl \
-    locales \
-    # ImportError: libGL.so.1: cannot open shared object file: No such file or directory
-    libgl1 \
-    fonts-wqy-zenhei \
-    fonts-noto-color-emoji
+# 安装软件包
+RUN apt update -y && \
+  apt install -y --no-install-recommends \
+  curl \
+  unrar \
+  locales \
+  # ImportError: libGL.so.1: cannot open shared object file: No such file or directory
+  libgl1 \
+  # ImportError: libEGL.so.1: cannot open shared object file: No such file or directory
+  libegl1 \
+  # 字体
+  fonts-wqy-zenhei \
+  fonts-noto-color-emoji \
+  # X11和xcb相关库
+  libglib2.0-0 \
+  libxcb1 \
+  libxcb-xinerama0 \
+  libxcb-randr0 \
+  libxcb-cursor0 \
+  libxcb-keysyms1 \
+  libxcb-image0 \
+  libxcb-shm0 \
+  libxcb-icccm4 \
+  libxcb-sync1 \
+  libxcb-xfixes0 \
+  libxcb-shape0 \
+  libxcb-render-util0 \
+  libxcb-render0 \
+  libxcb-glx0 \
+  libx11-6 \
+  libxext6 \
+  libxrender1 \
+  libsm6 \
+  libfontconfig1 \
+  libfreetype6 \
+  libtiff6 \
+  libwebpdemux2 \
+  libglu1-mesa \
+  libxkbcommon-x11-0 \
+  libxkbcommon0 \
+  libdbus-1-3 && \
+  # 清理缓存
+  apt-get autoremove -y; \
+  apt-get autoclean; \
+  apt-get clean; \
+  rm -rf /var/lib/apt/lists/*; \
+  rm -rf /var/cache/apt/archives/*; \
+  rm -rf /tmp/*; \
+  rm -rf /var/tmp/*
 
 
 RUN export LANG=zh_CN.UTF-8 && locale-gen zh_CN.UTF-8

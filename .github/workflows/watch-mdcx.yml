@@ -12,11 +12,14 @@ on:
       isDev:
         description: Is Dev
         type: boolean
+        default: true
 
 env:
   RELEASE_URL: 'https://api.github.com/repos/sqzw-x/mdcx/releases/latest'
   ENABLE_WATCH: ${{ vars.ENABLE_WATCH_MDCX_RELEASE }}
   MDCX_TAG: ${{ vars.MDCX_TAG }}
+  MDCX_SRC_TAG: ${{ vars.MDCX_SRC_TAG }}
+  MDCX_SRC_REPO: ${{ vars.MDCX_SRC_REPO }}
   GITHUB_CURRENT_REPO: ${{ github.event.repository.name }}
   GITHUB_API_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
   GITHUB_OWNER: ${{ github.repository_owner }}
@@ -26,17 +29,10 @@ env:
 
 jobs:
   # 检查是否有新版本
-  # TODO 清理N天前的runs
   watch:
+    if: ${{ vars.ENABLE_WATCH_MDCX_RELEASE == 'true' || (github.event_name == 'workflow_dispatch' && github.event.inputs.isDev == 'true') }}
     runs-on: ubuntu-latest
     steps:
-      -
-        run: |
-          # TODO 在job上貌似不能读取env或者secrets
-
-          if [[ "${{ env.ENABLE_WATCH }}" != "true" && "${{ github.event.inputs.isDev }}" != "true" ]]; then
-            exit 1
-          fi
       -
         name: Set timezone
         uses: szenius/set-timezone@v1.0
@@ -63,8 +59,31 @@ jobs:
           VAR_VERSION="MDCX_LATEST_VERSION"
           VAR_TIME="MDCX_LATEST_TIME"
 
-          REPO="sqzw-x/mdcx"
-          TAG_NAME="${{ env.MDCX_TAG || 'latest' }}"
+          REPO="${{ env.MDCX_SRC_REPO }}"
+          TAG_NAME="${{ env.MDCX_SRC_TAG }}"
+
+          # 回退读取仓库根目录 .env
+          if [[ -z "$REPO" && -f .env ]]; then
+            REPO=$(grep -E '^MDCX_SRC_REPO=' .env | tail -n1 | cut -d '=' -f2-)
+          fi
+          if [[ -z "$TAG_NAME" && -f .env ]]; then
+            TAG_NAME=$(grep -E '^MDCX_SRC_TAG=' .env | tail -n1 | cut -d '=' -f2-)
+          fi
+
+          if [[ -z "$TAG_NAME" ]]; then
+            TAG_NAME="${{ env.MDCX_TAG }}"
+          fi
+          if [[ -z "$REPO" ]]; then
+            REPO='sqzw-x/mdcx'
+          fi
+          if [[ -z "$TAG_NAME" ]]; then
+            if [[ "$REPO" == "sqzw-x/mdcx" ]]; then
+              TAG_NAME="daily_release"
+            else
+              TAG_NAME="latest"
+            fi
+          fi
+          echo "✅ 使用版本标签: $TAG_NAME"
 
           info=$(get_release_info "$REPO" "$TAG_NAME")
           if [[ $? -ne 0 ]]; then
@@ -116,6 +135,8 @@ jobs:
           echo "hasNewVersion=$hasNewVersion" >> $GITHUB_OUTPUT
           echo "latestVersion=$latestVersion" >> $GITHUB_OUTPUT
           echo "latestTime=$latestTime" >> $GITHUB_OUTPUT
+          echo "srcRepo=$REPO" >> $GITHUB_OUTPUT
+          echo "tagName=$TAG_NAME" >> $GITHUB_OUTPUT
           # 当前时间
           echo "currentTime=$(date '+%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
           # 下次检查时间
@@ -145,7 +166,7 @@ jobs:
             🎉 MDCx新版本！
             📦 新版本号：${{ steps.check.outputs.newVersion }}
             📅 更新时间：${{ steps.check.outputs.newTime }}
-            🔗 发布链接：https://github.com/sqzw-x/mdcx/releases/tag/latest
+            🔗 发布链接：https://github.com/${{ steps.check.outputs.srcRepo }}/releases/tag/${{ steps.check.outputs.tagName }}
       -
         name: TG Notification - For no new version
         uses: appleboy/telegram-action@master
@@ -191,7 +212,7 @@ jobs:
             -H "Authorization: Bearer ${TOKEN}"\
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/${REPO}/actions/workflows/${WORKFLOW_ID}/dispatches \
-            -d '{"ref":"main","inputs":{"stage":"prod","baseImage":"latest"}}'
+            -d '{"ref":"main","inputs":{"stage":"${{ github.event.inputs.isDev == 'true' && 'dev' || 'prod' }}"}}'
 
           if [[ $? -ne 0 ]]; then
             echo "❌ 触发构建失败！"

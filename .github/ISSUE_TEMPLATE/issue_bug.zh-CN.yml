@@ -60,9 +60,7 @@ body:
       description: 请勾选您使用的镜像
       options:
         - mdcx-builtin-gui-base
-        - mdcx-src-gui-base
         - mdcx-builtin-webtop-base
-        - mdcx-src-webtop-base
     validations:
       required: true
   - type: textarea

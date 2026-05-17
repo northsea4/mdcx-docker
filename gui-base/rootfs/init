@@ -1,4 +1,8 @@
 #!/bin/sh
+#
+# This is the system init of the container, i.e. the first script executed when
+# the container starts.
+#
 
 set -e # Exit immediately if a command exits with a non-zero status.
 set -u # Treat unset variables as an error.
@@ -17,33 +21,32 @@ log() {
             echo "$*" | cut -c 4-
             ;;
         *)
-            printf "[%-${MIN_LOG_PREFIX_LENGTH}s] " "$STAGE"
+            printf "[%-${MIN_LOG_PREFIX_LENGTH}s] " "${STAGE}"
             echo "$*"
             ;;
     esac
 }
 
 log_script() {
-    while IFS= read OUTPUT; do
-        case "$OUTPUT" in
-            :::*) log "$OUTPUT";;
-            *) log "$1: $OUTPUT";;
+    while IFS= read -r output; do
+        case "${output}" in
+            :::*) log "${output}" ;;
+            *) log "$1: ${output}" ;;
         esac
     done
 }
 
 set_min_log_prefix_length() {
-    find /etc/services.d -maxdepth 1 -type d | while read DIR
-    do
-        if [ "${#DIR}" -gt "$MIN_LOG_PREFIX_LENGTH" ]; then
-            MIN_LOG_PREFIX_LENGTH="${#DIR}"
+    find /etc/services.d -maxdepth 1 -type d | while read -r dir; do
+        if [ "${#dir}" -gt "${MIN_LOG_PREFIX_LENGTH}" ]; then
+            MIN_LOG_PREFIX_LENGTH="${#dir}"
         fi
     done
 }
 
 valid_env_var_name() {
     case "$1" in
-        *[!a-zA-Z0-9_]*|[0-9]*)
+        *[!a-zA-Z0-9_]* | [0-9]*)
             return 1
             ;;
         *)
@@ -53,16 +56,16 @@ valid_env_var_name() {
 }
 
 load_env_var() {
-    VAR_NAME="$1"
-    VAR_VAL="$2"
+    var_name="$1"
+    var_val="$2"
     # Use the parameter expansion '${parameter+word}': we want to set
-    # the environment variable only when *unset*.  If the variable is
+    # the environment variable only when *unset*. If the variable is
     # already set, with null or a value, we need to skip it.
     # https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_06_02
-    VAR_TEST="$(eval echo \$\{$VAR_NAME+x\})"
-    if [ -z "$VAR_TEST" ]; then
-        export "$VAR_NAME"="$VAR_VAL"
-        echo "export $VAR_NAME=\"$VAR_VAL\"" >> /var/tmp/.cont-env-internal
+    var_test="$(eval echo \$\{"${var_name}"+x\})"
+    if [ -z "${var_test}" ]; then
+        export "${var_name}"="${var_val}"
+        echo "export ${var_name}=\"${var_val}\"" >> /var/tmp/.cont-env-internal
     fi
 }
 
@@ -77,15 +80,14 @@ umask 022
 STAGE=cont-env
 log "loading container environment variables..."
 if [ -d /etc/cont-env.d ]; then
-    FILELIST="$(mktemp)"
-    find /etc/cont-env.d -maxdepth 1 -type f | sort > "$FILELIST"
-    exec 3<"$FILELIST" # Open for reading on file descriptor 3.
-    while read FILE
-    do
-        FILENAME="$(basename "$FILE")"
+    flist="$(mktemp)"
+    find /etc/cont-env.d -maxdepth 1 -type f | sort > "${flist}"
+    exec 3< "${flist}" # Open for reading on file descriptor 3.
+    while read -r fpath; do
+        fname="$(basename "${fpath}")"
 
-        if ! valid_env_var_name "$FILENAME"; then
-            echo "invalid environment variable name: $FILENAME"
+        if ! valid_env_var_name "${fname}"; then
+            log "invalid environment variable name: ${fname}"
             exit 1
         fi
 
@@ -93,53 +95,49 @@ if [ -d /etc/cont-env.d ]; then
         # If the calling process has appropriate privileges (i.e., is superuser), 
         # POSIX.1-2001 permits an implementation to indicate success for an X_OK check 
         # even if none of the execute file permission bits are set. 
-        if [ -x "${FILE}" ] && ls -ld "${FILE}" | grep -q '^-.*x'; then
-            # The file is an executable.  The value of the environment variable
-            # is the stdout of the program.  Anything printed to stderr is
+        if [ -x "${fpath}" ] && ls -ld "${fpath}" | grep -q '^-.*x'; then
+            # The file is an executable. The value of the environment variable
+            # is the stdout of the program. Anything printed to stderr is
             # redirected to the container's log.
 
-            echo "executing..." | log_script "$FILENAME"
+            echo "executing..." | log_script "${fname}"
 
-            # Create a file descriptor used to store the stderr output of
-            # the program.
-            CMDOUT="$(mktemp)"
-            exec 4>"$CMDOUT" # Open for writing on file descriptor 4.
+            # Create a file to store the stderr output of the program.
+            cmd_out="$(mktemp)"
 
             # Execute the program.
             set +e
-            VAL="$($FILE 2>&4 | head -n1)"
-            RC="$?"
+            val="$(${fpath} 2> "${cmd_out}")"
+            rc="$?"
             set -e
 
             # Log any stderr output from the program.
-            log_script "$FILENAME" < "$CMDOUT"
+            log_script "${fname}" < "${cmd_out}"
 
-            # Remove file descriptor used to store the stderr output of the
-            # program.
-            exec 4>&- # Close file descriptor.
-            rm "$CMDOUT"
+            # Remove file used to store the stderr output of the program.
+            rm "${cmd_out}"
 
-            if [ $RC -eq 0 ] || [ $RC -eq 100 ]; then
-                echo "terminated successfully." | log_script "$FILENAME"
+            if [ "${rc}" -eq 0 ] || [ "${rc}" -eq 100 ]; then
+                echo "terminated successfully." | log_script "${fname}"
             else
-                echo "terminated with error $RC." | log_script "$FILENAME"
-                exit $RC
+                echo "terminated with error ${rc}." | log_script "${fname}"
+                exit "${rc}"
             fi
 
             # Load the environment variable in case of success.
-            if [ $RC -eq 0 ]; then
-                echo "loading..." | log_script "$FILENAME"
-                load_env_var "$FILENAME" "$VAL"
+            if [ "${rc}" -eq 0 ]; then
+                echo "loading..." | log_script "${fname}"
+                load_env_var "${fname}" "$(echo "${val}" | head -n1)"
             else
-                echo "not setting variable."
+                echo "not setting variable." | log_script "${fname}"
             fi
         else
-            echo "loading..." | log_script "$FILENAME"
-            load_env_var "$FILENAME" "$(cat "$FILE" | head -n1)"
+            echo "loading..." | log_script "${fname}"
+            load_env_var "${fname}" "$(head -n1 < "${fpath}")"
         fi
     done <&3
     exec 3>&- # Close file descriptor.
-    rm "$FILELIST"
+    rm "${flist}"
 fi
 log "container environment variables initialized."
 
@@ -147,23 +145,22 @@ log "container environment variables initialized."
 STAGE=cont-secrets
 log "loading container secrets..."
 if [ -d /run/secrets ]; then
-    FILELIST="$(mktemp)"
-    find /run/secrets -maxdepth 1 -type f -name "CONT_ENV_*" | sort > "$FILELIST"
-    exec 3<"$FILELIST" # Open for reading on file descriptor 3.
-    while read FILE
-    do
-        ENV_VAR_NAME="${FILE#/run/secrets/CONT_ENV_}"
+    flist="$(mktemp)"
+    find /run/secrets -maxdepth 1 -type f -name "CONT_ENV_*" | sort > "${flist}"
+    exec 3< "${flist}" # Open for reading on file descriptor 3.
+    while read -r fpath; do
+        env_var_name="${fpath#/run/secrets/CONT_ENV_}"
 
-        if ! valid_env_var_name "$ENV_VAR_NAME"; then
-            echo "invalid environment variable name: $FILENAME"
+        if ! valid_env_var_name "${env_var_name}"; then
+            log "invalid environment variable name: ${fname}"
             exit 1
         fi
 
-        echo "loading..." | log_script "$ENV_VAR_NAME"
-        load_env_var "$ENV_VAR_NAME" "$(cat "$FILE" | head -n1)"
+        echo "loading..." | log_script "${env_var_name}"
+        load_env_var "${env_var_name}" "$(head -n1 < "${fpath}")"
     done <&3
     exec 3>&- # Close file descriptor.
-    rm "$FILELIST"
+    rm "${flist}"
 fi
 log "container secrets loaded."
 
@@ -171,33 +168,35 @@ log "container secrets loaded."
 STAGE=cont-init
 log "executing container initialization scripts..."
 if [ -d /etc/cont-init.d ]; then
-    find /etc/cont-init.d -maxdepth 1 -type f | sort | while read FILE
-    do
-        FILENAME="$(basename "$FILE")"
+    find /etc/cont-init.d -maxdepth 1 -type f | sort | while read -r f; do
+        fname="$(basename "${f}")"
 
         # https://man7.org/linux/man-pages/man2/access.2.html
         # If the calling process has appropriate privileges (i.e., is superuser), 
         # POSIX.1-2001 permits an implementation to indicate success for an X_OK check 
         # even if none of the execute file permission bits are set. 
         # For now, all files inside /etc/cont-init.d are executable, but we keep this for future non-executable files
-        if [ ! -x "$FILE" ] || ! ls -ld "${FILE}" | grep -q '^-.*x'; then
-            echo "WARNING: not executable, ignoring." | log_script "$FILENAME"
+        if ! [ -x "${f}" ] || ! ls -ld "${f}" | grep -q '^-.*x'; then
+            echo "WARNING: not executable, ignoring." | log_script "${fname}"
             continue
         fi
 
-        echo "executing..." | log_script "$FILENAME"
+        echo "executing..." | log_script "${fname}"
 
-        set +e
-        # https://unix.stackexchange.com/a/70675
-        (((("$FILE" 2>&1; echo $? >&3) | log_script "$FILENAME" >&4) 3>&1) | (read xs; exit $xs)) 4>&1
-        RC=$?
-        set -e
+        rc_file="$(mktemp)"
+        (
+            set +e
+            ${f} 2>&1
+            echo $? > "${rc_file}"
+        ) | log_script "${fname}"
+        read -r rc < "${rc_file}"
+        rm -f "${rc_file}"
 
-        if [ $RC -eq 0 ]; then
-            echo "terminated successfully." | log_script "$FILENAME"
+        if [ "${rc}" -eq 0 ]; then
+            echo "terminated successfully." | log_script "${fname}"
         else
-            echo "terminated with error $RC." | log_script "$FILENAME"
-            exit $RC
+            echo "terminated with error ${rc}." | log_script "${fname}"
+            exit "${rc}"
         fi
     done
 fi
@@ -206,16 +205,21 @@ log "all container initialization scripts executed."
 # Finally, invoke the process supervisor.
 STAGE=init
 
-CINIT_ARGS="--progname supervisor \
-    --default-service-uid $USER_ID \
-    --default-service-gid $GROUP_ID \
-"
-
+# Re-build positional parameters to be passed to the process supervisor.
+set --
+set -- "$@" "--progname"
+set -- "$@" "supervisor"
+set -- "$@" "--services-gracetime"
+set -- "$@" "${SERVICES_GRACETIME:-5000}"
+set -- "$@" "--default-service-uid"
+set -- "$@" "${USER_ID}"
+set -- "$@" "--default-service-gid"
+set -- "$@" "${GROUP_ID}"
 if is-bool-val-true "${CONTAINER_DEBUG:-0}"; then
-    CINIT_ARGS="$CINIT_ARGS --debug"
+    set -- "$@" "--debug"
 fi
 
 log "giving control to process supervisor."
-exec /opt/base/sbin/cinit $CINIT_ARGS
+exec /opt/base/sbin/cinit "$@"
 
 # vim:ft=sh:ts=4:sw=4:et:sts=4

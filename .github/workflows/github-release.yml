@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
 
   workflow_dispatch:
     inputs:
@@ -17,7 +19,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: ${{ github.ref_name == 'main' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.ref_name == 'main' || github.ref_type == 'tag' }}
     steps:
       - 
         name: Checkout
@@ -53,19 +55,22 @@ jobs:
 
           rm -rf mdcx-docker
 
-          TAG=
-          if [[ "${{ github.event_name }}" == "tag" ]]; then
+          TAG=latest
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
             TAG=${{ github.ref_name }}
           fi
-          FALLBACK_TAG=${{ github.event.inputs.tag }}
-          TAG=${TAG-${FALLBACK_TAG}}
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ github.event.inputs.tag }}" ]]; then
+            TAG=${{ github.event.inputs.tag }}
+          fi
+
           echo "TAG=$TAG" >> $GITHUB_OUTPUT
       - 
-        name: Create latest release
+        name: Create release
         uses: ncipollo/release-action@v1
         with:
-          name: "latest"
-          tag: "latest"
+          name: "${{ steps.prepare.outputs.TAG }}"
+          tag: "${{ steps.prepare.outputs.TAG }}"
           allowUpdates: true
           removeArtifacts: true
           replacesArtifacts: true

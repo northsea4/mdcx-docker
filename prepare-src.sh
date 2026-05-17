@@ -4,79 +4,19 @@
 # 一般只用于构建镜像流程，普通用户可以忽略。
 # UPDATE 2023-12-24 17:08:03 使用新的源码仓库:https://github.com/sqzw-x/mdcx
 # UPDATE 2024-05-28 21:28:01 sqzw-x/mdcx目前基本只进行daily_release构建
+# UPDATE 2026-03-29 20:46:30 dynamic repo
 
-# 检查是否有jq命令
-if ! command -v jq &> /dev/null
-then
-  echo "❌ 请先安装jq命令！参考：https://command-not-found.com/jq"
-  exit 1
-fi
-
-release_tag="daily_release"
-
-while [[ $# -gt 0 ]]
-do
-  key="$1"
-  case $key in
-    --context)
-      context="$2"
-      shift
-      shift
-      ;;
-    --tag)
-      release_tag="$2"
-      shift 2
-      ;;
-    --verbose)
-      verbose=1
-      shift
-      ;;
-    --dry)
-      dry=1
-      shift
-      ;;
-    -h|--help)
-      help=1
-      shift
+get_default_release_tag_by_repo() {
+  local target_repo="$1"
+  case "$target_repo" in
+    sqzw-x/mdcx)
+      echo "daily_release"
       ;;
     *)
-      shift
+      echo "latest"
       ;;
   esac
-done
-
-# 显示帮助
-if [[ -n "$help" ]]; then
-  echo "用法: $0 [--context <context>] [--tag <release_tag>] [--verbose] [--dry]"
-  echo "  --context <context>   指定源码解压目录，默认为当前目录"
-  echo "  --tag <release_tag>   指定要下载的版本标签，默认为'daily_release'"
-  echo "  --verbose             显示详细的下载过程"
-  echo "  --dry                 只进行检查，不实际下载"
-  exit 0
-fi
-
-if [[ -n "$release_tag" ]]; then
-  echo "✅ 使用指定的版本标签: $release_tag"
-else
-  echo "❌ 未指定版本标签"
-  exit 1
-fi
-
-if [[ -z "$context" ]]; then
-  echo "❌ context is required!"
-  exit 1
-fi
-
-if [[ ! -d "$context" ]]; then
-  echo "❌ Dir $context is not exist!"
-  exit 1
-fi
-
-cd $context
-
-
-echo "○ 将从发布仓库下载源码进行构建"
-
+}
 
 generate_app_version() {
   local published_at="$1"
@@ -85,7 +25,7 @@ generate_app_version() {
   published_at=$(echo "$published_at" | tr -dc '0-9')
 
   # 取前8位数字作为年月日，前缀为d
-  echo "d${published_at:0:8}"
+  echo "v2-${published_at:0:8}"
 }
 
 find_release_by_tag_name() {
@@ -101,7 +41,11 @@ find_release_by_tag_name() {
   local found=false
   local page=1
   while true; do
-    local response=$(curl -s "${url}?per_page=100&page=${page}")
+    local curl_cmd="curl -s"
+    if [[ -n "$github_token" ]]; then
+      curl_cmd="$curl_cmd -H 'Authorization: Bearer $github_token'"
+    fi
+    local response=$(eval "$curl_cmd \"${url}?per_page=100&page=${page}\"")
     if [[ -z "$response" ]]; then
       break
     fi
@@ -149,7 +93,11 @@ fetch_release_info() {
     url="https://api.github.com/repos/${repo}/releases/latest"
   fi
   
-  curl -s "${url}" > "$temp_file"
+  local curl_cmd="curl -s"
+  if [[ -n "$github_token" ]]; then
+    curl_cmd="$curl_cmd -H 'Authorization: Bearer $github_token'"
+  fi
+  eval "$curl_cmd \"${url}\"" > "$temp_file"
   if [[ ! -s "$temp_file" ]]; then
     rm -f "$temp_file"
     echo "❌ 无法获取release信息！"
@@ -211,7 +159,12 @@ get_release_info() {
     return 1
   fi
 
-  release_version=$(generate_app_version "$published_at")
+  # TODO 如果是数字版本(220250909)则直接使用，否则根据发布时间生成版本号
+  if [[ "$tag_name" =~ ^[0-9]+$ ]]; then
+    release_version="$tag_name"
+  else
+    release_version=$(generate_app_version "$published_at")
+  fi
 
   tar_url=$(printf '%s' "$release" | jq -r '.tarball_url')
   if [[ -z "$tar_url" || "$tar_url" == "null" ]]; then
@@ -237,67 +190,194 @@ get_release_info() {
   return 0
 }
 
-REPO="sqzw-x/mdcx"
-TAG_NAME="${release_tag}"
+print_help() {
+  # 显示帮助
+  echo "用法: $0 [--context <context>] [--tag <release_tag>] [--repo <owner/repo>] [--token <github_token>] [--verbose] [--dry]"
+  echo "  --context <context>   指定源码解压目录，默认为当前目录"
+  echo "  --tag <release_tag>   指定要下载的版本标签；不指定时按repo自动选择，也可用 .env/环境变量MDCX_SRC_TAG"
+  echo "  --repo <owner/repo>   指定源码仓库，默认'sqzw-x/mdcx'，也可用 .env/环境变量MDCX_SRC_REPO"
+  echo "  --token <github_token> 指定GitHub Token以避免API速率限制，也可用环境变量GITHUB_TOKEN"
+  echo "  --verbose             显示详细的下载过程"
+  echo "  --dry                 只进行检查，不实际下载"
+}
 
-info=$(get_release_info "$REPO" "$TAG_NAME")
-if [[ $? -ne 0 ]]; then
-  echo "❌ 获取仓库 ${REPO} 中 tag_name=${TAG_NAME} 的release信息失败！"
-  exit 1
-else
-  echo "✅ 获取仓库 ${REPO} 中 tag_name=${TAG_NAME} 的release信息成功！"
-fi
-echo $info | jq
-# exit 0
+require_jq() {
+  # 检查是否有jq命令
+  if ! command -v jq > /dev/null 2>&1; then
+    echo "❌ 请先安装jq命令！参考：https://command-not-found.com/jq"
+    exit 1
+  fi
+}
 
-# 发布时间
-published_at=$(printf '%s' "$info" | jq -r ".published_at")
-echo "📅 发布时间: $published_at"
+load_defaults() {
+  SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 
-# 版本号
-release_version=$(printf '%s' "$info" | jq -r ".release_version")
-echo "🔢 版本号: $release_version"
+  # 支持从仓库根目录 .env 读取默认值（命令行参数优先）
+  if [[ -f "$SCRIPT_DIR/.env" ]]; then
+    . "$SCRIPT_DIR/.env"
+  fi
 
-# 源码链接
-file_url=$(printf '%s' "$info" | jq -r ".tar_url")
-echo "🔗 下载链接: $file_url"
+  release_tag="${MDCX_SRC_TAG:-}"
+  default_repo="sqzw-x/mdcx"
+  repo="${MDCX_SRC_REPO:-$default_repo}"
+  github_token="${GITHUB_TOKEN:-}"
+}
 
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --context)
+        context="$2"
+        shift 2
+        ;;
+      --tag)
+        release_tag="$2"
+        shift 2
+        ;;
+      --repo)
+        repo="$2"
+        shift 2
+        ;;
+      --token)
+        github_token="$2"
+        shift 2
+        ;;
+      --verbose)
+        verbose=1
+        shift
+        ;;
+      --dry)
+        dry=1
+        shift
+        ;;
+      -h|--help)
+        help=1
+        shift
+        ;;
+      *)
+        shift
+        ;;
+    esac
+  done
+}
 
-if [[ -z "$file_url" ]]; then
-  echo "❌ 从请求结果获取下载链接失败！"
-  exit 1
-fi
+validate_inputs() {
+  if [[ -n "$help" ]]; then
+    print_help
+    exit 0
+  fi
 
-if [[ -n "$dry" ]]; then
-  exit 0
-fi
+  if [[ -z "$repo" ]]; then
+    echo "❌ 未指定源码仓库"
+    exit 1
+  fi
 
-echo "⏳ 下载文件..."
+  if ! printf '%s' "$repo" | grep -Eq '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$'; then
+    echo "❌ 源码仓库格式错误: $repo (正确格式: owner/repo)"
+    exit 1
+  fi
 
-tar_path="$release_version.tar.gz"
-srcDir=".mdcx_src"
+  echo "✅ 使用源码仓库: $repo"
 
-if [[ -n "$verbose" ]]; then
-  curl -o $tar_path $file_url -L
-else
-  curl -so $tar_path $file_url -L
-fi
+  if [[ -z "$release_tag" ]]; then
+    release_tag="$(get_default_release_tag_by_repo "$repo")"
+    echo "✅ 未指定版本标签，已按仓库自动选择: $release_tag"
+  else
+    echo "✅ 使用指定的版本标签: $release_tag"
+  fi
 
-if [[ $? -ne 0 ]]; then
-  echo "❌ 下载文件失败！"
-  exit 1
-fi
+  if [[ -z "$context" ]]; then
+    echo "❌ context is required!"
+    exit 1
+  fi
 
-echo "✅ 下载成功"
-echo "⏳ 开始解压..."
+  if [[ ! -d "$context" ]]; then
+    echo "❌ Dir $context is not exist!"
+    exit 1
+  fi
+}
 
-# 使用tar命令解压
-rm -rf $srcDir
-mkdir -p $srcDir
-tar -zxvf $tar_path -C $srcDir --strip-components 1
-rm -f $tar_path
-echo "✅ 源码已解压到 $srcDir"
+download_and_extract() {
+  local file_url="$1"
+  local release_version="$2"
 
-if [ -n "$GITHUB_ACTIONS" ]; then
-  echo "APP_VERSION=$release_version" >> $GITHUB_OUTPUT
-fi
+  if [[ -z "$file_url" ]]; then
+    echo "❌ 从请求结果获取下载链接失败！"
+    exit 1
+  fi
+
+  if [[ -n "$dry" ]]; then
+    exit 0
+  fi
+
+  echo "⏳ 下载文件..."
+
+  local tar_path="${release_version}.tar.gz"
+  local srcDir=".mdcx_src"
+
+  if [[ -n "$verbose" ]]; then
+    curl -o "$tar_path" "$file_url" -L
+  else
+    curl -so "$tar_path" "$file_url" -L
+  fi
+
+  if [[ $? -ne 0 ]]; then
+    echo "❌ 下载文件失败！"
+    exit 1
+  fi
+
+  echo "✅ 下载成功"
+  echo "⏳ 开始解压..."
+
+  # 使用tar命令解压
+  rm -rf "$srcDir"
+  mkdir -p "$srcDir"
+  tar -zxvf "$tar_path" -C "$srcDir" --strip-components 1
+  rm -f "$tar_path"
+  echo "✅ 源码已解压到 $srcDir"
+}
+
+main() {
+  require_jq
+  load_defaults
+  parse_args "$@"
+  validate_inputs
+
+  cd "$context" || exit 1
+
+  echo "○ 将从发布仓库下载源码进行构建"
+
+  REPO="$repo"
+  TAG_NAME="${release_tag}"
+
+  info=$(get_release_info "$REPO" "$TAG_NAME")
+  if [[ $? -ne 0 ]]; then
+    echo "❌ 获取仓库 ${REPO} 中 tag_name=${TAG_NAME} 的release信息失败！"
+    exit 1
+  else
+    echo "✅ 获取仓库 ${REPO} 中 tag_name=${TAG_NAME} 的release信息成功！"
+  fi
+  printf '%s' "$info" | jq
+  # exit 0
+
+  # 发布时间
+  published_at=$(printf '%s' "$info" | jq -r ".published_at")
+  echo "📅 发布时间: $published_at"
+
+  # 版本号
+  release_version=$(printf '%s' "$info" | jq -r ".release_version")
+  echo "🔢 版本号: $release_version"
+
+  # 源码链接
+  file_url=$(printf '%s' "$info" | jq -r ".tar_url")
+  echo "🔗 下载链接: $file_url"
+
+  download_and_extract "$file_url" "$release_version"
+
+  if [ -n "$GITHUB_ACTIONS" ]; then
+    echo "APP_VERSION=$release_version" >> "$GITHUB_OUTPUT"
+  fi
+}
+
+main "$@"

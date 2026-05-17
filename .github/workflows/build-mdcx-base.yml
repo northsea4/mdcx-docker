@@ -1,5 +1,7 @@
 name: Image build-mdcx-base CI
 
+run-name: Image build-mdcx-base CI [stage=${{ github.event.inputs.stage || 'prod' }}]
+
 on:
   push:
     branches:
@@ -10,17 +12,17 @@ on:
       stage:
         description: Stage
         type: choice
-        default: dev
+        default: prod
         options:
           - dev
           - prod
       baseImage:
-        description: Tag of base image `ubuntu`
+        description: Tag of base image `jlesage/baseimage-gui`
         type: choice
-        default: '22.04'
+        default: 'ubuntu-24.04-v4'
         options:
-          - '22.04'
-          - 'latest'
+          - 'ubuntu-24.04-v4'
+          - 'ubuntu-22.04-v4'
 
 env:
   IMAGE_BASE: build-mdcx
@@ -60,11 +62,11 @@ jobs:
         id: imageInfo
         run: |
           if [[ "${{ github.event.inputs.stage }}" == "dev" ]]; then
-            echo "latest=latest-dev" >> $GITHUB_OUTPUT
-            echo "version=${{ steps.versions.outputs.BUILD_MDCX_BASE_VERSION }}-dev" >> $GITHUB_OUTPUT
+            echo "latest=v2-latest-dev-pyqt6" >> $GITHUB_OUTPUT
+            echo "version=${{ steps.versions.outputs.BUILD_MDCX_BASE_VERSION }}-dev-pyqt6" >> $GITHUB_OUTPUT
           else
-            echo "latest=latest" >> $GITHUB_OUTPUT
-            echo "version=${{ steps.versions.outputs.BUILD_MDCX_BASE_VERSION }}" >> $GITHUB_OUTPUT
+            echo "latest=v2-latest-pyqt6" >> $GITHUB_OUTPUT
+            echo "version=${{ steps.versions.outputs.BUILD_MDCX_BASE_VERSION }}-pyqt6" >> $GITHUB_OUTPUT
           fi
       - 
         name: Build and push
@@ -80,8 +82,7 @@ jobs:
             PYPI_MIRROR=${{ env.PYPI_MIRROR }}
             BASE_IMAGE_TAG=${{ github.event.inputs.baseImage }}
           platforms: |
-            linux/amd64
-            linux/arm64
+            linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:${{ steps.imageInfo.outputs.latest }}

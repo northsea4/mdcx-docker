@@ -1,5 +1,7 @@
 name: Image build-mdcx CI
 
+run-name: Image build-mdcx CI [stage=${{ github.event.inputs.stage || 'prod' }}]
+
 on:
   push:
     branches:
@@ -21,7 +23,7 @@ on:
           - prod
       baseImage:
         description: Tag of base image `build-mdcx-base`
-        default: 'latest'
+        default: 'v2-latest-pyqt6'
 
 env:
   IMAGE_BASE: build-mdcx
@@ -30,6 +32,8 @@ env:
   APT_SOURCE_HOST: ''
   ENABLE_TG_NOTIFICATION: ${{ vars.ENABLE_TG_NOTIFICATION }}
   MDCX_TAG: ${{ vars.MDCX_TAG }}
+  MDCX_SRC_TAG: ${{ vars.MDCX_SRC_TAG }}
+  MDCX_SRC_REPO: ${{ vars.MDCX_SRC_REPO }}
 
 jobs:
   build:
@@ -47,7 +51,30 @@ jobs:
         name: Prepare App source
         id: prepare
         run: |
-          bash ./prepare-src.sh --verbose --context $IMAGE_BASE --tag ${{ env.MDCX_TAG || 'latest' }}
+          SRC_REPO=${{ env.MDCX_SRC_REPO }}
+          SRC_TAG=${{ env.MDCX_SRC_TAG }}
+
+          # 回退读取仓库根目录 .env
+          if [[ -z "$SRC_REPO" && -f .env ]]; then
+            SRC_REPO=$(grep -E '^MDCX_SRC_REPO=' .env | tail -n1 | cut -d '=' -f2-)
+          fi
+          if [[ -z "$SRC_TAG" && -f .env ]]; then
+            SRC_TAG=$(grep -E '^MDCX_SRC_TAG=' .env | tail -n1 | cut -d '=' -f2-)
+          fi
+
+          if [[ -z "$SRC_TAG" ]]; then
+            SRC_TAG=${{ env.MDCX_TAG }}
+          fi
+
+          if [[ -z "$SRC_REPO" ]]; then
+            SRC_REPO='sqzw-x/mdcx'
+          fi
+
+          if [[ -n "$SRC_TAG" ]]; then
+            bash ./prepare-src.sh --verbose --context $IMAGE_BASE --repo "$SRC_REPO" --tag "$SRC_TAG" --token "${{ secrets.GITHUB_TOKEN }}"
+          else
+            bash ./prepare-src.sh --verbose --context $IMAGE_BASE --repo "$SRC_REPO" --token "${{ secrets.GITHUB_TOKEN }}"
+          fi
       -
         name: Prepare Version Values
         uses: cardinalby/export-env-action@v2
@@ -71,16 +98,35 @@ jobs:
         name: Produce docker image tags and other information
         id: imageInfo
         run: |
-          if [[ "${{ github.event.inputs.stage }}" == "dev" ]]; then
-            echo "latest=latest-dev" >> $GITHUB_OUTPUT
-            echo "version=${{ steps.prepare.outputs.APP_VERSION }}-dev" >> $GITHUB_OUTPUT
+          STAGE=${{ github.event.inputs.stage }}
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            WORKFLOW_RUN_JSON='${{ toJson(github.event.workflow_run) }}'
+            if echo "$WORKFLOW_RUN_JSON" | grep -q 'stage=dev'; then
+              STAGE=dev
+            else
+              STAGE=prod
+            fi
+          fi
+
+          if [[ "$STAGE" == "dev" ]]; then
+            echo "latest=v2-latest-dev-pyqt6" >> $GITHUB_OUTPUT
+            echo "version=${{ steps.prepare.outputs.APP_VERSION }}-dev-pyqt6" >> $GITHUB_OUTPUT
           else
-            echo "latest=latest" >> $GITHUB_OUTPUT
-            echo "version=${{ steps.prepare.outputs.APP_VERSION }}" >> $GITHUB_OUTPUT
+            echo "latest=v2-latest-pyqt6" >> $GITHUB_OUTPUT
+            echo "version=${{ steps.prepare.outputs.APP_VERSION }}-pyqt6" >> $GITHUB_OUTPUT
           fi
 
           baseImageTag=${{ github.event.inputs.baseImage }}
-          baseImageTag=${baseImageTag:-latest}
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            if [[ "$STAGE" == "dev" ]]; then
+              baseImageTag=v2-latest-dev-pyqt6
+            else
+              baseImageTag=v2-latest-pyqt6
+            fi
+          fi
+          baseImageTag=${baseImageTag:-v2-latest-pyqt6}
+
+          echo "stage=${STAGE}" >> $GITHUB_OUTPUT
           echo "baseImageTag=${baseImageTag}" >> $GITHUB_OUTPUT
       - 
         name: Build and push
@@ -97,12 +143,14 @@ jobs:
             BASE_IMAGE_TAG=${{ steps.imageInfo.outputs.baseImageTag }}
             APP_VERSION=${{ steps.prepare.outputs.APP_VERSION }}
           platforms: |
-            linux/amd64
-            linux/arm64
+            linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:${{ steps.imageInfo.outputs.latest }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:${{ steps.imageInfo.outputs.version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:v2-latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:v2-${{ steps.prepare.outputs.APP_VERSION }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_KEY }}:${{ steps.prepare.outputs.APP_VERSION }}
 
       -
         name: TG Notification

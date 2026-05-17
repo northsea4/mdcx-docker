@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-    tags:
 
   workflow_dispatch:
     inputs:
@@ -36,14 +35,9 @@ jobs:
         run: |
           mkdir mdcx-docker && cd mdcx-docker && cp -a ../gui-base/. .
           cp .env.sample .env
-          cp mdcx-src.sample.yml docker-compose.yml
+          cp mdcx-builtin.sample.yml docker-compose.yml
           rm Dockerfile*
           rm -rf rootfs*
-          cd ..
-          zip -q -r template-mdcx-src-gui-base.zip mdcx-docker
-
-          cd mdcx-docker
-          cp -f mdcx-builtin.sample.yml docker-compose.yml
           cd ..
           zip -q -r template-mdcx-builtin-gui-base.zip mdcx-docker
 
@@ -51,14 +45,9 @@ jobs:
 
           mkdir mdcx-docker && cd mdcx-docker && cp -a ../webtop-base/. .
           cp .env.sample .env
-          cp mdcx-src.sample.yml docker-compose.yml
+          cp mdcx-builtin.sample.yml docker-compose.yml
           rm Dockerfile*
           rm -rf rootfs*
-          cd ..
-          zip -q -r template-mdcx-src-webtop-base.zip mdcx-docker
-
-          cd mdcx-docker
-          cp -f mdcx-builtin.sample.yml docker-compose.yml
           cd ..
           zip -q -r template-mdcx-builtin-webtop-base.zip mdcx-docker
 

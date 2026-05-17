@@ -2,10 +2,5 @@
   "files.associations": {
     ".env.versions": "env",
     ".env.sample": "env"
-  },
-  "github.copilot.chat.codeGeneration.instructions": [
-    {
-      "text": "Always respond in chinese."
-    }
-  ]
+  }
 }

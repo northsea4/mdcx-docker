@@ -22,7 +22,7 @@ bash -c "$(wget https://raw.githubusercontent.com/northsea4/mdcx-docker/main/ins
 ---
 > 以下的步骤是手动部署的详细说明，即使使用了脚本部署，也请务必阅读一下了解更多细节，如安全、更新等。
 
-[stainless403/mdcx-builtin-webtop-base](https://hub.docker.com/r/stainless403/mdcx-builtin-webtop-base)镜像已内置编译好的MDCx。如果想使用本地MDCx源码版的，请使用[stainless403/mdcx-src-webtop-base](https://hub.docker.com/r/stainless403/mdcx-src-webtop-base)镜像 ([🔗 查看部署说明](https://github.com/northsea4/mdcx-docker/blob/main/webtop-base/mdcx-src.md))。
+[stainless403/mdcx-builtin-webtop-base](https://hub.docker.com/r/stainless403/mdcx-builtin-webtop-base)镜像已内置编译好的MDCx，直接部署即可使用。
 
 
 ### 1.1 准备项目目录
@@ -34,14 +34,13 @@ mdcx-docker
   |-- data ------容器系统数据
     ...
   |-- mdcx-config --------应用配置文件目录
-    |-- config.ini
+    |-- config.v2.json
     |-- MDCx.config
   |-- logs --------应用日志目录
     |-- 2023-02-04-01-15-00.txt
   |-- .env ------环境变量文件
   |-- .env.sample ------环境变量示例文件
   |-- .env.versions ------应用版本文件
-  |-- mdcx-src.sample.yml
   |-- mdcx-builtin.sample.yml -------容器部署配置示例
   |-- docker-compose.yml -------容器部署配置
 ```
@@ -51,11 +50,11 @@ mdcx-docker
 编辑`.env`文件，按需修改。
 文件里每个参数都有具体的说明，`.env.sample`文件里可以查看原始的数值。
 
-一般需要修改的参数：`RDP_LISTEN_PORT`, `WEB_PORT`, `PUID`, `PGID`
+一般需要修改的参数：`WEB_PORT`, `HTTPS_PORT`, `PUID`, `PGID`
 | 参数名称 | 说明 | 默认值 | 必填 |
 | --- | --- | --- | --- |
-| RDP_LISTEN_PORT | RDP远程桌面端口 | 3389 | 是 |
 | WEB_PORT | Web访问端口 | 3000 | 是 |
+| HTTPS_PORT | Web HTTPS访问端口 | 3001 | 否 |
 | PUID | 运行应用的用户ID，通过`id -u`命令可以查看当前用户ID，`id -u user1`则可以查看用户user1的用户ID | 0 | 是 |
 | PGID | 运行应用的用户组ID，通过`id -g`命令可以查看当前用户组ID，`id -g user1`则可以查看用户user1的用户组ID | 0 | 是 |
 
@@ -76,7 +75,7 @@ services:
           
       # 配置文件目录
       - ./mdcx-config:/mdcx-config
-      # `配置文件目录`标记文件（纯文本文件，内容为当前使用的配置文件路径，默认/mdcx-config/config.ini）
+      # `配置文件目录`标记文件（纯文本文件，内容为当前使用的配置文件路径，默认/mdcx-config/config.v2.json）
       - ./mdcx-config/MDCx.config:/app/MDCx.config
 
       # 日志目录
@@ -86,7 +85,7 @@ services:
       - /path/to/movies:/movies
     ports:
       - ${WEB_PORT}:3000
-      - ${RDP_LISTEN_PORT}:3389
+      - ${HTTPS_PORT}:3001
     restart: unless-stopped
     network_mode: bridge
     stdin_open: true
@@ -110,14 +109,13 @@ docker-compose up -d
 
 > 修改密码方式2：进入系统后，打开`konsole`，然后执行`passwd abc`
 
-本镜像支持[RDP](https://zh.wikipedia.org/zh-cn/%E9%81%A0%E7%AB%AF%E6%A1%8C%E9%9D%A2%E5%8D%94%E5%AE%9A)，也就是常说的`远程桌面`，默认端口是`3389`。
-可以使用支持RDP协议的客户端连接使用。常见的客户端：
-- Microsoft Remote Desktop / 微软远程桌面，多平台支持
-- Windows自带的「远程桌面」
+本镜像通过网页访问，默认端口如下：
+- HTTP：`3000`
+- HTTPS：`3001`
 
-另外，也支持网页访问。
-假设服务器IP为`192.168.1.100`，使用默认端口`3000`。
-则访问地址为：http://192.168.1.100:3000。
+假设服务器IP为`192.168.1.100`，则访问地址为：
+- http://192.168.1.100:3000
+- https://192.168.1.100:3001
 
 进入桌面后，点击桌面上的应用图标即可运行。
 
@@ -130,13 +128,12 @@ mkdir -p $MDCX_DOCKER_DIR && cd $MDCX_DOCKER_DIR
 # 必须：相关数据或日志目录
 mkdir -p mdcx-config logs data
 # 必须：配置文件目录标记文件
-echo "/mdcx-config/config.ini" > mdcx-config/MDCx.config
-# 确保有config.ini文件
-touch mdcx-config/config.ini
+echo "/mdcx-config/config.v2.json" > mdcx-config/MDCx.config
+# 不需要手动创建配置文件，程序会自动创建
 
 docker run -d --name mdcx \
   -p 3000:3000 `#Web访问端口` \
-  -p 3389:3389 `#RDP访问端口` \
+  -p 3001:3001 `#Web HTTPS访问端口` \
   -v $(pwd)/data:/config `#容器系统数据` \
   -v $(pwd)/mdcx-config:/mdcx-config `#配置文件目录` \
   -v $(pwd)/mdcx-config/MDCx.config:/app/MDCx.config `#配置文件目录标记文件` \

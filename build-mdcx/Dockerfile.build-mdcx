@@ -1,80 +1,68 @@
 # syntax=docker/dockerfile:1.4
 
-ARG BASE_IMAGE_TAG=latest
-FROM stainless403/build-mdcx-base:$BASE_IMAGE_TAG as builder
+ARG BASE_IMAGE_TAG=v2-latest-dev
+FROM stainless403/build-mdcx-base:$BASE_IMAGE_TAG AS builder
 
 LABEL maintainer="stainless403"
 LABEL description="base on stainless403/mdcx-build-base:$BASE_IMAGE_TAG"
 
 ARG APP_VERSION
-
 ARG TARGETPLATFORM
 ARG TARGETOS
 ARG TARGETARCH
 ARG TARGETVARIANT
-
 ARG BUILDPLATFORM
 ARG BUILDOS
 ARG BUILDARCH
 ARG BUILDVARIANT
 
-RUN echo "-----Image target platform details:"
-RUN echo "TARGETPLATFORM    : $TARGETPLATFORM"
-RUN echo "TARGETOS          : $TARGETOS"
-RUN echo "TARGETARCH        : $TARGETARCH"
-RUN echo "TARGETVARIANT     : $TARGETVARIANT"
-
-RUN echo "-----Image build platform details:"
-RUN echo "BUILDPLATFORM     : $BUILDPLATFORM"
-RUN echo "BUILDOS           : $BUILDOS"
-RUN echo "BUILDARCH         : $BUILDARCH"
-RUN echo "BUILDVARIANT      : $BUILDVARIANT"
+# 输出构建信息
+RUN echo "-----Image platform details:" && \
+  echo "Target: $TARGETPLATFORM ($TARGETOS/$TARGETARCH/$TARGETVARIANT)" && \
+  echo "Build: $BUILDPLATFORM ($BUILDOS/$BUILDARCH/$BUILDVARIANT)"
 
 COPY build-mdcx/.mdcx_src /tmp/mdcx
 WORKDIR /tmp/mdcx
 
-ARG PYQT5_VERSION="5.15.6"
-
-RUN cp requirements.txt requirements.txt.bak
-RUN sed -i -e "s/PyQt5==[0-9.]\+/PyQt5==$PYQT5_VERSION/" requirements.txt
-
+# 设置PyPI镜像
 ARG PYPI_MIRROR
-ARG DEFAULT_MIRROR="https://pypi.doubanio.com/simple"
+# ARG DEFAULT_MIRROR="https://pypi.doubanio.com/simple"
+# ARG DEFAULT_MIRROR=""
 ENV PYPI_MIRROR=${PYPI_MIRROR:-${DEFAULT_MIRROR}}
-RUN echo "PYPI_MIRROR: $PYPI_MIRROR"
 
-RUN python3 -m pip install -r requirements.txt --verbose -i $PYPI_MIRROR
+# 安装依赖
+RUN uv sync --all-extras --dev && \
+  uv pip install -e .
 
-RUN pyinstaller -n MDCx \
-  # 图标是macOS和Windows专属
-  # -i Img/MDCx.ico \
+# 保存版本信息
+RUN mkdir -p ./dist && echo $APP_VERSION > ./dist/app-version
+
+# 安装依赖并构建
+RUN echo "PYPI_MIRROR: $PYPI_MIRROR" && \
+  uv run pyinstaller -n MDCx \
   -F -w main.py \
-  -p "./src" \
-  # --add-data "Data:." \
-  # --add-data "Img:Img" \
   --add-data "resources:resources" \
   --add-data "libs:." \
   --hidden-import socks \
   --hidden-import urllib3 \
   --hidden-import _cffi_backend \
-  --collect-all curl_cffi
+  --hidden-import PIL \
+  --hidden-import PIL.Image \
+  --hidden-import PIL.ImageFile \
+  --hidden-import PIL.ImageFilter \
+  --hidden-import PIL._imaging \
+  --hidden-import PyQt6 \
+  --collect-all PyQt6 \
+  --collect-all curl_cffi && \
+  # 保存版本信息
+  echo $APP_VERSION > /tmp/mdcx/dist/app-version && \
+  # 清理构建缓存
+  rm -rf /tmp/mdcx/build /tmp/mdcx/__pycache__ /root/.cache/pip
 
-RUN pyinstaller MDCx.spec
-
-RUN echo $APP_VERSION > /tmp/mdcx/dist/app-version
-
-# 改选alpine，体积很小
+# 最终镜像仅用于存储和分发二进制文件
 FROM alpine:latest
-COPY --from=builder /tmp/mdcx/dist/MDCx /MDCx
+
+COPY --from=builder --chmod=+x /tmp/mdcx/dist/MDCx /MDCx
 COPY --from=builder /tmp/mdcx/dist/app-version /app-version
-
-# 从scratch里复制文件似乎并没有那么简单。
-# 目前了解到的是：先docker pull，再docker save为tar，再解压tar，接着再解压某个目录里的layer.tar...
-# FROM scratch
-# COPY --from=builder /tmp/mdcx/dist/MDCx /MDCx
-# COPY --from=builder /tmp/mdcx/dist/app-version /app-version
-
-# scratch里没有bash
-# RUN echo $APP_VERSION > /app-version
 
 CMD [ "echo", "This image just contains MDCx bin." ]

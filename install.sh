@@ -26,6 +26,42 @@ escape_sed_replacement() {
   printf '%s' "$1" | sed -e 's/[&|\\]/\\&/g'
 }
 
+replace_volumes() {
+  local volumes=$1
+  local compose_file=$2
+  local temporary_file
+  local volumes_file
+  local exit_code
+
+  temporary_file=$(mktemp "${compose_file}.XXXXXX") || return 1
+  volumes_file=$(mktemp "${compose_file}.volumes.XXXXXX") || {
+    rm -f "$temporary_file"
+    return 1
+  }
+
+  if [ -n "$volumes" ]; then
+    printf '%s\n' "$volumes" > "$volumes_file" || {
+      rm -f "$temporary_file" "$volumes_file"
+      return 1
+    }
+  fi
+
+  awk '
+    FILENAME == ARGV[1] {
+      volumes = volumes $0 "\n"
+      next
+    }
+    $0 == "      # VOLUMES_REPLACEMENT" {
+      printf "%s", volumes
+      next
+    }
+    { print }
+  ' "$volumes_file" "$compose_file" > "$temporary_file" && mv "$temporary_file" "$compose_file"
+  exit_code=$?
+  rm -f "$volumes_file"
+  return "$exit_code"
+}
+
 read_env_value() {
   local envFile=$1
   local envKey=$2
@@ -276,7 +312,10 @@ collect_runtime_inputs() {
       echo "❌ 错误：输入格式不正确，请按格式输入"
       continue
     fi
-    VOLUMES="$VOLUMES\n      - $MOVIE_DIR"
+    if [ -n "$VOLUMES" ]; then
+      VOLUMES+=$'\n'
+    fi
+    VOLUMES+="      - $MOVIE_DIR"
   done
 }
 
@@ -320,7 +359,6 @@ apply_replacements() {
   local escaped_web_port
   local escaped_vnc_port
   local escaped_https_port
-  local escaped_volumes
   local escaped_container_name
   local escaped_image_tag
 
@@ -352,13 +390,20 @@ apply_replacements() {
   echo "✅ 替换环境变量完成"
 
   echo "⏳ 替换挂载卷..."
-  # $VOLUMES不为空时才进行替换
   if [[ -n "$VOLUMES" ]]; then
-    escaped_volumes=$(escape_sed_replacement "$VOLUMES")
-    replace_in_file "s|# VOLUMES_REPLACEMENT|$escaped_volumes|" docker-compose.yml
-    echo "✅ 替换挂载卷完成"
+    if replace_volumes "$VOLUMES" docker-compose.yml; then
+      echo "✅ 替换挂载卷完成"
+    else
+      echo "❌ 替换挂载卷失败"
+      on_error "${DIR_FULL_PATH}"
+    fi
   else
-    echo "❗ 你没有指定映射影片目录，你可以之后在docker-compose.yml中手动添加。"
+    if replace_volumes "" docker-compose.yml; then
+      echo "❗ 你没有指定映射影片目录，你可以之后在docker-compose.yml中手动添加。"
+    else
+      echo "❌ 替换挂载卷失败"
+      on_error "${DIR_FULL_PATH}"
+    fi
   fi
 
   # 询问输入容器名称
